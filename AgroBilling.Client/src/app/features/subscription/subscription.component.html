@@ -1,0 +1,156 @@
+<div class="sub-page">
+    <div class="sub-header">
+      <div class="brand-logo">
+        <span>🌿</span>
+        <span class="logo-text">AgroBilling</span>
+      </div>
+      <button class="btn btn-outline btn-sm" (click)="logout()">Logout</button>
+    </div>
+  
+    <!-- STEP 1: Plans -->
+    <div class="sub-container" *ngIf="step === 'plans'">
+      <div class="sub-title-area">
+        <h1>Choose Your Plan</h1>
+        <p class="text-muted">Your 14-day free trial has ended. Subscribe to continue.</p>
+      </div>
+  
+      <div class="plans-grid">
+  
+        <!-- Monthly -->
+        <div class="plan-card" (click)="selectPlan('monthly')">
+          <div class="plan-badge">Popular</div>
+          <h2 class="plan-name">Monthly</h2>
+          <div class="plan-price">
+            <span class="currency">₹</span>
+            <span class="amount">599</span>
+            <span class="period">/month</span>
+          </div>
+          <ul class="plan-features">
+            <li>✅ Unlimited billing</li>
+            <li>✅ Full inventory</li>
+            <li>✅ Customer management</li>
+            <li>✅ Supplier tracking</li>
+            <li>✅ Monthly reports</li>
+          </ul>
+          <button class="btn btn-primary w-full">Get Started →</button>
+        </div>
+  
+        <!-- Yearly -->
+        <div class="plan-card plan-card-gold" (click)="selectPlan('yearly')">
+          <div class="plan-badge plan-badge-gold">Best Value</div>
+          <h2 class="plan-name">Yearly</h2>
+          <div class="plan-price">
+            <span class="currency">₹</span>
+            <span class="amount">5,999</span>
+            <span class="period">/year</span>
+          </div>
+          <div class="plan-saving">Save ₹1,189 — 2 months free!</div>
+          <ul class="plan-features">
+            <li>✅ Everything in Monthly</li>
+            <li>✅ Priority support</li>
+            <li>✅ Excel import/export</li>
+            <li>✅ 2 months FREE</li>
+          </ul>
+          <button class="btn btn-gold w-full">Get Best Value →</button>
+        </div>
+  
+      </div>
+    </div>
+  
+    <!-- STEP 2: Payment -->
+    <div class="sub-container" *ngIf="step === 'payment'">
+      <button class="btn btn-outline btn-sm mb-16" (click)="step = 'plans'">← Back to Plans</button>
+  
+      <div class="pay-grid">
+  
+        <!-- QR Side -->
+        <div class="card pay-card">
+          <div class="card-header">
+            <span class="card-title">💳 Pay via UPI</span>
+            <span class="badge badge-success">{{ currentPlan.label }} — ₹{{ currentPlan.price }}</span>
+          </div>
+  
+          <div class="qr-area">
+            <img [src]="upiQr" alt="UPI QR Code" class="qr-img" />
+            <p class="qr-note">Scan with any UPI app</p>
+            <p class="upi-id">
+              <span>{{ upiId }}</span>
+              <button class="btn btn-sm btn-outline" (click)="copyUpi()">📋 Copy</button>
+            </p>
+          </div>
+  
+          <div class="pay-steps">
+            <p class="text-muted text-sm">Steps:</p>
+            <ol class="steps-list">
+              <li>Open PhonePe / GPay / Paytm</li>
+              <li>Scan QR or enter UPI ID</li>
+              <li>Pay <strong>₹{{ currentPlan.price }}</strong></li>
+              <li>Note the Transaction ID</li>
+              <li>Fill form on right →</li>
+            </ol>
+          </div>
+        </div>
+  
+        <!-- Form Side -->
+        <div class="card pay-card">
+          <div class="card-header">
+            <span class="card-title">✅ Confirm Payment</span>
+          </div>
+  
+          <div class="alert alert-danger" *ngIf="error">
+            <span>⚠️</span> {{ error }}
+          </div>
+  
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label class="form-label">Transaction ID *</label>
+              <input type="text" class="form-control" formControlName="transactionId"
+                placeholder="e.g. T2506181234567890" />
+              <p class="text-xs text-muted mt-8">UPI app mein payment ke baad transaction ID milega</p>
+              <div class="form-error" *ngIf="form.get('transactionId')?.invalid && form.get('transactionId')?.touched">
+                Valid transaction ID required (min 6 chars)
+              </div>
+            </div>
+  
+            <div class="form-group">
+              <label class="form-label">Your Name *</label>
+              <input type="text" class="form-control" formControlName="payerName"
+                placeholder="Name as in UPI app" />
+              <div class="form-error" *ngIf="form.get('payerName')?.invalid && form.get('payerName')?.touched">Required</div>
+            </div>
+  
+            <div class="form-group">
+              <label class="form-label">Mobile Number *</label>
+              <input type="tel" class="form-control" formControlName="payerMobile"
+                placeholder="UPI registered mobile" />
+              <div class="form-error" *ngIf="form.get('payerMobile')?.invalid && form.get('payerMobile')?.touched">Valid mobile required</div>
+            </div>
+  
+            <div class="amount-summary">
+              <span>Plan</span><span class="font-bold">{{ currentPlan.label }}</span>
+              <span>Amount</span><span class="font-bold text-green">₹{{ currentPlan.price }}</span>
+              <span>Duration</span><span class="font-bold">{{ currentPlan.duration }}</span>
+            </div>
+  
+            <button type="submit" class="btn btn-primary w-full btn-lg mt-16" [disabled]="submitting">
+              <span *ngIf="submitting" class="btn-spinner"></span>
+              {{ submitting ? 'Submitting...' : '✅ Submit Payment Request' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  
+    <!-- STEP 3: Submitted -->
+    <div class="sub-container submitted-state" *ngIf="step === 'submitted'">
+      <div class="success-icon">✅</div>
+      <h1>Payment Request Submitted!</h1>
+      <p class="text-muted">Hamara team 2-4 ghante mein verify karega.</p>
+      <p class="text-muted">Verify hone ke baad aapko access mil jaayega.</p>
+      <div class="alert alert-info mt-24">
+        <span>📞</span>
+        <span>Urgent ho toh call karo: <strong>+91 XXXXXXXXXX</strong></span>
+      </div>
+      <button class="btn btn-outline mt-24" (click)="logout()">Back to Login</button>
+    </div>
+  </div>

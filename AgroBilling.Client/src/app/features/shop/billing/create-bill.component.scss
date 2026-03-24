@@ -1,0 +1,50 @@
+.dropdown-list {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); max-height: 220px; overflow-y: auto;
+  box-shadow: var(--shadow-md); margin-top: 2px;
+}
+.product-drop { right: auto; width: 320px; }
+.drop-item {
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--hover-bg); }
+}
+.drop-main { display: block; font-weight: 600; font-size: 0.875rem; color: var(--text-1); }
+.drop-sub  { display: block; font-size: 0.75rem; color: var(--text-2); margin-top: 2px; }
+.selected-chip {
+  margin-top: 8px; padding: 8px 12px;
+  background: rgba(67,160,71,0.1); border: 1px solid var(--green-700);
+  border-radius: var(--radius-md); font-size: 0.875rem; display: flex;
+  align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+.chip-pending { color: var(--gold-400); font-size: 0.8125rem; font-weight: 600; }
+.summary-rows { display: flex; flex-direction: column; gap: 0; }
+.summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 0; font-size: 0.9375rem;
+  border-bottom: 1px solid var(--border);
+  &:last-child { border-bottom: none; }
+}
+.summary-divider { height: 2px; background: var(--border); margin: 4px 0; }
+.grand-total { font-family: var(--font-display); font-size: 1.125rem; font-weight: 800; }
+.status-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; }
+.input-sm { padding: 6px 10px; font-size: 0.875rem; }
+.prod-name { font-weight: 600; font-size: 0.875rem; }
+.btn-spinner {
+  width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin 0.6s linear infinite; display: inline-block;
+}
+.is-invalid {
+  border-color: var(--danger-500) !important;
+  background-color: rgba(211, 47, 47, 0.05);
+}
+.form-error-inline {
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: var(--card); border: 1px solid var(--danger-500);
+  border-top: none; border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  padding: 6px 8px; font-size: 0.75rem; color: var(--danger-500);
+  white-space: nowrap; z-index: 10; font-weight: 500;
+}

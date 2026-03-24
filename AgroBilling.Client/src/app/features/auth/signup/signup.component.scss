@@ -1,0 +1,4 @@
+// Login page ke saath same styles hain — sirf import karo
+// Ya yeh ek line:
+@use '../login/login.component.scss';
+// Agar import nahi karna toh login.component.scss ka sara content copy karo yahan

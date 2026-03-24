@@ -1,0 +1,14 @@
+.add-expense {
+  padding: 1rem;
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  &__lead {
+    margin: 0;
+    color: var(--muted-foreground, #64748b);
+  }
+}

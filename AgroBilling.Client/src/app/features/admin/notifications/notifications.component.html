@@ -1,0 +1,35 @@
+<div class="page-container fade-in">
+  <div class="page-header">
+    <div>
+      <p class="breadcrumb">Admin <span>/ Notifications</span></p>
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-subtitle">{{ unreadCount }} unread</p>
+    </div>
+    <button class="btn btn-outline" (click)="markAllRead()" *ngIf="unreadCount > 0">✅ Mark All Read</button>
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+
+  <div class="card" *ngIf="!loading">
+    <div class="empty-state" *ngIf="!notifications.length">
+      <div class="empty-icon">🔔</div>
+      <h3>No notifications</h3>
+      <p>All caught up!</p>
+    </div>
+
+    <div class="notif-list" *ngIf="notifications.length">
+      <div class="notif-item" *ngFor="let n of notifications" [class.unread]="isUnread(n)" (click)="markRead(notifId(n))">
+        <div class="notif-icon">{{ typeIcon(n.type ?? '') }}</div>
+        <div class="notif-body">
+          <div class="notif-top">
+            <span class="notif-shop font-bold">{{ n.shopName }}</span>
+            <span class="badge" [class]="typeClass(n.type ?? '')">{{ (n.type ?? '').replace('_',' ') }}</span>
+          </div>
+          <p class="notif-msg">{{ n.message ?? n.body }}</p>
+          <span class="notif-time text-xs text-muted">{{ n.createdAt | date:'dd MMM yyyy, hh:mm a' }}</span>
+        </div>
+        <div class="notif-unread-dot" *ngIf="isUnread(n)"></div>
+      </div>
+    </div>
+  </div>
+</div>

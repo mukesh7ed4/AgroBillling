@@ -1,0 +1,250 @@
+<div class="page-container fade-in" *ngIf="!loading && ledger">
+
+  <!-- ── PAGE HEADER ── -->
+  <div class="page-header">
+    <div>
+      <p class="breadcrumb">
+        Home <span>/ Suppliers /</span>
+        <span>{{ ledger?.supplier?.companyName || '—' }}</span>
+      </p>
+
+      <h1 class="page-title">
+        {{ ledger?.supplier?.companyName || '—' }}
+      </h1>
+
+      <p class="page-subtitle">
+        <span *ngIf="ledger?.supplier?.mobileNumber">
+          📞 {{ ledger?.supplier?.mobileNumber }}
+        </span>
+
+        <span *ngIf="ledger?.supplier?.contactPersonName">
+          · 👤 {{ ledger?.supplier?.contactPersonName }}
+        </span>
+
+        <!-- ✅ GST FIX -->
+        <span *ngIf="ledger?.supplier?.gstNumber">
+          · GST: {{ ledger?.supplier?.gstNumber }}
+        </span>
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-gold" (click)="showPaymentModal=true">
+        💰 Pay Supplier
+      </button>
+
+      <a routerLink="/shop/purchases/create" class="btn btn-primary">
+        🛒 New Purchase
+      </a>
+
+      <a routerLink="/shop/suppliers" class="btn btn-outline">
+        ← Back
+      </a>
+    </div>
+  </div>
+
+  <!-- ── STAT CARDS ── -->
+  <div class="grid-4 mb-24">
+
+    <div class="stat-card">
+      <div class="stat-icon gold-icon">📦</div>
+      <div class="stat-value">
+        {{ fmt(ledger?.supplier?.totalPurchased ?? calcTotalPurchased()) }}
+      </div>
+      <div class="stat-label">Total Purchased</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon green-icon">✅</div>
+      <div class="stat-value amount-paid">
+        {{ fmt(ledger?.supplier?.totalPaid ?? calcTotalPaid()) }}
+      </div>
+      <div class="stat-label">Total Paid</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon red-icon">⏳</div>
+      <div class="stat-value amount-pending">
+        {{ fmt(ledger?.supplier?.outstandingDue ?? calcOutstanding()) }}
+      </div>
+      <div class="stat-label">Outstanding Due</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🧾</div>
+      <div class="stat-value">
+        {{ ledger?.purchases?.length || 0 }}
+      </div>
+      <div class="stat-label">Total Purchases</div>
+    </div>
+
+  </div>
+
+  <!-- ── TABS ── -->
+  <div class="tabs-bar mb-24">
+    <button class="tab-btn"
+            [class.active]="activeTab==='purchases'"
+            (click)="activeTab='purchases'">
+      🛒 Purchases ({{ ledger?.purchases?.length || 0 }})
+    </button>
+
+    <button class="tab-btn"
+            [class.active]="activeTab==='payments'"
+            (click)="activeTab='payments'">
+      💳 Payments ({{ ledger?.payments?.length || 0 }})
+    </button>
+  </div>
+
+  <!-- ── PURCHASES TAB ── -->
+  <div class="card" *ngIf="activeTab==='purchases'">
+
+    <div class="empty-state" *ngIf="!(ledger?.purchases?.length)">
+      <div class="empty-icon">🛒</div>
+      <h3>No purchases yet</h3>
+      <p>Add a new purchase to start tracking</p>
+    </div>
+
+    <div class="table-wrapper" *ngIf="ledger?.purchases?.length">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Invoice No.</th>
+            <th>Total</th>
+            <th>Paid</th>
+            <th>Due</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let p of ledger?.purchases">
+            <td>{{ p.purchaseDate | date:'dd MMM yyyy' }}</td>
+
+            <td class="text-muted">
+              {{ p.invoiceNumber || '—' }}
+            </td>
+
+            <td class="amount-total">{{ fmt(p.netPayable) }}</td>
+
+            <td class="amount-paid">{{ fmt(p.amountPaid) }}</td>
+
+            <td class="amount-pending">
+              {{ fmt((p.netPayable ?? 0) - (p.amountPaid ?? 0)) }}
+            </td>
+
+            <td>
+              <span class="badge" [class]="statusClass(p.paymentStatus)">
+                {{ p.paymentStatus }}
+              </span>
+            </td>
+
+            <td>
+              <a [routerLink]="['/shop/purchases', p.purchaseId]"
+                 class="btn btn-sm btn-outline">
+                View
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ── PAYMENTS TAB ── -->
+  <div class="card" *ngIf="activeTab==='payments'">
+
+    <div class="empty-state" *ngIf="!(ledger?.payments?.length)">
+      <div class="empty-icon">💳</div>
+      <h3>No payments recorded</h3>
+    </div>
+
+    <div class="table-wrapper" *ngIf="ledger?.payments?.length">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Invoice No.</th>
+            <th>Amount</th>
+            <th>Mode</th>
+            <th>Reference</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let p of ledger?.payments">
+            <td>{{ p.paymentDate | date:'dd MMM yyyy' }}</td>
+
+            <td class="text-muted">
+              {{ p.purchase?.invoiceNumber || p.invoiceNumber || '—' }}
+            </td>
+
+            <td class="amount-paid font-bold">
+              {{ fmt(p.amount) }}
+            </td>
+
+            <td>
+              <span class="badge badge-info">
+                {{ p.paymentMode }}
+              </span>
+            </td>
+
+            <td class="text-muted">
+              {{ p.reference || '—' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ── LOADING ── -->
+<div class="loading-overlay" *ngIf="loading">
+  <div class="spinner"></div>
+</div>
+
+<!-- ── PAYMENT MODAL ── -->
+<div class="modal-backdrop" *ngIf="showPaymentModal" (click)="showPaymentModal=false">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <span class="modal-title">💰 Pay Supplier</span>
+      <button class="modal-close" (click)="showPaymentModal=false">✕</button>
+    </div>
+
+    <!-- Outstanding -->
+    <div class="payment-outstanding-bar" *ngIf="ledger">
+      <span class="pob-label">Outstanding Due</span>
+      <span class="pob-value amount-pending">
+        {{ fmt(ledger?.supplier?.outstandingDue ?? calcOutstanding()) }}
+      </span>
+    </div>
+
+    <form [formGroup]="paymentForm" (ngSubmit)="addPayment()">
+
+      <input type="number" class="form-control" formControlName="amount" placeholder="Amount" />
+
+      <select class="form-control" formControlName="paymentMode">
+        <option>Cash</option>
+        <option>UPI</option>
+        <option>Cheque</option>
+        <option>Bank Transfer</option>
+      </select>
+
+      <input type="text" class="form-control" formControlName="reference" placeholder="Reference" />
+
+      <input type="date" class="form-control" formControlName="paymentDate" />
+
+      <button type="submit" class="btn btn-primary w-full">
+        Record Payment
+      </button>
+
+    </form>
+
+  </div>
+</div>

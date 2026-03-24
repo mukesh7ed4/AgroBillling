@@ -1,0 +1,73 @@
+<header class="app-header" [class.expanded]="sidebarCollapsed">
+
+  <div class="header-left">
+    <!-- Hide menu btn on mobile — bottom nav handles navigation -->
+    <button class="menu-btn" (click)="toggleSidebar.emit()">☰</button>
+    <h2 class="header-title">{{ pageTitle }}</h2>
+  </div>
+
+  <div class="header-right">
+    <!-- Theme toggle (visible on both desktop & mobile) -->
+    <button class="icon-btn" (click)="theme.toggleTheme()" [title]="theme.currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'">
+      {{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}
+    </button>
+
+    <!-- Language toggle (visible on both desktop & mobile) -->
+    <button class="icon-btn" (click)="theme.toggleLang()" [title]="theme.currentLang === 'en' ? 'Switch to Hindi' : 'Switch to English'">
+      🌐
+    </button>
+
+    <!-- ── USER CHIP — desktop & tablet ── -->
+    <div class="user-chip" (click)="toggleUserMenu()" [class.open]="userMenuOpen">
+      <div class="user-avatar">{{ initials }}</div>
+      <div class="user-info">
+        <span class="user-name">{{ ownerName }}</span>
+        <span class="user-role">{{ isAdmin ? 'Admin' : 'Shop Owner' }}</span>
+      </div>
+      <span class="chevron">{{ userMenuOpen ? '▴' : '▾' }}</span>
+    </div>
+
+    <!-- ── AVATAR ONLY — mobile ── -->
+    <div class="user-avatar-mob" (click)="toggleUserMenu()" [class.active]="userMenuOpen">
+      {{ initials }}
+    </div>
+  </div>
+
+</header>
+
+<!-- ── BACKDROP ── -->
+<div class="user-menu-backdrop" *ngIf="userMenuOpen" (click)="closeUserMenu()"></div>
+
+<!-- ── USER DROPDOWN / PROFILE SHEET ── -->
+<div class="user-dropdown" [class.open]="userMenuOpen">
+
+  <!-- Profile header -->
+  <div class="dropdown-profile">
+    <div class="dp-avatar">{{ initials }}</div>
+    <div class="dp-info">
+      <div class="dp-name">{{ ownerName }}</div>
+      <div class="dp-sub">{{ isAdmin ? '⚙️ Administrator' : ('🏪 ' + shopName) }}</div>
+    </div>
+  </div>
+
+  <div class="dropdown-divider"></div>
+
+  <!-- Actions -->
+  <button class="dropdown-item" (click)="theme.toggleTheme(); closeUserMenu()">
+    <span class="di-icon">{{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}</span>
+    <span>{{ theme.currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
+  </button>
+
+  <button class="dropdown-item" (click)="theme.toggleLang(); closeUserMenu()">
+    <span class="di-icon">🌐</span>
+    <span>{{ theme.currentLang === 'en' ? 'हिंदी में बदलें' : 'Switch to English' }}</span>
+  </button>
+
+  <div class="dropdown-divider"></div>
+
+  <button class="dropdown-item dropdown-logout" (click)="logout()">
+    <span class="di-icon">🚪</span>
+    <span>Logout</span>
+  </button>
+
+</div>

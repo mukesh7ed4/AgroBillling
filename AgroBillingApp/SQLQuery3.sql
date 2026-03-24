@@ -1,0 +1,2 @@
+﻿SELECT COUNT(*) FROM Bills;
+SELECT COUNT(*) FROM Customers;

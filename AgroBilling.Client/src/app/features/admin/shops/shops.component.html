@@ -1,0 +1,191 @@
+<div class="page-container fade-in">
+  <div class="page-header">
+    <div>
+      <p class="breadcrumb">Admin <span>/ Shops</span></p>
+      <h1 class="page-title">Manage Shops</h1>
+      <p class="page-subtitle">{{ totalCount }} registered shops</p>
+    </div>
+    <button class="btn btn-primary" (click)="showAddModal=true">🏪 Add New Shop</button>
+  </div>
+
+  <div class="filter-bar card mb-24">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input [(ngModel)]="searchText" (ngModelChange)="onSearch()" placeholder="Search by shop name, owner, city..." />
+    </div>
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+
+  <div class="card" *ngIf="!loading">
+    <div class="empty-state" *ngIf="!shops.length">
+      <div class="empty-icon">🏪</div>
+      <h3>No shops registered yet</h3>
+      <button class="btn btn-primary mt-16" (click)="showAddModal=true">Add First Shop</button>
+    </div>
+    <div class="table-wrapper" *ngIf="shops.length">
+      <table>
+        <thead>
+          <tr><th>Shop</th><th>Owner</th><th>Mobile</th><th>City</th><th>GST%</th><th>Subscription</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of shops">
+            <td>
+              <div class="font-bold">{{ s.shopName }}</div>
+              <div class="text-xs text-muted">ID: {{ s.shopId }}</div>
+            </td>
+            <td>{{ s.ownerName }}</td>
+            <td>{{ s.mobileNumber }}</td>
+            <td class="text-muted">{{ s.city }}</td>
+            <td class="text-muted">{{ s.gstPercent }}%</td>
+            <td>
+              <div *ngIf="s.subscription">
+                <div class="text-sm">{{ s.subscription.planName }}</div>
+                <div class="text-xs text-muted">Till {{ s.subscription.endDate | date:'dd MMM yyyy' }}</div>
+              </div>
+              <span class="text-muted" *ngIf="!s.subscription">No subscription</span>
+            </td>
+            <td>
+              <span class="badge" [class]="alertClass(daysLeft(s.subscription))">
+                {{ s.subscription ? daysLeft(s.subscription) + 'd left' : 'No sub' }}
+              </span>
+            </td>
+            <td>
+              <div class="flex gap-8">
+                <button class="btn btn-sm btn-gold" (click)="openExtend(s)">🔄 Extend</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button class="btn btn-sm btn-outline" (click)="prevPage()" [disabled]="pageNumber === 1">← Prev</button>
+      <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
+      <button class="btn btn-sm btn-outline" (click)="nextPage()" [disabled]="pageNumber === totalPages">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Shop Modal -->
+<div class="modal-backdrop" *ngIf="showAddModal" (click)="showAddModal=false">
+  <div class="modal modal-xl" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">🏪 Register New Shop</span>
+      <button class="modal-close" (click)="showAddModal=false">✕</button>
+    </div>
+    <form [formGroup]="addForm" (ngSubmit)="submitAdd()">
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label class="form-label">Shop Name *</label>
+            <input type="text" class="form-control" formControlName="shopName" placeholder="e.g. Kisan Agro Store" />
+            <div class="form-error" *ngIf="addForm.get('shopName')?.invalid && addForm.get('shopName')?.touched">Required</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Owner Name *</label>
+            <input type="text" class="form-control" formControlName="ownerName" placeholder="Full name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mobile *</label>
+            <input type="tel" class="form-control" formControlName="mobileNumber" placeholder="10-digit mobile" />
+            <div class="form-error" *ngIf="addForm.get('mobileNumber')?.invalid && addForm.get('mobileNumber')?.touched">Valid mobile required</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" formControlName="email" placeholder="Optional" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Login Password *</label>
+            <input type="password" class="form-control" formControlName="password" placeholder="Min 6 characters" />
+          </div>
+        </div>
+        <div>
+          <div class="form-group">
+            <label class="form-label">Address *</label>
+            <input type="text" class="form-control" formControlName="address" placeholder="Shop address" />
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">City *</label>
+              <input type="text" class="form-control" formControlName="city" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">State</label>
+              <input type="text" class="form-control" formControlName="state" />
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">GST %</label>
+              <input type="number" class="form-control" formControlName="gstPercent" min="0" max="100" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bill Start No.</label>
+              <input type="number" class="form-control" formControlName="billStartNumber" min="1" />
+              <p class="text-xs text-muted mt-8">Physical bill number to continue from</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">GST Number</label>
+            <input type="text" class="form-control" formControlName="gstNumber" placeholder="Optional" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subscription Plan *</label>
+            <select class="form-control" formControlName="planId">
+              <option value="">-- Select Plan --</option>
+              <option *ngFor="let p of plans" [value]="p.planId">{{ p.planName }} — ₹{{ p.price }} ({{ p.durationDays }}d)</option>
+            </select>
+            <div class="form-error" *ngIf="addForm.get('planId')?.invalid && addForm.get('planId')?.touched">Select a plan</div>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary w-full btn-lg mt-8" [disabled]="submitting">
+        <span *ngIf="submitting" class="btn-spinner"></span>
+        {{ submitting ? 'Registering...' : '✅ Register Shop' }}
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Extend Subscription Modal -->
+<div class="modal-backdrop" *ngIf="showExtendModal" (click)="showExtendModal=false">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">🔄 Extend Subscription</span>
+      <button class="modal-close" (click)="showExtendModal=false">✕</button>
+    </div>
+    <p class="text-muted mb-16" *ngIf="selectedShop">
+      Shop: <strong>{{ selectedShop.shopName }}</strong> — {{ selectedShop.ownerName }}
+    </p>
+    <form [formGroup]="extendForm" (ngSubmit)="submitExtend()">
+      <div class="form-group">
+        <label class="form-label">Select Plan *</label>
+        <select class="form-control" formControlName="planId">
+          <option value="">-- Select Plan --</option>
+          <option *ngFor="let p of plans" [value]="p.planId">{{ p.planName }} — ₹{{ p.price }} ({{ p.durationDays }}d)</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Amount Paid (₹)</label>
+          <input type="number" class="form-control" formControlName="amountPaid" min="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Mode</label>
+          <select class="form-control" formControlName="paymentMode">
+            <option>Cash</option><option>UPI</option><option>Bank Transfer</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <input type="text" class="form-control" formControlName="notes" placeholder="Optional" />
+      </div>
+      <button type="submit" class="btn btn-primary w-full" [disabled]="submitting">
+        {{ submitting ? 'Processing...' : 'Extend Subscription' }}
+      </button>
+    </form>
+  </div>
+</div>

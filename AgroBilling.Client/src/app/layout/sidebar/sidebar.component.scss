@@ -1,0 +1,459 @@
+/* ============================================================
+   AGROBILLING — SIDEBAR COMPONENT STYLES
+   Desktop/Tablet: Fixed left sidebar (collapsible) — UNCHANGED
+   Mobile (≤768px): Bottom nav bar + More sheet — MODERNIZED
+   ============================================================ */
+
+/* ─────────────────────────────────────────
+   DESKTOP SIDEBAR (>768px) — FULLY UNCHANGED
+   ───────────────────────────────────────── */
+   .sidebar {
+    width: 230px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    overflow: hidden;
+  
+    &.collapsed { width: 64px; }
+  }
+  
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid var(--border);
+    min-height: 64px;
+  }
+  
+  .logo-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 8px rgba(67, 160, 71, 0.5));
+  }
+  
+  .logo-text {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-1);
+    white-space: nowrap;
+    flex: 1;
+  }
+  
+  .collapse-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-2);
+    cursor: pointer;
+    padding: 2px 7px;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    margin-left: auto;
+    flex-shrink: 0;
+  
+    &:hover {
+      border-color: var(--green-500);
+      color: var(--green-400);
+    }
+  }
+  
+  .shop-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(67, 160, 71, 0.07);
+    border-bottom: 1px solid var(--border);
+  
+    &.shop-label-sm { justify-content: center; }
+  }
+  
+  .shop-icon { font-size: 0.9rem; }
+  
+  .shop-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--green-400);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .sidebar-nav {
+    flex: 1;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+  }
+  
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: var(--text-2);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.18s;
+    position: relative;
+    white-space: nowrap;
+  
+    .nav-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .nav-label { flex: 1; }
+  
+    .nav-active-bar {
+      position: absolute;
+      right: 0;
+      top: 25%;
+      bottom: 25%;
+      width: 3px;
+      background: var(--green-500);
+      border-radius: 3px;
+    }
+  
+    &:hover { background: var(--hover-bg); color: var(--text-1); }
+    &.active {
+      background: rgba(67, 160, 71, 0.12);
+      color: var(--green-400);
+      font-weight: 600;
+    }
+  }
+  
+  .sidebar-bottom {
+    padding: 8px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .bottom-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-2);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    width: 100%;
+  
+    &:hover { background: var(--hover-bg); color: var(--text-1); }
+  }
+  
+  .logout-btn:hover {
+    background: rgba(229, 57, 53, 0.1) !important;
+    color: #ef5350 !important;
+  }
+  
+  /* ─── TABLET (≤1024px) — UNCHANGED ─── */
+  @media (max-width: 1024px) {
+    .sidebar {
+      width: 200px;
+      &.collapsed { width: 60px; }
+    }
+    .sidebar-logo { padding: 16px 12px; min-height: 56px; }
+    .logo-icon { font-size: 1.25rem; }
+    .logo-text { font-size: 0.95rem; }
+    .nav-item { padding: 8px 10px; font-size: 0.8125rem; }
+    .bottom-btn { padding: 8px 10px; font-size: 0.8rem; }
+  }
+  
+  
+  /* ═════════════════════════════════════════════════════════
+     MOBILE (≤768px)
+     Hide desktop sidebar, show bottom nav bar + more sheet
+     ═════════════════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+  
+    /* Hide the desktop sidebar entirely */
+    .sidebar { display: none !important; }
+  
+    /* ── MOBILE BOTTOM NAV BAR ── */
+    .mobile-bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 62px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 200;
+      align-items: stretch;
+      /* Subtle glass effect for modern look */
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  
+    .mob-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      text-decoration: none;
+      color: var(--text-2);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+      position: relative;
+      transition: background 0.15s;
+      padding: 0;
+      min-width: 0;
+  
+      &:active { background: var(--hover-bg); }
+  
+      &.active {
+        color: var(--green-400);
+        background: rgba(67, 160, 71, 0.06);
+      }
+    }
+  
+    /* Top indicator line for active item */
+    .mob-nav-indicator {
+      position: absolute;
+      top: 0;
+      left: 20%;
+      right: 20%;
+      height: 2.5px;
+      background: var(--green-500);
+      border-radius: 0 0 4px 4px;
+    }
+  
+    .mob-nav-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      display: block;
+    }
+  
+    .mob-nav-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      padding: 0 4px;
+    }
+  
+    /* Green dot on "More" when an active route is hidden inside */
+    .mob-more-dot {
+      position: absolute;
+      top: 8px;
+      right: calc(50% - 14px);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green-500);
+      border: 1.5px solid var(--surface);
+    }
+  
+    /* ── MORE BACKDROP ── */
+    .more-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 299;
+      animation: fadeIn 0.2s ease;
+    }
+  
+    /* ── MORE BOTTOM SHEET ── */
+    .more-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      border-top: 1px solid var(--border);
+      z-index: 300;
+      padding: 8px 0 calc(env(safe-area-inset-bottom, 0px) + 80px);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.3);
+  
+      &.open { transform: translateY(0); }
+    }
+  
+    /* Drag handle */
+    .more-sheet-handle {
+      width: 36px;
+      height: 4px;
+      border-radius: 4px;
+      background: var(--border);
+      margin: 4px auto 14px;
+    }
+  
+    /* Sheet header — logo + shop name */
+    .more-sheet-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+  
+    .more-sheet-logo { font-size: 1.25rem; }
+  
+    .more-sheet-title {
+      font-family: var(--font-display);
+      font-size: 0.9375rem;
+      font-weight: 800;
+      color: var(--text-1);
+      flex: 1;
+    }
+  
+    .more-sheet-shop {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--green-400);
+      background: rgba(67, 160, 71, 0.1);
+      padding: 3px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+  
+    /* 2-column grid of extra nav items */
+    .more-sheet-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 8px 12px;
+      gap: 4px;
+    }
+  
+    .more-sheet-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-2);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+  
+      &:active { background: var(--hover-bg); }
+  
+      &.active {
+        background: rgba(67, 160, 71, 0.1);
+        color: var(--green-400);
+        font-weight: 600;
+      }
+    }
+  
+    .more-item-icon { font-size: 1.1rem; flex-shrink: 0; }
+  
+    .more-item-label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: inherit;
+      white-space: nowrap;
+    }
+  
+    /* Footer actions — language, theme, logout */
+    .more-sheet-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 8px 12px 0;
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+    }
+  
+    .more-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-2);
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      width: 100%;
+      text-align: left;
+  
+      &:active { background: var(--hover-bg); }
+      &:hover { background: var(--hover-bg); color: var(--text-1); }
+    }
+  
+    .more-logout-btn {
+      color: #ef5350;
+      &:hover { background: rgba(229, 57, 53, 0.1) !important; color: #ef5350 !important; }
+    }
+  }
+  
+  /* ─── SMALL MOBILE (≤480px) ─── */
+  @media (max-width: 480px) {
+    .mobile-bottom-nav { height: 56px; }
+  
+    .mob-nav-icon { font-size: 1.15rem; }
+    .mob-nav-label { font-size: 0.6rem; }
+  
+    .more-sheet-grid {
+      padding: 6px 10px;
+      gap: 2px;
+    }
+  
+    .more-sheet-item {
+      padding: 11px 12px;
+      gap: 10px;
+      border-radius: 10px;
+    }
+  
+    .more-item-label { font-size: 0.75rem; }
+  
+    .more-action-btn {
+      padding: 10px 12px;
+      font-size: 0.8125rem;
+    }
+  }
+  
+  /* ─── HIDE mobile nav on desktop/tablet ─── */
+  @media (min-width: 769px) {
+    .mobile-bottom-nav,
+    .more-backdrop,
+    .more-sheet { display: none !important; }
+  }
+  
+  /* ─── Safe area bottom padding for notched phones (iPhone X+) ─── */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    @media (max-width: 768px) {
+      .mobile-bottom-nav {
+        padding-bottom: env(safe-area-inset-bottom);
+        height: calc(62px + env(safe-area-inset-bottom));
+      }
+    }
+  }

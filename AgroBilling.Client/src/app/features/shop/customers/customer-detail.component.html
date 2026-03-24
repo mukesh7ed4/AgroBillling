@@ -1,0 +1,114 @@
+<div class="page-container fade-in" *ngIf="!loading && ledger">
+  <div class="page-header">
+    <div>
+      <p class="breadcrumb">
+        Home <span>/ Customers /</span>
+        <span>{{ ledger.customer.fullName ?? ledger.customer.name ?? '-' }}</span>
+      </p>
+      <h1 class="page-title">{{ ledger.customer.fullName ?? ledger.customer.name ?? '-' }}</h1>
+      <p class="page-subtitle">
+        {{ ledger.customer.mobileNumber ?? ledger.customer.phone ?? '' }}
+        · {{ ledger.customer.village }} , {{ ledger.customer.district }}
+      </p>
+    </div>
+    <div class="flex gap-12">
+      <a routerLink="/shop/billing/create" class="btn btn-primary">🧾 New Bill</a>
+      <a routerLink="/shop/customers" class="btn btn-outline">← Back</a>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="grid-4 mb-24">
+    <div class="stat-card">
+      <div class="stat-icon">🧾</div>
+      <div class="stat-value">{{ (ledger.billsTotalCount ?? ledger.customer.totalBills ?? ledger.bills.length) || 0 }}</div>
+      <div class="stat-label">Total Bills</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon gold-icon">💰</div>
+      <div class="stat-value">{{ fmt(totalBilled) }}</div>
+      <div class="stat-label">Total Billed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green-icon">✅</div>
+      <div class="stat-value amount-paid">{{ fmt(totalPaidOnBills) }}</div>
+      <div class="stat-label">Total Paid</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red-icon">⏳</div>
+      <div class="stat-value amount-pending">{{ fmt(totalPending) }}</div>
+      <div class="stat-label">Total Pending</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-bar mb-24">
+    <button class="tab-btn" [class.active]="activeTab==='bills'"    (click)="activeTab='bills'">📋 {{ billsTabLabel }}</button>
+    <button class="tab-btn" [class.active]="activeTab==='payments'" (click)="activeTab='payments'">💳 {{ paymentsTabLabel }}</button>
+    <button class="tab-btn" [class.active]="activeTab==='credits'"  (click)="activeTab='credits'">↩️ {{ creditsTabLabel }}</button>
+  </div>
+
+  <!-- Bills Tab -->
+  <div class="card" *ngIf="activeTab==='bills'">
+    <p class="text-muted text-sm mb-16" *ngIf="ledger.billsTotalCount != null && ledger.billsTotalCount > ledger.bills.length">
+      Showing the latest {{ ledger.bills.length }} of {{ ledger.billsTotalCount }} bills.
+    </p>
+    <div class="empty-state" *ngIf="!ledger.bills.length"><div class="empty-icon">🧾</div><h3>No bills yet</h3></div>
+    <div class="table-wrapper" *ngIf="ledger.bills.length">
+      <table>
+        <thead><tr><th>Bill No.</th><th>Date</th><th>Total</th><th>Paid</th><th>Pending</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let b of ledger.bills">
+            <td class="bill-no">{{ b.billNumber }}</td>
+            <td class="text-muted">{{ b.billDate | date:'dd MMM yyyy' }}</td>
+            <td class="amount-total">{{ fmt(b.totalAmount) }}</td>
+            <td class="amount-paid">{{ fmt(b.amountPaid) }}</td>
+            <td [class]="(b.amountPending ?? 0) > 0 ? 'amount-pending' : 'amount-paid'">{{ fmt(b.amountPending) }}</td>
+            <td><span class="badge" [class]="statusClass(b.paymentStatus)">{{ b.paymentStatus }}</span></td>
+            <td><a [routerLink]="['/shop/billing', b.billId]" class="btn btn-sm btn-outline">View</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Payments Tab -->
+  <div class="card" *ngIf="activeTab==='payments'">
+    <div class="empty-state" *ngIf="!ledger.payments.length"><div class="empty-icon">💳</div><h3>No payments yet</h3></div>
+    <div class="table-wrapper" *ngIf="ledger.payments.length">
+      <table>
+        <thead><tr><th>Date</th><th>Bill No.</th><th>Amount</th><th>Mode</th><th>Reference</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let p of ledger.payments">
+            <td>{{ p.paymentDate | date:'dd MMM yyyy' }}</td>
+            <td class="bill-no">—</td>
+            <td class="amount-paid font-bold">{{ fmt(p.amount) }}</td>
+            <td><span class="badge badge-info">{{ p.paymentMode }}</span></td>
+            <td class="text-muted">{{ p.reference || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Credits Tab -->
+  <div class="card" *ngIf="activeTab==='credits'">
+    <div class="empty-state" *ngIf="!ledger.creditNotes.length"><div class="empty-icon">↩️</div><h3>No returns yet</h3></div>
+    <div class="table-wrapper" *ngIf="ledger.creditNotes.length">
+      <table>
+        <thead><tr><th>Date</th><th>Original Bill</th><th>Credit Amt</th><th>Adjusted</th><th>Remaining</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let cn of ledger.creditNotes">
+            <td>{{ cn.creditNoteDate | date:'dd MMM yyyy' }}</td>
+            <td class="bill-no">{{ cn.originalBill?.billNumber }}</td>
+            <td class="amount-pending">{{ fmt(cn.creditAmount) }}</td>
+            <td class="amount-paid">{{ fmt(cn.adjustedAmount) }}</td>
+            <td>{{ fmt(cn.remainingCredit) }}</td>
+            <td><span class="badge" [class]="cn.status==='CLOSED'?'badge-success':cn.status==='OPEN'?'badge-warning':'badge-muted'">{{ cn.status }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>

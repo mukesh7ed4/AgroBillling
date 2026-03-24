@@ -1,0 +1,114 @@
+<div class="page-container fade-in">
+    <div class="page-header">
+      <div>
+        <p class="breadcrumb">Admin <span>/ Dashboard</span></p>
+        <h1 class="page-title">Admin Dashboard</h1>
+        <p class="page-subtitle">Platform overview & subscription alerts</p>
+      </div>
+      <a routerLink="/admin/shops" class="btn btn-primary">🏪 Manage Shops</a>
+    </div>
+  
+    <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+  
+    <ng-container *ngIf="!loading && data">
+  
+      <!-- Summary stats -->
+      <div class="grid-4 mb-24">
+        <div class="stat-card">
+          <div class="stat-icon">🏪</div>
+          <div class="stat-value">{{ data.allShops.length }}</div>
+          <div class="stat-label">Total Shops</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green-icon">✅</div>
+          <div class="stat-value amount-paid">{{ data.allShops.length - data.expired.length }}</div>
+          <div class="stat-label">Active Subscriptions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon gold-icon">⚠️</div>
+          <div class="stat-value amount-pending">{{ data.expiringSoon.length }}</div>
+          <div class="stat-label">Expiring in 7 Days</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red-icon">❌</div>
+          <div class="stat-value" style="color:#EF5350">{{ data.expired.length }}</div>
+          <div class="stat-label">Expired</div>
+        </div>
+      </div>
+  
+      <!-- Expiring Soon Alert -->
+      <div class="alert alert-warning mb-24" *ngIf="data.expiringSoon.length">
+        <span>⚠️</span>
+        <span><strong>{{ data.expiringSoon.length }} shop(s)</strong> subscription expiring within 7 days. Contact them to renew.</span>
+      </div>
+  
+      <!-- Expiring Soon Table -->
+      <div class="card mb-24" *ngIf="data.expiringSoon.length">
+        <div class="card-header">
+          <span class="card-title">⚠️ Expiring Soon</span>
+          <a routerLink="/admin/subscriptions" class="btn btn-sm btn-outline">Manage All</a>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Shop</th><th>Owner</th><th>Mobile</th><th>City</th><th>Expires</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let s of data.expiringSoon">
+                <td class="font-bold">{{ s.shopName }}</td>
+                <td>{{ s.ownerName }}</td>
+                <td>{{ s.mobileNumber }}</td>
+                <td class="text-muted">—</td>
+                <td>{{ s.endDate | date:'dd MMM yyyy' }}</td>
+                <td><span class="badge" [class]="alertClass(s.daysLeft)">{{ alertLabel(s.daysLeft) }}</span></td>
+                <td><a [routerLink]="['/admin/shops']" class="btn btn-sm btn-gold">Renew</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+  
+      <!-- Expired -->
+      <div class="card mb-24" *ngIf="data.expired.length">
+        <div class="card-header">
+          <span class="card-title" style="color:#EF5350">❌ Expired Subscriptions</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Shop</th><th>Owner</th><th>Mobile</th><th>Expired On</th><th>Overdue</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let s of data.expired">
+                <td class="font-bold">{{ s.shopName }}</td>
+                <td>{{ s.ownerName }}</td>
+                <td>{{ s.mobileNumber }}</td>
+                <td>{{ s.endDate | date:'dd MMM yyyy' }}</td>
+                <td><span class="badge badge-danger">{{ Math.abs(s.daysLeft) }} days overdue</span></td>
+                <td><a [routerLink]="['/admin/shops']" class="btn btn-sm btn-primary">Renew Now</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+  
+      <!-- All Shops -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🏪 All Shops</span>
+          <a routerLink="/admin/shops" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Shop</th><th>Owner</th><th>Plan</th><th>Valid Till</th><th>Days Left</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let s of data.allShops | slice:0:10">
+                <td class="font-bold">{{ s.shopName }}</td>
+                <td>{{ s.ownerName }}</td>
+                <td><span class="badge badge-muted">{{ s.planName }}</span></td>
+                <td>{{ s.endDate | date:'dd MMM yyyy' }}</td>
+                <td><span class="badge" [class]="alertClass(s.daysLeft)">{{ alertLabel(s.daysLeft) }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+  
+    </ng-container>
+  </div>

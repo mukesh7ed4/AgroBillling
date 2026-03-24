@@ -1,0 +1,63 @@
+<div class="page-container fade-in">
+  <div class="page-header">
+    <div>
+      <p class="breadcrumb">Home <span>/ Customers</span></p>
+      <h1 class="page-title">Customers</h1>
+      <p class="page-subtitle">{{ totalCount }} registered customers</p>
+    </div>
+    <a routerLink="/shop/customers/add" class="btn btn-primary">👤 Add Customer</a>
+  </div>
+
+  <div class="filter-bar card mb-24">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input [(ngModel)]="searchText" (ngModelChange)="onSearch()" placeholder="Search by name, mobile, village..." />
+    </div>
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+
+  <div class="card" *ngIf="!loading">
+    <div class="empty-state" *ngIf="!customers.length">
+      <div class="empty-icon">👥</div>
+      <h3>No customers found</h3>
+      <p>Add your first customer to get started</p>
+      <a routerLink="/shop/customers/add" class="btn btn-primary mt-16">Add Customer</a>
+    </div>
+    <div class="table-wrapper" *ngIf="customers.length">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Father's Name</th><th>Mobile</th><th>Village</th><th>Pending</th><th>Bills</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of customers" [routerLink]="['/shop/customers', c.customerId ?? c.id]">
+            <td>
+              <div class="cust-avatar-row">
+                <div class="cust-avatar">{{ (c.fullName || c.name || '?')[0] }}</div>
+                <span class="font-bold">{{ c.fullName || c.name }}</span>
+              </div>
+            </td>
+            <td class="text-muted">{{ c.fatherName || '—' }}</td>
+            <td>{{ c.mobileNumber || c.phone }}</td>
+            <td class="text-muted">{{ c.village || '—' }}, {{ c.district || '' }}</td>
+            <td>
+              <span [class]="(c.totalPending || 0) > 0 ? 'amount-pending' : 'amount-paid'">
+                {{ fmt(c.totalPending || 0) }}
+              </span>
+            </td>
+            <td><span class="badge badge-muted">{{ c.totalBills || 0 }} bills</span></td>
+            <td>
+              <a [routerLink]="['/shop/customers', c.customerId ?? c.id]" class="btn btn-sm btn-outline" (click)="$event.stopPropagation()">Ledger</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button class="btn btn-sm btn-outline" (click)="prevPage()" [disabled]="pageNumber === 1">← Prev</button>
+      <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
+      <button class="btn btn-sm btn-outline" (click)="nextPage()" [disabled]="pageNumber === totalPages">Next →</button>
+    </div>
+  </div>
+</div>

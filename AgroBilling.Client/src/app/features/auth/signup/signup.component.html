@@ -1,0 +1,118 @@
+<div class="login-page">
+    <div class="login-left">
+      <div class="brand-area">
+        <div class="brand-logo">
+          <span class="logo-leaf">🌿</span>
+          <span class="logo-text">AgroBilling</span>
+        </div>
+        <p class="brand-tagline">14 Din Free Trial</p>
+        <p class="brand-sub">Koi credit card nahi chahiye. Aaj hi shuru karo.</p>
+      </div>
+      <div class="features-list">
+        <div class="feat-item"><span class="feat-icon">✅</span><span>14 days completely free</span></div>
+        <div class="feat-item"><span class="feat-icon">🧾</span><span>Unlimited billing</span></div>
+        <div class="feat-item"><span class="feat-icon">📦</span><span>Full inventory access</span></div>
+        <div class="feat-item"><span class="feat-icon">👥</span><span>Customer management</span></div>
+        <div class="feat-item"><span class="feat-icon">📊</span><span>Reports & analytics</span></div>
+      </div>
+      <div class="art-circles">
+        <div class="art-circle c1"></div>
+        <div class="art-circle c2"></div>
+        <div class="art-circle c3"></div>
+      </div>
+    </div>
+  
+    <div class="login-right">
+      <div class="login-card fade-in">
+        <button class="theme-toggle" (click)="theme.toggleTheme()">
+          {{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}
+        </button>
+  
+        <h1 class="login-title">Start Free Trial</h1>
+        <p class="login-subtitle">14 days free — no payment needed</p>
+  
+        <div class="alert alert-danger" *ngIf="error">
+          <span>⚠️</span> {{ error }}
+        </div>
+  
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Shop Name *</label>
+              <input type="text" class="form-control" formControlName="shopName"
+                placeholder="e.g. Kisan Agro Store"
+                [class.is-invalid]="f['shopName'].invalid && f['shopName'].touched" />
+              <div class="form-error" *ngIf="f['shopName'].invalid && f['shopName'].touched">Required</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Owner Name *</label>
+              <input type="text" class="form-control" formControlName="ownerName"
+                placeholder="Your full name"
+                [class.is-invalid]="f['ownerName'].invalid && f['ownerName'].touched" />
+              <div class="form-error" *ngIf="f['ownerName'].invalid && f['ownerName'].touched">Required</div>
+            </div>
+          </div>
+  
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Mobile *</label>
+              <input type="tel" class="form-control" formControlName="mobileNumber"
+                placeholder="10-digit number"
+                [class.is-invalid]="f['mobileNumber'].invalid && f['mobileNumber'].touched" />
+              <div class="form-error" *ngIf="f['mobileNumber'].invalid && f['mobileNumber'].touched">Valid mobile required</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email *</label>
+              <input type="email" class="form-control" formControlName="email"
+                placeholder="your@email.com"
+                [class.is-invalid]="f['email'].invalid && f['email'].touched" />
+              <div class="form-error" *ngIf="f['email'].invalid && f['email'].touched">Valid email required</div>
+            </div>
+          </div>
+  
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">City *</label>
+              <input type="text" class="form-control" formControlName="city"
+                placeholder="e.g. Rohtak"
+                [class.is-invalid]="f['city'].invalid && f['city'].touched" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">State</label>
+              <input type="text" class="form-control" formControlName="state" />
+            </div>
+          </div>
+  
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Password *</label>
+              <input type="password" class="form-control" formControlName="password"
+                placeholder="Min 6 characters"
+                [class.is-invalid]="f['password'].invalid && f['password'].touched" />
+              <div class="form-error" *ngIf="f['password'].invalid && f['password'].touched">Min 6 characters</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm Password *</label>
+              <input type="password" class="form-control" formControlName="confirmPass"
+                placeholder="Repeat password"
+                [class.is-invalid]="form.errors?.['mismatch'] && f['confirmPass'].touched" />
+              <div class="form-error" *ngIf="form.errors?.['mismatch'] && f['confirmPass'].touched">Passwords do not match</div>
+            </div>
+          </div>
+  
+          <button type="submit" class="btn btn-primary w-full btn-lg mt-8" [disabled]="submitting">
+            <span *ngIf="submitting" class="btn-spinner"></span>
+            {{ submitting ? 'Creating Account...' : '🚀 Start Free Trial' }}
+          </button>
+        </form>
+  
+        <div class="signup-link mt-16 text-center">
+          <p class="text-muted">Already have an account?
+            <a routerLink="/auth/login" class="text-green font-bold">Sign In →</a>
+          </p>
+        </div>
+  
+        <p class="login-footer">&copy; {{ year }} AgroBilling. All rights reserved.</p>
+      </div>
+    </div>
+  </div>

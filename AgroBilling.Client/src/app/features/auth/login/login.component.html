@@ -1,0 +1,87 @@
+<div class="login-page">
+  <div class="login-left">
+    <div class="brand-area">
+      <div class="brand-logo">
+        <span class="logo-leaf">🌿</span>
+        <span class="logo-text">AgroBilling</span>
+      </div>
+      <p class="brand-tagline">Fasal ka hisaab, digital andaaz mein</p>
+      <p class="brand-sub">Complete billing & inventory management for agriculture shops</p>
+    </div>
+    <div class="features-list">
+      <div class="feat-item"><span class="feat-icon">📋</span><span>Smart Billing with GST</span></div>
+      <div class="feat-item"><span class="feat-icon">📦</span><span>Inventory Management</span></div>
+      <div class="feat-item"><span class="feat-icon">👥</span><span>Customer Ledger</span></div>
+      <div class="feat-item"><span class="feat-icon">🏭</span><span>Supplier Tracking</span></div>
+      <div class="feat-item"><span class="feat-icon">📊</span><span>Monthly Reports</span></div>
+    </div>
+    <div class="art-circles">
+      <div class="art-circle c1"></div>
+      <div class="art-circle c2"></div>
+      <div class="art-circle c3"></div>
+    </div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-card fade-in">
+      <button class="theme-toggle" (click)="theme.toggleTheme()">
+        {{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}
+      </button>
+
+      <h1 class="login-title">Welcome Back</h1>
+      <p class="login-subtitle">Sign in to your account</p>
+
+      <!-- Error -->
+      <div class="alert alert-danger" *ngIf="error">
+        <span>⚠️</span> {{ error }}
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-control" formControlName="email"
+            placeholder="Enter your email"
+            [class.is-invalid]="email?.invalid && email?.touched" />
+          <div class="form-error" *ngIf="email?.invalid && email?.touched">
+            <span *ngIf="email?.errors?.['required']">Email is required</span>
+            <span *ngIf="email?.errors?.['email']">Enter a valid email</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="password-field">
+            <input [type]="showPass ? 'text' : 'password'" class="form-control"
+              formControlName="password" placeholder="Enter your password"
+              [class.is-invalid]="password?.invalid && password?.touched" />
+            <button type="button" class="pass-toggle" (click)="showPass = !showPass">
+              {{ showPass ? '🙈' : '👁️' }}
+            </button>
+          </div>
+          <div class="form-error" *ngIf="password?.invalid && password?.touched">
+            <span *ngIf="password?.errors?.['required']">Password is required</span>
+            <span *ngIf="password?.errors?.['minlength']">Minimum 6 characters</span>
+          </div>
+        </div>
+
+        <div class="form-row-end">
+          <a routerLink="/auth/forgot-password" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-full btn-lg login-btn" [disabled]="loading">
+          <span *ngIf="loading" class="btn-spinner"></span>
+          {{ loading ? 'Signing in...' : 'Sign In' }}
+        </button>
+      </form>
+
+      <!-- Signup link -->
+      <div class="signup-link mt-24 text-center">
+        <p class="text-muted">New to AgroBilling?
+          <a routerLink="/auth/signup" class="text-green font-bold">Start Free Trial →</a>
+        </p>
+      </div>
+
+      <p class="login-footer">&copy; {{ year }} AgroBilling. All rights reserved.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+@AgroBilling.API_HostAddress = http://localhost:5249
+
+GET {{AgroBilling.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,168 @@
+.dropdown-list { 
+  position: absolute; 
+  top: 100%; 
+  left: 0; 
+  right: 0; 
+  z-index: 200; 
+  background: var(--card); 
+  border: 1px solid var(--border); 
+  border-radius: var(--radius-md); 
+  max-height: 220px; 
+  overflow-y: auto; 
+  box-shadow: var(--shadow-md); 
+  margin-top: 2px; 
+  width: 320px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.drop-item { 
+  padding: 10px 14px; 
+  cursor: pointer; 
+  border-bottom: 1px solid var(--border); 
+  transition: background 0.15s;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--hover-bg); }
+}
+
+.drop-main { 
+  display: block; 
+  font-weight: 600; 
+  font-size: 0.875rem; 
+}
+
+.drop-sub  { 
+  display: block; 
+  font-size: 0.75rem; 
+  color: var(--text-2); 
+  margin-top: 2px; 
+}
+
+.summary-rows { 
+  display: flex; 
+  flex-direction: column; 
+}
+
+.summary-row { 
+  display: flex; 
+  justify-content: space-between; 
+  padding: 12px 0; 
+  border-bottom: 1px solid var(--border); 
+
+  &:last-child { border-bottom: none; }
+}
+
+.input-sm { 
+  padding: 6px 10px; 
+  font-size: 0.875rem; 
+}
+
+.btn-spinner { 
+  width: 15px; 
+  height: 15px; 
+  border: 2px solid rgba(255,255,255,0.3); 
+  border-top-color: #fff; 
+  border-radius: 50%; 
+  animation: spin 0.6s linear infinite; 
+  display: inline-block; 
+}
+
+/* ─── TABLET ─── */
+@media (max-width: 1024px) {
+  .dropdown-list {
+    width: 280px;
+    max-height: 200px;
+  }
+
+  .drop-item {
+    padding: 8px 12px;
+  }
+
+  .drop-main {
+    font-size: 0.8125rem;
+  }
+
+  .drop-sub {
+    font-size: 0.7rem;
+  }
+
+  .summary-row {
+    padding: 10px 0;
+    font-size: 0.875rem;
+  }
+}
+
+/* ─── MOBILE ─── */
+@media (max-width: 768px) {
+  .dropdown-list {
+    width: 100%;
+    position: relative;
+    top: 4px;
+    max-height: 180px;
+    border-radius: 8px;
+  }
+
+  .drop-item {
+    padding: 8px 10px;
+    font-size: 0.8125rem;
+  }
+
+  .drop-main {
+    font-size: 0.8rem;
+  }
+
+  .drop-sub {
+    font-size: 0.65rem;
+  }
+
+  .summary-rows {
+    gap: 2px;
+  }
+
+  .summary-row {
+    padding: 10px 0;
+    font-size: 0.8125rem;
+  }
+
+  .input-sm {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+    width: 100%;
+  }
+
+  .btn-spinner {
+    width: 12px;
+    height: 12px;
+    border-width: 1.5px;
+  }
+}
+
+/* ─── SMALL MOBILE ─── */
+@media (max-width: 480px) {
+  .dropdown-list {
+    max-height: 150px;
+  }
+
+  .drop-item {
+    padding: 6px 8px;
+  }
+
+  .drop-main {
+    font-size: 0.75rem;
+  }
+
+  .drop-sub {
+    font-size: 0.6rem;
+    margin-top: 1px;
+  }
+
+  .summary-row {
+    padding: 8px 0;
+    font-size: 0.75rem;
+  }
+
+  .input-sm {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+  }
+}

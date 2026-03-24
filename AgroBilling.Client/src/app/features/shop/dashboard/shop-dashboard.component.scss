@@ -1,0 +1,64 @@
+.status-rows, .expense-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .status-row, .expense-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  
+    &:last-child { border-bottom: none; }
+  }
+
+  @media (max-width: 768px) {
+    .page-container {
+      padding: 16px 12px 90px;        /* extra bottom space for fixed nav */
+    }
+  
+    .grid-4, .grid-2 {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+  
+    .stat-card {
+      padding: 16px;
+      .stat-icon { width: 48px; height: 48px; font-size: 1.4rem; }
+      .stat-value { font-size: 1.6rem; }
+      .stat-label { font-size: 0.85rem; }
+    }
+  
+    .card {
+      padding: 16px;
+      border-radius: 14px;
+    }
+  
+    .card-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  
+    .status-rows .status-row,
+    .status-row {
+      font-size: 0.9rem;
+      padding: 12px 0;
+    }
+  
+    .table-wrapper {
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+  
+    table {
+      font-size: 0.82rem;
+    }
+  
+    thead th, tbody td {
+      padding: 10px 12px;
+    }
+  }

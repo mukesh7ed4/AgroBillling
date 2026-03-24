@@ -1,0 +1,107 @@
+<div class="page-container fade-in">
+  <div class="page-header">
+    <div>
+      <p class="breadcrumb">Home <span>/ Reports</span></p>
+      <h1 class="page-title">Monthly Report</h1>
+      <p class="page-subtitle">{{ monthLabel(selectedMonth) }}</p>
+    </div>
+    <div class="flex gap-12 align-items-center">
+      <input type="month" class="form-control" [(ngModel)]="selectedMonth" (ngModelChange)="load()" style="width:180px" />
+    </div>
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+
+  <ng-container *ngIf="!loading && dashboard">
+
+    <!-- Top stats -->
+    <div class="grid-4 mb-24">
+      <div class="stat-card">
+        <div class="stat-icon gold-icon">💰</div>
+        <div class="stat-value">{{ fmt(sm.totalSales) }}</div>
+        <div class="stat-label">Total Sales</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green-icon">✅</div>
+        <div class="stat-value amount-paid">{{ fmt(sm.totalCollected) }}</div>
+        <div class="stat-label">Cash Collected</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red-icon">💸</div>
+        <div class="stat-value amount-pending">{{ fmt(dashboard.totalExpenses) }}</div>
+        <div class="stat-label">Total Expenses</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" [style.background]="netProfit >= 0 ? 'rgba(67,160,71,0.15)' : 'rgba(229,57,53,0.15)'"
+          [style.color]="netProfit >= 0 ? 'var(--green-400)' : '#EF5350'">📊</div>
+        <div class="stat-value" [class]="netProfit >= 0 ? 'amount-paid' : 'amount-pending'">{{ fmt(netProfit) }}</div>
+        <div class="stat-label">Net Profit</div>
+      </div>
+    </div>
+
+    <div class="grid-2 mb-24">
+      <!-- Bill breakdown -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">🧾 Sales Breakdown</span></div>
+        <div class="report-rows">
+          <div class="report-row"><span>Total Bills</span><span class="font-bold">{{ sm.totalBills }}</span></div>
+          <div class="report-row"><span class="text-muted">Paid Bills</span><span class="amount-paid">{{ sm.paidBills }}</span></div>
+          <div class="report-row"><span class="text-muted">Partial Bills</span><span class="amount-pending">{{ sm.partialBills }}</span></div>
+          <div class="report-row"><span class="text-muted">Pending Bills</span><span class="amount-pending">{{ sm.pendingBills }}</span></div>
+          <div class="report-row highlight"><span>Total Pending Recovery</span><span class="amount-pending font-bold">{{ fmt(sm.totalPending) }}</span></div>
+        </div>
+      </div>
+
+      <!-- Expense breakdown -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">💸 Expense Breakdown</span>
+          <span class="amount-pending font-bold">{{ fmt(dashboard.totalExpenses) }}</span>
+        </div>
+        <div class="report-rows">
+          <div class="report-row" *ngFor="let e of dashboard.expenseBreakdown">
+            <span class="text-muted">{{ e.categoryName }}</span>
+            <span class="font-bold">{{ fmt(e.totalExpense) }}</span>
+          </div>
+          <div class="empty-state" *ngIf="!dashboard.expenseBreakdown?.length" style="padding:20px">
+            <p>No expenses this month</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Supplier summary -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">🏭 Supplier Summary</span></div>
+        <div class="report-rows">
+          <div class="report-row"><span>Total Purchased</span><span class="amount-total font-bold">{{ fmt(dashboard.totalPurchased) }}</span></div>
+          <div class="report-row"><span class="text-muted">Paid to Suppliers</span><span class="amount-paid">{{ fmt(dashboard.paidToSuppliers) }}</span></div>
+          <div class="report-row highlight"><span>Outstanding to Suppliers</span><span class="amount-pending font-bold">{{ fmt(supplierOutstanding) }}</span></div>
+        </div>
+      </div>
+
+      <!-- Top products -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">🏆 Top Selling Products</span></div>
+        <div class="empty-state" *ngIf="!dashboard.topProducts?.length" style="padding:20px">
+          <p>No sales data this month</p>
+        </div>
+        <div class="table-wrapper" *ngIf="dashboard.topProducts?.length">
+          <table>
+            <thead><tr><th>#</th><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let p of dashboard.topProducts; let i=index">
+                <td><span class="rank">{{ i+1 }}</span></td>
+                <td class="font-bold">{{ p.productName }}</td>
+                <td class="text-muted">{{ p.totalQty }}</td>
+                <td class="amount-total">{{ fmt(p.totalAmount) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

@@ -1,0 +1,107 @@
+<div class="page-container fade-in">
+  <div class="page-header">
+    <div>
+      <p class="breadcrumb">Home <span>/ Purchases /</span> <span>New Purchase</span></p>
+      <h1 class="page-title">Create Purchase Order</h1>
+    </div>
+    <a routerLink="/shop/purchases" class="btn btn-outline">← Back</a>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="grid-2 mb-24">
+      <div class="card">
+        <div class="card-header"><span class="card-title">🏭 Purchase Details</span></div>
+        <div class="form-group">
+          <label class="form-label">Supplier *</label>
+          <select class="form-control" formControlName="supplierId" [class.is-invalid]="form.get('supplierId')?.invalid && form.get('supplierId')?.touched">
+            <option value="">-- Select Supplier --</option>
+            <option *ngFor="let s of suppliers" [value]="s.supplierId">{{ s.companyName }} {{ s.gstNumber ? '(' + s.gstNumber + ')' : '' }}</option>
+          </select>
+          <div class="form-error" *ngIf="form.get('supplierId')?.invalid && form.get('supplierId')?.touched">Select a supplier</div>
+          <div class="text-muted text-xs mt-8" *ngIf="getSelectedSupplier()">
+            GST: {{ getSelectedSupplier()?.gstNumber || 'N/A' }} | Contact: {{ getSelectedSupplier()?.mobileNumber || '—' }}
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Purchase Date *</label>
+            <input type="date" class="form-control" formControlName="purchaseDate" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Supplier Invoice No.</label>
+            <input type="text" class="form-control" formControlName="invoiceNumber" placeholder="Optional" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Amount Paid Now (₹)</label>
+            <input type="number" class="form-control" formControlName="amountPaid" min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Mode</label>
+            <select class="form-control" formControlName="paymentMode">
+              <option>Cash</option><option>UPI</option><option>Cheque</option><option>Bank Transfer</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" class="form-control" formControlName="notes" placeholder="Optional" />
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">💰 Summary</span></div>
+        <div class="summary-rows">
+          <div class="summary-row"><span>Total Items</span><span class="font-bold">{{ items.length }}</span></div>
+          <div class="summary-row"><span>Grand Total</span><span class="amount-total font-bold">{{ fmt(grandTotal) }}</span></div>
+          <div class="summary-row"><span class="text-muted">Amount Paid</span><span class="amount-paid">{{ fmt(amountPaidNumber) }}</span></div>
+          <div class="summary-row"><span class="text-muted">Balance Due</span><span class="amount-pending">{{ fmt(purchaseDue) }}</span></div>
+        </div>
+        <button type="submit" class="btn btn-primary w-full btn-lg mt-24" [disabled]="submitting || !items.length">
+          <span *ngIf="submitting" class="btn-spinner"></span>
+          {{ submitting ? 'Saving...' : '✅ Save Purchase Order' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📦 Products Received</span>
+        <div class="search-bar" style="position:relative">
+          <span class="search-icon">🔍</span>
+          <input [(ngModel)]="productSearch" [ngModelOptions]="{standalone:true}"
+            (input)="onProductSearch()" (focus)="onProductFocus()"
+            placeholder="Search & add product..." style="width:220px" autocomplete="off" />
+          <div class="dropdown-list" *ngIf="showProductDrop && filteredProducts.length">
+            <div class="drop-item" *ngFor="let p of filteredProducts | slice:0:8" (click)="addProduct(p)">
+              <span class="drop-main">{{ p.productName }}</span>
+              <span class="drop-sub">Purchase: {{ fmt(p.purchasePrice) }} · Stock: {{ p.currentStock }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!items.length">
+        <div class="empty-icon">📦</div><h3>Search and add products received</h3>
+      </div>
+
+      <div class="table-wrapper" *ngIf="items.length" [formArrayName]="'items'">
+        <table>
+          <thead><tr><th>Product</th><th>Quantity</th><th>Unit Price (₹)</th><th>GST %</th><th>Total</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let item of items.controls; let i=index" [formGroupName]="i">
+              <td class="font-bold">{{ item.value.productName }}</td>
+              <td><input type="number" class="form-control input-sm" formControlName="quantity" min="0.001" step="0.001" (input)="recalc(i)" style="width:90px" /></td>
+              <td><input type="number" class="form-control input-sm" formControlName="unitPrice" min="0" (input)="recalc(i)" style="width:110px" /></td>
+              <td><input type="number" class="form-control input-sm" formControlName="gstPercent" min="0" max="100" (input)="recalc(i)" style="width:70px" /></td>
+              <td class="amount-total font-bold">{{ fmt(item.value.totalAmount) }}</td>
+              <td><button type="button" class="btn btn-sm btn-danger btn-icon" (click)="removeItem(i)">🗑️</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,6 @@
+.tabs-bar { display:flex; gap:4px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:4px; width:fit-content; }
+.tab-btn { padding:8px 18px; border-radius:8px; border:none; background:transparent; color:var(--text-2); font-family:var(--font-display); font-weight:600; font-size:0.875rem; cursor:pointer; transition:all 0.18s; white-space:nowrap; &.active { background:var(--green-700); color:#fff; } &:not(.active):hover { background:var(--hover-bg); color:var(--text-1); } }
+.bill-no { font-family:var(--font-display); font-weight:700; color:var(--green-400); }
+.gold-icon { background:rgba(249,168,37,0.15)!important; color:var(--gold-400)!important; }
+.green-icon { background:rgba(67,160,71,0.15)!important; color:var(--green-400)!important; }
+.red-icon { background:rgba(229,57,53,0.15)!important; color:#EF5350!important; }
