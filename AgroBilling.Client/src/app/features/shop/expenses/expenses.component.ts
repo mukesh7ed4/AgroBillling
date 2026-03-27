@@ -15,17 +15,17 @@ import { Expense, ExpenseCategory } from '../../../core/models/models';
   styleUrls: ['./expenses.component.scss']
 })
 export class ExpensesComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
+  private readonly fb  = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
-  expenses: Expense[] = [];
+
+  expenses:   Expense[]         = [];
   categories: ExpenseCategory[] = [];
-  loading = true;
+  loading      = true;
   showAddModal = false;
-  submitting = false;
-  totalCount = 0;
-  pageNumber = 1;
+  submitting   = false;
+  totalCount   = 0;
+  pageNumber   = 1;
   readonly pageSize = 10;
-  /** Full month sum from API (all rows in month, not just this page) */
   monthTotal: number | null = null;
   filterMonth = new Date().toISOString().substring(0, 7);
 
@@ -49,33 +49,41 @@ export class ExpensesComponent implements OnInit {
 
   loadCategories(): void {
     const shopId = this.auth.getShopId()!;
-    this.expenseService.getShopCategories(shopId).subscribe(r => (this.categories = r.data));
+    this.expenseService.getShopCategories(shopId).subscribe({
+      next: r => {
+        // Normalize — API may return data directly or wrapped
+        const raw = (r as any)?.data ?? r ?? [];
+        this.categories = (Array.isArray(raw) ? raw : []).map((c: any) => ({
+          id:           c.id           ?? c.categoryId   ?? 0,
+          categoryId:   c.categoryId   ?? c.id           ?? 0,
+          name:         c.name         ?? c.categoryName ?? '',
+          categoryName: c.categoryName ?? c.name         ?? '',
+          shopId:       c.shopId
+        }));
+        this.cdr.detectChanges();
+      },
+      error: () => { this.categories = []; }
+    });
   }
 
-  onMonthChange(): void {
-    this.pageNumber = 1;
-    this.load();
-  }
+  onMonthChange(): void { this.pageNumber = 1; this.load(); }
 
   load(): void {
     const shopId = this.auth.getShopId();
-    if (shopId == null) {
-      this.loading = false;
-      this.cdr.detectChanges();
-      return;
-    }
+    if (shopId == null) { this.loading = false; this.cdr.detectChanges(); return; }
     this.loading = true;
-    this.expenseService.getExpenses(shopId, { month: this.filterMonth }).subscribe({
+    this.expenseService.getExpenses(shopId, { month: this.filterMonth, page: this.pageNumber, pageSize: this.pageSize }).subscribe({
       next: res => {
-        this.expenses = res.items;
-        this.totalCount = res.totalCount;
-        this.loading = false;
+        this.expenses   = (res.items ?? []).map((e: any) => ({
+          ...e,
+          categoryName: e.categoryName ?? e.category?.name ?? e.category?.categoryName ?? ''
+        }));
+        this.totalCount = res.totalCount ?? 0;
+        this.monthTotal = (res as any).monthTotal ?? null;
+        this.loading    = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -85,12 +93,9 @@ export class ExpensesComponent implements OnInit {
     const shopId = this.auth.getShopId()!;
     this.expenseService.createExpense(shopId, this.form.value as any).subscribe({
       next: () => {
-        this.submitting = false;
+        this.submitting  = false;
         this.showAddModal = false;
-        this.form.reset({
-          paymentMode: 'Cash',
-          expenseDate: new Date().toISOString().substring(0, 10)
-        });
+        this.form.reset({ paymentMode: 'Cash', expenseDate: new Date().toISOString().substring(0, 10) });
         this.pageNumber = 1;
         this.load();
       },
@@ -103,28 +108,11 @@ export class ExpensesComponent implements OnInit {
     return this.expenses.reduce((s, e) => s + (e.amount ?? 0), 0);
   }
 
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
-  }
+  get totalPages(): number { return Math.max(1, Math.ceil(this.totalCount / this.pageSize)); }
+  prevPage(): void { if (this.pageNumber > 1) { this.pageNumber--; this.load(); } }
+  nextPage(): void { if (this.pageNumber < this.totalPages) { this.pageNumber++; this.load(); } }
 
-  prevPage(): void {
-    if (this.pageNumber > 1) {
-      this.pageNumber--;
-      this.load();
-    }
-  }
-
-  nextPage(): void {
-    if (this.pageNumber < this.totalPages) {
-      this.pageNumber++;
-      this.load();
-    }
-  }
   fmt(v: number | undefined): string {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(v ?? 0);
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v ?? 0);
   }
 }

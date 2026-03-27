@@ -1,0 +1,2 @@
+.info-rows { display:flex; flex-direction:column; }
+.info-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); &:last-child{border-bottom:none;} }

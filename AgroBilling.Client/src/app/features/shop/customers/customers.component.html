@@ -11,7 +11,9 @@
   <div class="filter-bar card mb-24">
     <div class="search-bar">
       <span class="search-icon">🔍</span>
-      <input [(ngModel)]="searchText" (ngModelChange)="onSearch()" placeholder="Search by name, mobile, village..." />
+      <input [(ngModel)]="searchText" (ngModelChange)="onSearch()"
+        placeholder="Search by name, mobile, village..." />
+      <button *ngIf="searchText" class="clear-btn" (click)="searchText=''; onSearch()">✕</button>
     </div>
   </div>
 
@@ -24,13 +26,19 @@
       <p>Add your first customer to get started</p>
       <a routerLink="/shop/customers/add" class="btn btn-primary mt-16">Add Customer</a>
     </div>
+
     <div class="table-wrapper" *ngIf="customers.length">
       <table>
         <thead>
-          <tr><th>Name</th><th>Father's Name</th><th>Mobile</th><th>Village</th><th>Pending</th><th>Bills</th><th>Action</th></tr>
+          <tr>
+            <th>Name</th><th>Father's Name</th><th>Mobile</th>
+            <th>Village</th><th>Pending</th><th>Bills</th><th>Action</th>
+          </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let c of customers" [routerLink]="['/shop/customers', c.customerId ?? c.id]">
+          <tr *ngFor="let c of customers"
+              [routerLink]="['/shop/customers', c.customerId ?? c.id]"
+              style="cursor:pointer">
             <td>
               <div class="cust-avatar-row">
                 <div class="cust-avatar">{{ (c.fullName || c.name || '?')[0] }}</div>
@@ -39,25 +47,35 @@
             </td>
             <td class="text-muted">{{ c.fatherName || '—' }}</td>
             <td>{{ c.mobileNumber || c.phone }}</td>
-            <td class="text-muted">{{ c.village || '—' }}, {{ c.district || '' }}</td>
+            <td class="text-muted">{{ c.village || '—' }}<span *ngIf="c.district">, {{ c.district }}</span></td>
             <td>
-              <span [class]="(c.totalPending || 0) > 0 ? 'amount-pending' : 'amount-paid'">
+              <span [class]="(c.totalPending || 0) > 0 ? 'amount-pending font-bold' : 'amount-paid'">
                 {{ fmt(c.totalPending || 0) }}
               </span>
             </td>
             <td><span class="badge badge-muted">{{ c.totalBills || 0 }} bills</span></td>
             <td>
-              <a [routerLink]="['/shop/customers', c.customerId ?? c.id]" class="btn btn-sm btn-outline" (click)="$event.stopPropagation()">Ledger</a>
+              <a [routerLink]="['/shop/customers', c.customerId ?? c.id]"
+                 class="btn btn-sm btn-outline"
+                 (click)="$event.stopPropagation()">Ledger</a>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="pagination" *ngIf="totalPages > 1">
-      <button class="btn btn-sm btn-outline" (click)="prevPage()" [disabled]="pageNumber === 1">← Prev</button>
-      <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
-      <button class="btn btn-sm btn-outline" (click)="nextPage()" [disabled]="pageNumber === totalPages">Next →</button>
+    <!-- ✅ PAGINATION — always show when totalCount > pageSize -->
+    <div class="pagination" *ngIf="totalCount > pageSize">
+      <button class="btn btn-sm btn-outline"
+              (click)="prevPage()"
+              [disabled]="pageNumber === 1">← Prev</button>
+      <span class="page-info">
+        Page {{ pageNumber }} of {{ totalPages }}
+        <span class="text-muted">({{ totalCount }} total)</span>
+      </span>
+      <button class="btn btn-sm btn-outline"
+              (click)="nextPage()"
+              [disabled]="pageNumber >= totalPages">Next →</button>
     </div>
   </div>
 </div>

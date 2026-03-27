@@ -39,14 +39,9 @@ export class LoginComponent implements OnInit {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true;
     this.error   = '';
-
-    // ✅ Role nahi bhej rahe — backend khud detect karega
+    // No role field — backend auto-detects
     this.auth.login(this.form.value).subscribe({
-      next: () => {
-        this.loading = false;
-        this.redirectByRole();
-        this.cdr.detectChanges();
-      },
+      next: () => { this.loading = false; this.redirectByRole(); this.cdr.detectChanges(); },
       error: (err: any) => {
         this.loading = false;
         this.error   = err.error?.message || 'Invalid credentials. Please try again.';
@@ -56,8 +51,7 @@ export class LoginComponent implements OnInit {
   }
 
   private redirectByRole(): void {
-    if (this.auth.isAdmin()) this.router.navigate(['/admin/dashboard']);
-    else this.router.navigate(['/shop/dashboard']);
+    this.router.navigate([this.auth.isAdmin() ? '/admin/dashboard' : '/shop/dashboard']);
   }
 
   get email()    { return this.form.get('email'); }

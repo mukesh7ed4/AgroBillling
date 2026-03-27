@@ -26,10 +26,8 @@
     </div>
   </div>
 
-  <!-- Loading -->
   <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
 
-  <!-- Table -->
   <div class="card" *ngIf="!loading">
     <div class="empty-state" *ngIf="!bills.length">
       <div class="empty-icon">🧾</div>
@@ -42,43 +40,48 @@
       <table>
         <thead>
           <tr>
-            <th>Bill No.</th>
-            <th>Customer</th>
-            <th>Date</th>
-            <th>Total</th>
-            <th>Paid</th>
-            <th>Pending</th>
-            <th>Status</th>
-            <th>Action</th>
+            <th>Bill No.</th><th>Customer</th><th>Date</th>
+            <th>Total</th><th>Paid</th><th>Pending</th><th>Status</th><th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let b of bills" [routerLink]="['/shop/billing', b.billId]" style="cursor:pointer">
+          <tr *ngFor="let b of bills"
+              [routerLink]="['/shop/billing', b.billId ?? b.id]"
+              style="cursor:pointer">
             <td><span class="bill-no">{{ b.billNumber }}</span></td>
             <td>
               <div class="cust-info">
-                <span class="cust-name">{{ b.customer?.fullName }}</span>
-                <span class="cust-mobile text-xs text-muted">{{ b.customer?.mobileNumber }}</span>
+                <span class="cust-name">{{ b.customer?.fullName || b.customerName }}</span>
+                <span class="cust-mobile text-xs text-muted">{{ b.customer?.mobileNumber || b.customerMobile }}</span>
               </div>
             </td>
             <td class="text-muted">{{ b.billDate | date:'dd MMM yyyy' }}</td>
             <td class="amount-total">{{ fmt(b.totalAmount) }}</td>
             <td class="amount-paid">{{ fmt(b.amountPaid) }}</td>
             <td [class]="(b.amountPending ?? 0) > 0 ? 'amount-pending' : 'amount-paid'">{{ fmt(b.amountPending) }}</td>
-            <td><span class="badge" [class]="statusClass(b.paymentStatus)">{{ statusLabel(b.paymentStatus) }}</span></td>
+            <td><span class="badge" [class]="statusClass(b.paymentStatus)">{{ b.paymentStatus }}</span></td>
             <td>
-              <a [routerLink]="['/shop/billing', b.billId]" class="btn btn-sm btn-outline" (click)="$event.stopPropagation()">View</a>
+              <a [routerLink]="['/shop/billing', b.billId ?? b.id]"
+                 class="btn btn-sm btn-outline"
+                 (click)="$event.stopPropagation()">View</a>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Pagination -->
-    <div class="pagination" *ngIf="totalPages > 1">
-      <button class="btn btn-sm btn-outline" (click)="prevPage()" [disabled]="pageNumber === 1">← Prev</button>
-      <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
-      <button class="btn btn-sm btn-outline" (click)="nextPage()" [disabled]="pageNumber === totalPages">Next →</button>
+    <!-- ✅ PAGINATION -->
+    <div class="pagination" *ngIf="totalCount > pageSize">
+      <button class="btn btn-sm btn-outline"
+              (click)="prevPage()"
+              [disabled]="pageNumber === 1">← Prev</button>
+      <span class="page-info">
+        Page {{ pageNumber }} of {{ totalPages }}
+        <span class="text-muted">({{ totalCount }} total)</span>
+      </span>
+      <button class="btn btn-sm btn-outline"
+              (click)="nextPage()"
+              [disabled]="pageNumber >= totalPages">Next →</button>
     </div>
   </div>
 </div>

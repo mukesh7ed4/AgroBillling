@@ -38,6 +38,7 @@ export class SidebarComponent implements OnInit {
     { label: 'Purchases', labelHi: 'खरीद',       icon: '🛒', route: '/shop/purchases' },
     { label: 'Expenses',  labelHi: 'खर्च',       icon: '💸', route: '/shop/expenses' },
     { label: 'Reports',   labelHi: 'रिपोर्ट',    icon: '📈', route: '/shop/reports' },
+    { label: 'Profile',   labelHi: 'प्रोफ़ाइल',    icon: '⚙️', route: '/shop/profile' },
   ];
 
   get navItems(): NavItem[] { return this.isAdmin ? this.adminNav : this.shopNav; }

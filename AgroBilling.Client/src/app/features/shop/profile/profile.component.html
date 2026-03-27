@@ -1,0 +1,60 @@
+<div class="page-container fade-in">
+  <div class="page-header">
+    <div>
+      <p class="breadcrumb">Home <span>/ Profile</span></p>
+      <h1 class="page-title">Profile & Settings</h1>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Shop Info -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">🏪 Shop Info</span></div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="text-muted">Shop Name</span>
+          <span class="font-bold">{{ shopName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="text-muted">Role</span>
+          <span class="badge badge-success">Shop Owner</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">🔐 Change Password</span></div>
+
+      <div class="alert alert-success" *ngIf="success">✅ {{ success }}</div>
+      <div class="alert alert-danger"  *ngIf="error">⚠️ {{ error }}</div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label class="form-label">Current Password *</label>
+          <input type="password" class="form-control" formControlName="currentPassword"
+            placeholder="Enter current password"
+            [class.is-invalid]="f['currentPassword'].invalid && f['currentPassword'].touched" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password *</label>
+          <input type="password" class="form-control" formControlName="newPassword"
+            placeholder="Min 6 characters"
+            [class.is-invalid]="f['newPassword'].invalid && f['newPassword'].touched" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm New Password *</label>
+          <input type="password" class="form-control" formControlName="confirmPassword"
+            placeholder="Repeat new password"
+            [class.is-invalid]="form.errors?.['mismatch'] && f['confirmPassword'].touched" />
+          <div class="form-error" *ngIf="form.errors?.['mismatch'] && f['confirmPassword'].touched">
+            Passwords do not match
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-full" [disabled]="loading">
+          {{ loading ? 'Updating...' : '🔐 Update Password' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
