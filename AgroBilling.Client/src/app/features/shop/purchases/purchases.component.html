@@ -1,3 +1,5 @@
+<!-- src/app/features/shop/purchases/purchases.component.html -->
+
 <div class="page-container fade-in">
   <div class="page-header">
     <div>
@@ -7,33 +9,61 @@
     </div>
     <a routerLink="/shop/purchases/create" class="btn btn-primary">🛒 New Purchase</a>
   </div>
+
   <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+
   <div class="card" *ngIf="!loading">
     <div class="empty-state" *ngIf="!purchases.length">
-      <div class="empty-icon">🛒</div><h3>No purchases yet</h3>
+      <div class="empty-icon">🛒</div>
+      <h3>No purchases yet</h3>
       <a routerLink="/shop/purchases/create" class="btn btn-primary mt-16">Create Purchase</a>
     </div>
+
     <div class="table-wrapper" *ngIf="purchases.length">
-      <table>
-        <thead><tr><th>Date</th><th>Supplier</th><th>Invoice No.</th><th>Total</th><th>Paid</th><th>Due</th><th>Status</th></tr></thead>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Supplier</th>
+            <th>Invoice No.</th>
+            <th>Sub Total</th>
+            <th>GST</th>
+            <th>Net Payable</th>
+            <th>Paid</th>
+            <th>Due</th>
+            <th>Status</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr *ngFor="let p of purchases">
+          <tr *ngFor="let p of purchases"
+              [routerLink]="['/shop/purchases', p.purchaseId ?? p.id]"
+              style="cursor:pointer"
+              class="tr-hover">
             <td>{{ p.purchaseDate | date:'dd MMM yyyy' }}</td>
-            <td class="font-bold">{{ p.supplier?.companyName }}</td>
+            <td class="font-bold">{{ p.supplier?.companyName || p.supplier?.name || p.supplierName || '—' }}</td>
             <td class="text-muted">{{ p.invoiceNumber || '—' }}</td>
-            <td class="amount-total">{{ fmt(p.netPayable) }}</td>
+            <td>{{ fmt(getSubTotal(p)) }}</td>
+            <td>
+              <!-- Safe access with optional chaining and fallback -->
+              {{ (getGSTAmount(p) > 0 ? fmt(getGSTAmount(p)) : '—') }}
+            </td>
+            <td class="amount-total font-bold">{{ fmt(p.netPayable) }}</td>
             <td class="amount-paid">{{ fmt(p.amountPaid) }}</td>
-            <td [class]="purchasePending(p) > 0 ? 'amount-pending' : 'amount-paid'">{{ fmt(purchasePending(p)) }}</td>
-            <td><span class="badge" [class]="statusClass(p.paymentStatus)">{{ p.paymentStatus }}</span></td>
+            <td [class]="purchasePending(p) > 0 ? 'amount-pending' : 'amount-paid'">
+              {{ fmt(purchasePending(p)) }}
+            </td>
+            <td>
+              <span class="badge" [class]="statusClass(p.paymentStatus)">{{ p.paymentStatus || 'PENDING' }}</span>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <div class="pagination" *ngIf="totalPages > 1">
-      <button class="btn btn-sm btn-outline" (click)="prevPage()" [disabled]="pageNumber === 1">← Prev</button>
+      <button class="btn btn-sm btn-outline" (click)="prevPage()" [disabled]="pageNumber===1">← Prev</button>
       <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
-      <button class="btn btn-sm btn-outline" (click)="nextPage()" [disabled]="pageNumber === totalPages">Next →</button>
+      <button class="btn btn-sm btn-outline" (click)="nextPage()" [disabled]="pageNumber===totalPages">Next →</button>
     </div>
   </div>
 </div>

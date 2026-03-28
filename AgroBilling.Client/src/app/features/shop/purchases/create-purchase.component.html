@@ -38,8 +38,8 @@
             <input type="date" class="form-control" formControlName="purchaseDate" />
           </div>
           <div class="form-group">
-            <label class="form-label">Invoice No.</label>
-            <input type="text" class="form-control" formControlName="invoiceNumber" placeholder="Optional" />
+            <label class="form-label">Invoice No. <span class="text-muted text-xs">(auto if blank)</span></label>
+            <input type="text" class="form-control" formControlName="invoiceNumber" placeholder="Auto-generated" />
           </div>
         </div>
 
@@ -68,10 +68,20 @@
         <div class="card-header"><span class="card-title">💰 Summary</span></div>
         <div class="summary-rows">
           <div class="summary-row">
-            <span>Total Items</span>
+            <span>Items</span>
             <span class="font-bold">{{ items.length }}</span>
           </div>
           <div class="summary-row">
+            <span>Sub Total (excl. GST)</span>
+            <span>{{ fmt(subTotal) }}</span>
+          </div>
+          <!-- ✅ GST breakdown -->
+          <div class="summary-row" *ngIf="totalGst > 0">
+            <span class="text-muted">GST Total</span>
+            <span>+ {{ fmt(totalGst) }}</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-row grand-total">
             <span>Grand Total</span>
             <span class="amount-total font-bold">{{ fmt(grandTotal) }}</span>
           </div>
@@ -101,34 +111,46 @@
       <div class="card-header">
         <span class="card-title">📦 Products Received</span>
 
-        <!-- ✅ Search bar - local filter, no API call -->
-        <div class="search-bar" style="position:relative">
-          <span class="search-icon">🔍</span>
-          <input
-            [(ngModel)]="productSearch"
-            [ngModelOptions]="{standalone:true}"
-            (input)="onProductSearch()"
-            (focus)="onProductFocus()"
-            (blur)="hideDropdown()"
-            placeholder="Search & add product..."
-            style="width:220px"
-            autocomplete="off" />
+        <div class="search-bar" style="position:relative; display:flex; align-items:center; gap:8px">
+          <div style="position:relative">
+            <span class="search-icon">🔍</span>
+            <input
+              [(ngModel)]="productSearch"
+              [ngModelOptions]="{standalone:true}"
+              (input)="onProductSearch()"
+              (focus)="onProductFocus()"
+              (blur)="hideDropdown()"
+              placeholder="Search product..."
+              style="width:220px"
+              autocomplete="off" />
 
-          <div class="dropdown-list" *ngIf="showProductDrop && filteredProducts.length">
-            <div class="drop-item"
-                 *ngFor="let p of filteredProducts | slice:0:10"
-                 (mousedown)="addProduct(p)">
-              <span class="drop-main">{{ p.productName ?? p.name }}</span>
-              <span class="drop-sub">
-                Purchase: {{ fmt(p.purchasePrice ?? p.unitPrice) }} ·
-                Stock: {{ p.currentStock ?? p.stockQty ?? 0 }}
-              </span>
+            <!-- Existing product dropdown -->
+            <div class="dropdown-list" *ngIf="showProductDrop">
+              <div class="drop-item"
+                   *ngFor="let p of filteredProducts | slice:0:10"
+                   (mousedown)="addProduct(p)">
+                <span class="drop-main">{{ p.productName ?? p.name }}</span>
+                <span class="drop-sub">
+                  Purchase: {{ fmt(p.purchasePrice ?? p.unitPrice) }} ·
+                  GST: {{ p.gstPercent ?? 0 }}% ·
+                  Stock: {{ p.currentStock ?? p.stockQty ?? 0 }}
+                </span>
+              </div>
+
+              <!-- ✅ "Add New Product" option at bottom of dropdown -->
+              <div class="drop-item drop-item-new" (mousedown)="openNewProduct()">
+                <span class="drop-main">➕ Add "{{ productSearch || 'New Product' }}" as new</span>
+                <span class="drop-sub">Will be added to inventory automatically</span>
+              </div>
             </div>
           </div>
 
-          <span class="text-xs text-muted" style="margin-left:8px" *ngIf="!dataLoaded">
-            Loading...
-          </span>
+          <!-- ✅ Direct new product button -->
+          <button type="button" class="btn btn-sm btn-outline" (click)="openNewProduct()">
+            ➕ New Product
+          </button>
+
+          <span class="text-xs text-muted" *ngIf="!dataLoaded">Loading...</span>
         </div>
       </div>
 
@@ -136,7 +158,7 @@
         <div class="empty-icon">📦</div>
         <h3>Search and add products received</h3>
         <p *ngIf="!dataLoaded">Loading product list...</p>
-        <p *ngIf="dataLoaded">{{ allProducts.length }} products available</p>
+        <p *ngIf="dataLoaded">{{ allProducts.length }} products available · or add new inline</p>
       </div>
 
       <div class="table-wrapper" *ngIf="items.length" [formArrayName]="'items'">
@@ -144,12 +166,15 @@
           <thead>
             <tr>
               <th>Product</th><th>Qty</th><th>Unit Price (₹)</th>
-              <th>GST %</th><th>Total</th><th></th>
+              <th>GST %</th><th>GST Amt</th><th>Total</th><th></th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let item of items.controls; let i=index" [formGroupName]="i">
-              <td class="font-bold">{{ item.value.productName }}</td>
+              <td>
+                <span class="font-bold">{{ item.value.productName }}</span>
+                <span class="badge badge-warning text-xs ml-8" *ngIf="item.value.isNew">NEW</span>
+              </td>
               <td>
                 <input type="number" class="form-control input-sm"
                   formControlName="quantity" min="0.001" step="0.001"
@@ -165,6 +190,7 @@
                   formControlName="gstPercent" min="0" max="100"
                   (input)="recalc(i)" style="width:70px" />
               </td>
+              <td class="text-muted">{{ item.value.gstAmount > 0 ? fmt(item.value.gstAmount) : '—' }}</td>
               <td class="amount-total font-bold">{{ fmt(item.value.totalAmount) }}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-danger btn-icon"
@@ -176,4 +202,42 @@
       </div>
     </div>
   </form>
+</div>
+
+<!-- ✅ Inline New Product Modal -->
+<div class="modal-overlay" *ngIf="showNewProductModal" (click)="showNewProductModal=false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>➕ Add New Product</h3>
+      <button class="btn-close" (click)="showNewProductModal=false">✕</button>
+    </div>
+
+    <p class="text-muted text-sm mb-16">
+      Yeh product inventory mein automatically add ho jayega.
+    </p>
+
+    <div class="form-group">
+      <label class="form-label">Product Name *</label>
+      <input type="text" class="form-control" [(ngModel)]="newProductName"
+        placeholder="e.g. DAP Fertilizer 50kg" />
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Purchase Price (₹) *</label>
+        <input type="number" class="form-control" [(ngModel)]="newProductPrice" min="0" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">GST %</label>
+        <input type="number" class="form-control" [(ngModel)]="newProductGst" min="0" max="100" />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" (click)="showNewProductModal=false">Cancel</button>
+      <button class="btn btn-primary" (click)="confirmNewProduct()"
+        [disabled]="!newProductName.trim() || newProductPrice <= 0">
+        ✅ Add to Purchase
+      </button>
+    </div>
+  </div>
 </div>

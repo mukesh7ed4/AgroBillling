@@ -68,7 +68,7 @@ export const routes: Routes = [
       { path: 'expenses',         loadComponent: () => import('./features/shop/expenses/expenses.component').then(c => c.ExpensesComponent) },
       { path: 'reports',          loadComponent: () => import('./features/shop/reports/reports.component').then(c => c.ReportsComponent) },
       { path: 'profile',          loadComponent: () => import('./features/shop/profile/profile.component').then(c => c.ProfileComponent) },
-      { path: 'purchases/:id', loadComponent: () => import('./features/shop/purchases/purchases.component').then(c => c.PurchasesComponent) },
+      { path: 'purchases/:id', loadComponent: () => import('./features/shop/purchases/purchase-detail.component').then(c => c.PurchaseDetailComponent) },
     ]
   },
 

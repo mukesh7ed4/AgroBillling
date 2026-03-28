@@ -24,32 +24,28 @@ export class AdminDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.reportService
       .getAdminDashboard()
-      .pipe(
-        finalize(() => {
-          this.loading = false;
-          this.cdr.detectChanges();
-        })
-      )
+      .pipe(finalize(() => { this.loading = false; this.cdr.detectChanges(); }))
       .subscribe({
         next: res => {
           const d = res?.data;
-          if (d == null) {
-            this.data = null;
-            return;
-          }
+          if (d == null) { this.data = null; return; }
           this.data = {
-            ...d,
-            allShops: [...(d.allShops ?? [])],
-            expired: [...(d.expired ?? [])],
+            totalShops:           d.totalShops          ?? 0,
+            activeSubscriptions:  d.activeSubscriptions ?? 0,
+            allShops:     [...(d.allShops     ?? [])],
+            expired:      [...(d.expired      ?? [])],
             expiringSoon: [...(d.expiringSoon ?? [])]
           };
         },
-        error: () => {
-          this.data = null;
-          this.cdr.detectChanges();
-        }
+        error: () => { this.data = null; this.cdr.detectChanges(); }
       });
   }
+
+  // ✅ Computed from allShops (more accurate than what API returns)
+  get totalShops():          number { return this.data?.totalShops ?? 0; }
+  get activeSubscriptions(): number { return this.data?.activeSubscriptions ?? 0; }
+  get expiringSoonCount():   number { return this.data?.expiringSoon?.length ?? 0; }
+  get expiredCount():        number { return this.data?.expired?.length ?? 0; }
 
   alertClass(days: number): string {
     if (days < 0)  return 'badge-danger';
@@ -59,7 +55,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   alertLabel(days: number): string {
-    if (days < 0)  return `Expired ${Math.abs(days)}d ago`;
+    if (days < 0)   return `Expired ${Math.abs(days)}d ago`;
     if (days === 0) return 'Expires Today!';
     return `${days} days left`;
   }

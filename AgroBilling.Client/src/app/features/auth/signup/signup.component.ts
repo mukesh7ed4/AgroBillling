@@ -2,7 +2,6 @@ import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
@@ -16,7 +15,6 @@ import { environment } from '../../../../environments/environment';
 })
 export class SignupComponent {
   private fb   = inject(FormBuilder);
-  private http = inject(HttpClient);
   private cdr  = inject(ChangeDetectorRef);
 
   submitting = false;
@@ -54,15 +52,40 @@ export class SignupComponent {
     this.submitting = true;
     this.error      = '';
 
-    this.http.post<any>(`${environment.apiUrl}/auth/signup`, payload).subscribe({
-      next: res => {
+    // ✅ Use auth.signup() directly — handles token + shopId from response
+    this.auth.signup(payload).subscribe({
+      next: (signupRes: any) => {
         this.submitting = false;
-        // Auto-login after signup
+
+        // ✅ Signup response se subscriptionStatus save karo
+        const signupData = signupRes?.data;
+        if (signupData?.subscriptionStatus) {
+          this.auth.setSubscriptionStatus(
+            signupData.subscriptionStatus,
+            signupData.subscriptionExpiry
+          );
+        }
+
+        // ✅ Ab auto-login karo to get JWT token
         this.auth.login({ email: payload.email!, password: payload.password! })
           .subscribe({
-            next: () => this.router.navigate(['/shop/dashboard']),
+            next: (loginRes: any) => {
+              // ✅ Login se bhi status check karo (already set hoga, but double ensure)
+              const loginData = loginRes?.data;
+              if (loginData?.subscriptionStatus) {
+                this.auth.setSubscriptionStatus(
+                  loginData.subscriptionStatus,
+                  loginData.subscriptionExpiry
+                );
+              } else if (!this.auth.getSubscriptionStatus()) {
+                // ✅ Fallback — agar kuch nahi aaya toh TRIAL set karo
+                this.auth.setSubscriptionStatus('TRIAL');
+              }
+              this.router.navigate(['/shop/dashboard']);
+            },
             error: () => this.router.navigate(['/auth/login'])
           });
+
         this.cdr.detectChanges();
       },
       error: (err: any) => {

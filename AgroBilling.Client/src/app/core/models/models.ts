@@ -9,8 +9,56 @@ export interface PagedResponse<T> {
   totalCount: number;
   page?: number;
   pageSize?: number;
-  /** Full month sum (expenses API) */
   monthTotal?: number;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  success?: boolean;
+  message?: string;
+}
+
+export interface PagedResponse<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber?: number;
+  pageSize?: number;
+  totalPages?: number;
+  monthTotal?: number;
+}
+
+// Add these interfaces
+export interface PurchaseOrderItem {
+  id?: number;
+  purchaseOrderId?: number;
+  purchaseId?: number;
+  productId?: number;
+  productName?: string;
+  quantity?: number;
+  unitPrice?: number;
+  gstPercent?: number;
+  gstpercent?: number;
+  gstAmount?: number;
+  gstamount?: number;
+  totalAmount?: number;
+  product?: {
+    productId?: number;
+    productName?: string;
+  };
+}
+
+export interface SupplierPayment {
+  id?: number;
+  paymentId?: number;
+  purchaseOrderId?: number;
+  purchaseId?: number;
+  amount?: number;
+  paymentDate?: string;
+  paymentMode?: string;
+  reference?: string;
+  notes?: string;
+  createdAt?: string;
+  paymentReference?: string;
 }
 
 export interface BillItem {
@@ -30,7 +78,6 @@ export interface Bill {
   shopId?: number;
   billNumber?: string;
   customerId?: number;
-  /** Nested when loaded from API with customer join */
   customer?: { customerId?: number; fullName?: string; mobileNumber?: string };
   customerName?: string;
   customerMobile?: string;
@@ -168,7 +215,6 @@ export interface CustomerLedger {
   creditNotes: CreditNoteLedgerRow[];
   entries?: unknown[];
   balance?: number;
-  /** Full counts / sums from API (lists may be capped) */
   billsTotalCount?: number;
   paymentsTotalCount?: number;
   creditNotesTotalCount?: number;
@@ -283,6 +329,7 @@ export interface PurchaseOrder {
   shopId?: number;
   supplierId?: number;
   total?: number;
+  totalAmount?: number;
   netPayable?: number;
   amountPaid?: number;
   paymentStatus?: string;
@@ -290,7 +337,23 @@ export interface PurchaseOrder {
   invoiceNumber?: string;
   status?: string;
   supplierName?: string;
-  supplier?: { supplierId?: number; companyName?: string };
+  gstAmount?: number;
+  gstamount?: number;
+  discountAmount?: number;
+  notes?: string;
+  
+  // Navigation properties
+  supplier?: { 
+    supplierId?: number; 
+    companyName?: string;
+    name?: string;
+  };
+  purchaseOrderItems?: PurchaseOrderItem[];
+  supplierPayments?: SupplierPayment[];
+  
+  // Legacy properties
+  items?: PurchaseOrderItem[];
+  payments?: SupplierPayment[];
 }
 
 export interface CreatePurchaseRequest {
@@ -358,18 +421,19 @@ export interface ExpenseBreakdownRow {
   totalExpense?: number;
 }
 
-/** Admin dashboard subscription row / shop summary */
+// ✅ FIXED — all fields that backend ShopSummaryDto sends
 export interface ShopAlert {
   shopId?: number;
   shopName?: string;
   ownerName?: string;
   mobileNumber?: string;
   city?: string;
-  startDate?: string;
-  endDate?: string;
+  startDate?: string;   // ✅ added — backend sends this
+  endDate?: string;     // ✅ endDate as string (JSON serialized DateOnly)
   daysLeft: number;
-  planName?: string;
+  planName?: string;    // ✅ added — backend sends this
   planId?: number;
+  isActive?: boolean;   // ✅ added
 }
 
 export interface MonthlyDashboard {
@@ -390,7 +454,7 @@ export interface AdminDashboard {
   totalShops?: number;
   activeSubscriptions?: number;
   metrics?: unknown;
-  allShops: ShopAlert[];
+  allShops: ShopAlert[];       // ✅ ShopAlert has planName, startDate, endDate
   expired: ShopAlert[];
   expiringSoon: ShopAlert[];
 }
@@ -408,6 +472,8 @@ export interface Notification {
   createdAt?: string;
 }
 
+// ✅ FIXED — Shop interface matches what backend GetPagedWithSubscriptionsAsync returns
+// Backend returns Shop entity with ShopSubscriptions collection included
 export interface Shop {
   id: number;
   shopId?: number;
@@ -418,12 +484,34 @@ export interface Shop {
   city?: string;
   gstPercent?: number;
   isActive?: boolean;
-  subscriptionEndsAt?: string;
+  // ✅ Backend includes ShopSubscriptions array — we read first active one
+  shopSubscriptions?: ShopSubscription[];
+  // ✅ Computed on frontend from shopSubscriptions[0]
   subscription?: {
     planName?: string;
     planId?: number;
     endDate?: string;
+    startDate?: string;
     daysLeft?: number;
+    isTrial?: boolean;
+  };
+}
+
+// ✅ NEW — matches backend ShopSubscription model
+export interface ShopSubscription {
+  subscriptionId?: number;
+  shopId?: number;
+  planId?: number;
+  startDate?: string;
+  endDate?: string;
+  amountPaid?: number;
+  isActive?: boolean;
+  plan?: {
+    planId?: number;
+    planName?: string;
+    durationDays?: number;
+    price?: number;
+    isTrial?: boolean;
   };
 }
 
@@ -440,6 +528,7 @@ export interface SubscriptionPlan {
   planName?: string;
   durationDays?: number;
   price?: number;
+  isTrial?: boolean;  // ✅ added
 }
 
 export type Theme = 'light' | 'dark';
