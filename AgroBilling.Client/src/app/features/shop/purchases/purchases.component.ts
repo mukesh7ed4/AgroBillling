@@ -1,86 +1,83 @@
 // src/app/features/shop/purchases/purchases.component.ts
 
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { PurchaseService } from '../../../core/services/api.services';
+import { AuthService } from '../../../core/services/auth.service';
 import { PurchaseOrder } from '../../../core/models/models';
 
 @Component({
   selector: 'app-purchases',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './purchases.component.html',
   styleUrls: ['./purchases.component.scss']
 })
 export class PurchasesComponent implements OnInit {
-  private cdr = inject(ChangeDetectorRef);
-  
+  private readonly cdr = inject(ChangeDetectorRef);
+
   purchases: PurchaseOrder[] = [];
   loading = true;
+  searchText = '';
+  filterStatus = '';
   totalCount = 0;
   pageNumber = 1;
-  pageSize = 20;
-  totalPages = 1;
+  readonly pageSize = 10;
 
-  constructor(private purchaseService: PurchaseService) {}
+  constructor(
+    private purchaseService: PurchaseService,
+    private auth: AuthService
+  ) {}
 
   ngOnInit(): void {
-    this.loadPurchases();
+    this.auth.runWhenShopReady(() => this.load());
   }
 
-  loadPurchases(): void {
-    this.loading = true;
-    this.cdr.detectChanges(); // Force detect changes to show loading state
+  load(): void {
+    const shopId = this.auth.getShopId();
+    if (shopId == null) {
+      this.loading = false;
+      this.cdr.detectChanges();
+      return;
+    }
     
-    this.purchaseService.getPurchases(this.pageNumber).subscribe({
+    this.loading = true;
+    const params: Record<string, unknown> = {
+      page: this.pageNumber,
+      pageSize: this.pageSize
+    };
+    if (this.searchText) params['search'] = this.searchText;
+    if (this.filterStatus) params['status'] = this.filterStatus;
+    
+    this.purchaseService.getPurchases(shopId, params).subscribe({
       next: (response: any) => {
-        console.log('Purchase response:', response); // Debug log
-        
-        // Handle the response based on your API structure
-        if (response?.data) {
-          // If response has data property
-          if (Array.isArray(response.data)) {
-            this.purchases = response.data;
-            this.totalCount = response.data.length;
-          } else if (response.data.items) {
-            this.purchases = response.data.items;
-            this.totalCount = response.data.totalCount || response.data.items.length;
-            this.totalPages = response.data.totalPages || Math.ceil(this.totalCount / this.pageSize);
-          } else {
-            this.purchases = [];
-            this.totalCount = 0;
-          }
-        } else if (Array.isArray(response)) {
-          // If response is directly an array
-          this.purchases = response;
-          this.totalCount = response.length;
-          this.totalPages = 1;
-        } else if (response?.items && Array.isArray(response.items)) {
-          // If response has items property (paged response)
+        // Handle response structure
+        if (response?.items && Array.isArray(response.items)) {
           this.purchases = response.items;
           this.totalCount = response.totalCount ?? 0;
-          this.totalPages = response.totalPages ?? Math.ceil(this.totalCount / this.pageSize);
+        } else if (Array.isArray(response)) {
+          this.purchases = response;
+          this.totalCount = response.length;
         } else {
           this.purchases = [];
           this.totalCount = 0;
-          this.totalPages = 1;
         }
         
-        // Ensure totalPages is at least 1
-        this.totalPages = Math.max(1, this.totalPages);
-        
         this.loading = false;
-        this.cdr.detectChanges(); // Force detect changes after data update
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load purchases:', err);
         this.loading = false;
-        this.purchases = [];
-        this.totalCount = 0;
-        this.cdr.detectChanges(); // Force detect changes on error
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
   }
 
   getSubTotal(purchase: PurchaseOrder): number {
@@ -105,9 +102,42 @@ export class PurchasesComponent implements OnInit {
     return netPayable - amountPaid;
   }
 
-  fmt(value: number | undefined | null): string {
-    const amount = value ?? 0;
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+  onSearch(): void {
+    this.pageNumber = 1;
+    this.load();
+  }
+
+  onFilter(): void {
+    this.pageNumber = 1;
+    this.load();
+  }
+
+  clearSearch(): void {
+    this.searchText = '';
+    this.onSearch();
+  }
+
+  prevPage(): void {
+    if (this.pageNumber > 1) {
+      this.pageNumber--;
+      this.load();
+    }
+  }
+
+  nextPage(): void {
+    if (this.pageNumber < this.totalPages) {
+      this.pageNumber++;
+      this.load();
+    }
+  }
+
+  fmt(v: number | undefined | null): string {
+    const amount = v ?? 0;
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 2
+    }).format(amount);
   }
 
   statusClass(status: string | undefined): string {
@@ -115,19 +145,5 @@ export class PurchasesComponent implements OnInit {
     const upperStatus = status.toUpperCase();
     return upperStatus === 'PAID' ? 'badge-success' : 
            upperStatus === 'PARTIAL' ? 'badge-warning' : 'badge-danger';
-  }
-
-  prevPage(): void {
-    if (this.pageNumber > 1) {
-      this.pageNumber--;
-      this.loadPurchases();
-    }
-  }
-
-  nextPage(): void {
-    if (this.pageNumber < this.totalPages) {
-      this.pageNumber++;
-      this.loadPurchases();
-    }
   }
 }

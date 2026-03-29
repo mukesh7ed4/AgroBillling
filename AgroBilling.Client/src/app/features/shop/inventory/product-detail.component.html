@@ -1,0 +1,191 @@
+<div class="page-container fade-in" *ngIf="!loading && product">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <p class="breadcrumb">Home <span>/ Inventory /</span> <span>{{ product.productName }}</span></p>
+        <h1 class="page-title">{{ product.productName }}</h1>
+        <p class="page-subtitle">
+          {{ product.categoryName || '—' }}
+          <span *ngIf="product.companyName"> · {{ product.companyName }}</span>
+          <span *ngIf="product.supplierName"> · 🏭 {{ product.supplierName }}</span>
+        </p>
+      </div>
+      <div class="flex gap-12">
+        <a routerLink="/shop/purchases/create" class="btn btn-primary">🛒 New Purchase</a>
+        <a routerLink="/shop/inventory" class="btn btn-outline">← Back</a>
+      </div>
+    </div>
+  
+    <!-- Stat Cards -->
+    <div class="grid-4 mb-24">
+      <div class="stat-card">
+        <div class="stat-icon" [class]="stockBadge()">📦</div>
+        <div class="stat-value" [class]="isLowStock ? 'amount-pending' : 'amount-paid'">
+          {{ fmtQty(product.currentStock, product.unitShortName) }}
+        </div>
+        <div class="stat-label">Current Stock<span *ngIf="isLowStock" class="low-alert"> ⚠️ Low</span></div>
+      </div>
+  
+      <div class="stat-card">
+        <div class="stat-icon gold-icon">💰</div>
+        <div class="stat-value">{{ fmt(product.sellingPrice) }}</div>
+        <div class="stat-label">Selling Price</div>
+      </div>
+  
+      <div class="stat-card">
+        <div class="stat-icon">🛒</div>
+        <div class="stat-value">{{ fmt(product.purchasePrice) }}</div>
+        <div class="stat-label">Purchase Price</div>
+      </div>
+  
+      <div class="stat-card">
+        <div class="stat-icon green-icon">📈</div>
+        <div class="stat-value amount-paid">{{ fmt(product.sellingPrice - product.purchasePrice) }}</div>
+        <div class="stat-label">Margin / Unit</div>
+      </div>
+    </div>
+  
+    <!-- Tabs -->
+    <div class="tabs-bar mb-24">
+      <button class="tab-btn" [class.active]="activeTab==='overview'"   (click)="activeTab='overview'">📋 Overview</button>
+      <button class="tab-btn" [class.active]="activeTab==='purchases'"  (click)="activeTab='purchases'">🛒 Purchase History ({{ product.purchaseHistory?.length || 0 }})</button>
+      <button class="tab-btn" [class.active]="activeTab==='movements'"  (click)="activeTab='movements'">📊 Stock Movements ({{ product.stockMovements?.length || 0 }})</button>
+    </div>
+  
+    <!-- ── OVERVIEW TAB ── -->
+    <div *ngIf="activeTab==='overview'" class="grid-2">
+  
+      <!-- Product Info -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">📦 Product Details</span></div>
+        <div class="info-grid">
+          <div class="info-row"><span class="info-lbl">Product Name</span><span class="info-val font-bold">{{ product.productName }}</span></div>
+          <div class="info-row"><span class="info-lbl">Category</span><span class="info-val">{{ product.categoryName || '—' }}</span></div>
+          <div class="info-row"><span class="info-lbl">Company / Brand</span><span class="info-val">{{ product.companyName || '—' }}</span></div>
+          <div class="info-row"><span class="info-lbl">Unit</span><span class="info-val"><span class="badge badge-muted">{{ product.unitShortName }}</span></span></div>
+          <div class="info-row"><span class="info-lbl">HSN Code</span><span class="info-val">{{ product.hsncode || product.hsnCode || '—' }}</span></div>
+          <div class="info-row"><span class="info-lbl">GST %</span><span class="info-val">{{ product.gstpercent ?? product.gstPercent ?? 0 }}%</span></div>
+          <div class="info-row"><span class="info-lbl">GST Mode</span><span class="info-val">{{ product.useShopGst ? 'Shop GST' : 'Product GST' }}</span></div>
+          <div class="info-row"><span class="info-lbl">Default Supplier</span><span class="info-val">{{ product.supplierName || '—' }}</span></div>
+          <div class="info-row"><span class="info-lbl">Added On</span><span class="info-val">{{ product.createdAt | date:'dd MMM yyyy' }}</span></div>
+        </div>
+      </div>
+  
+      <!-- Stock & Pricing Summary -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">💰 Stock & Pricing</span></div>
+        <div class="info-grid">
+          <div class="info-row">
+            <span class="info-lbl">Current Stock</span>
+            <span class="info-val" [class]="isLowStock ? 'amount-pending font-bold' : 'amount-paid font-bold'">
+              {{ fmtQty(product.currentStock, product.unitShortName) }}
+            </span>
+          </div>
+          <div class="info-row"><span class="info-lbl">Min Stock Alert</span><span class="info-val">{{ fmtQty(product.minStockAlert, product.unitShortName) }}</span></div>
+          <div class="info-row"><span class="info-lbl">Purchase Price</span><span class="info-val">{{ fmt(product.purchasePrice) }}</span></div>
+          <div class="info-row"><span class="info-lbl">Selling Price</span><span class="info-val amount-total font-bold">{{ fmt(product.sellingPrice) }}</span></div>
+          <div class="info-row">
+            <span class="info-lbl">Profit Margin</span>
+            <span class="info-val amount-paid font-bold">
+              {{ fmt(product.sellingPrice - product.purchasePrice) }}
+              <span class="text-muted text-xs" *ngIf="product.purchasePrice > 0">
+                ({{ ((product.sellingPrice - product.purchasePrice) / product.purchasePrice * 100).toFixed(1) }}%)
+              </span>
+            </span>
+          </div>
+          <div class="info-row"><span class="info-lbl">Stock Value (Purchase)</span><span class="info-val">{{ fmt(product.currentStock * product.purchasePrice) }}</span></div>
+          <div class="info-row"><span class="info-lbl">Stock Value (Selling)</span><span class="info-val amount-total">{{ fmt(product.currentStock * product.sellingPrice) }}</span></div>
+        </div>
+  
+        <!-- Purchase summary -->
+        <div class="summary-strip mt-16" *ngIf="product.purchaseHistory?.length">
+          <div class="ss-item"><div class="ss-val">{{ totalPurchased }}</div><div class="ss-lbl">Total Bought</div></div>
+          <div class="ss-item"><div class="ss-val amount-pending">{{ totalSoldQty }}</div><div class="ss-lbl">Total Sold</div></div>
+          <div class="ss-item"><div class="ss-val">{{ fmt(totalSpent) }}</div><div class="ss-lbl">Total Spent</div></div>
+          <div class="ss-item"><div class="ss-val">{{ product.purchaseHistory?.length || 0 }}</div><div class="ss-lbl">Orders</div></div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- ── PURCHASE HISTORY TAB ── -->
+    <div class="card" *ngIf="activeTab==='purchases'">
+      <div class="empty-state" *ngIf="!product.purchaseHistory?.length">
+        <div class="empty-icon">🛒</div>
+        <h3>No purchase history yet</h3>
+        <a routerLink="/shop/purchases/create" class="btn btn-primary mt-16">Create Purchase</a>
+      </div>
+  
+      <div class="table-wrapper" *ngIf="product.purchaseHistory?.length">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Supplier</th><th>Invoice</th>
+              <th>Qty</th><th>Unit Price</th><th>GST %</th><th>Total</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of product.purchaseHistory">
+              <td>{{ p.date | date:'dd MMM yyyy' }}</td>
+              <td class="font-bold">{{ p.supplier }}</td>
+              <td class="text-muted">{{ p.invoiceNumber || '—' }}</td>
+              <td><span class="badge badge-muted">{{ fmtQty(p.qty, product.unitShortName) }}</span></td>
+              <td>{{ fmt(p.unitPrice) }}</td>
+              <td class="text-muted">{{ p.gstPercent > 0 ? p.gstPercent + '%' : '—' }}</td>
+              <td class="amount-total font-bold">{{ fmt(p.total) }}</td>
+              <td>
+                <a *ngIf="p.purchaseId" [routerLink]="['/shop/purchases', p.purchaseId]"
+                   class="btn btn-sm btn-outline">View</a>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="font-bold text-muted">Total</td>
+              <td class="font-bold">{{ fmtQty(totalPurchased, product.unitShortName) }}</td>
+              <td></td><td></td>
+              <td class="amount-total font-bold">{{ fmt(totalSpent) }}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  
+    <!-- ── STOCK MOVEMENTS TAB ── -->
+    <div class="card" *ngIf="activeTab==='movements'">
+      <div class="empty-state" *ngIf="!product.stockMovements?.length">
+        <div class="empty-icon">📊</div>
+        <h3>No stock movements recorded</h3>
+      </div>
+  
+      <div class="table-wrapper" *ngIf="product.stockMovements?.length">
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Type</th><th>Change</th><th>Before</th><th>After</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of product.stockMovements">
+              <td>{{ m.createdAt | date:'dd MMM yyyy, h:mm a' }}</td>
+              <td>
+                <span class="movement-type">
+                  {{ movementIcon(m.movementType) }} {{ m.movementType }}
+                </span>
+              </td>
+              <td>
+                <span class="font-bold" [class]="movementClass(m)">
+                  {{ +m.quantityChange > 0 ? '+' : '' }}{{ fmtQty(m.quantityChange, product.unitShortName) }}
+                </span>
+              </td>
+              <td class="text-muted">{{ fmtQty(m.stockBefore, product.unitShortName) }}</td>
+              <td class="font-bold">{{ fmtQty(m.stockAfter, product.unitShortName) }}</td>
+              <td class="text-muted">{{ m.notes || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+  </div>
+  
+  <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>

@@ -1,154 +1,290 @@
-<div class="page-container fade-in" *ngIf="!loading && bill">
-  <div class="page-header">
-    <div>
-      <p class="breadcrumb">Home <span>/ Billing /</span> <span>{{ bill.billNumber }}</span></p>
-      <h1 class="page-title">Bill #{{ bill.billNumber }}</h1>
-      <p class="page-subtitle">
-        {{ bill.billDate | date:'dd MMMM yyyy' }} ·
-        {{ bill.customer?.fullName ?? bill.customerName ?? '-' }}
-      </p>
-    </div>
-    <div class="flex gap-12">
-      <button class="btn btn-outline" (click)="printBill()">🖨️ Print</button>
-      <button class="btn btn-gold" (click)="showPaymentModal=true" *ngIf="canAddPayment">💰 Add Payment</button>
-      <button class="btn btn-outline" (click)="showReturnModal=true">↩️ Return</button>
-    </div>
-  </div>
+<!-- ============================================================
+     SCREEN VIEW
+     ============================================================ -->
+     <div class="page-container fade-in" *ngIf="!loading && bill">
 
-  <!-- Bill Header Card -->
-  <div class="grid-2 mb-24">
-    <div class="card">
-      <div class="card-header"><span class="card-title">👤 Customer Info</span></div>
-      <div class="info-list">
-        <div class="info-item">
-          <span class="info-label">Name</span>
-          <span class="info-val">{{ bill.customer?.fullName ?? bill.customerName ?? '-' }}</span>
+      <div class="page-header no-print">
+        <div>
+          <p class="breadcrumb">Home <span>/ Billing /</span> <span>Bill #{{ bill.billNumber }}</span></p>
+          <h1 class="page-title">Bill #{{ bill.billNumber }}</h1>
+          <p class="page-subtitle">
+            {{ bill.billDate | date:'dd MMMM yyyy' }} ·
+            {{ bill.customer?.fullName ?? bill.customerName ?? '—' }}
+          </p>
         </div>
-        <div class="info-item">
-          <span class="info-label">Mobile</span>
-          <span class="info-val">{{ bill.customer?.mobileNumber ?? bill.customerMobile ?? '' }}</span>
+        <div class="flex gap-12">
+          <button class="btn btn-outline" (click)="printBill()">🖨️ Print / PDF</button>
+          <button class="btn btn-primary" (click)="showPaymentModal=true" *ngIf="canAddPayment">💰 Add Payment</button>
+          <button class="btn btn-outline" (click)="showReturnModal=true">↩️ Return</button>
+          <a routerLink="/shop/billing" class="btn btn-outline">← Back</a>
         </div>
-        <a [routerLink]="['/shop/customers', bill.customerId]" class="btn btn-sm btn-outline mt-8">View Customer Ledger →</a>
+      </div>
+    
+      <!-- Summary Cards -->
+      <div class="grid-4 mb-24 no-print">
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-value">{{ bill.items?.length || 0 }}</div>
+          <div class="stat-label">Items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon gold-icon">💰</div>
+          <div class="stat-value">{{ fmt(bill.totalAmount) }}</div>
+          <div class="stat-label">Net Payable</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green-icon">✅</div>
+          <div class="stat-value amount-paid">{{ fmt(bill.amountPaid) }}</div>
+          <div class="stat-label">Amount Paid</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red-icon">⏳</div>
+          <div class="stat-value amount-pending">{{ fmt(bill.amountPending) }}</div>
+          <div class="stat-label">Balance Due</div>
+        </div>
+      </div>
+    
+      <!-- Tabs (screen only) -->
+      <div class="tabs-bar mb-24 no-print">
+        <button class="tab-btn" [class.active]="activeTab==='details'"  (click)="activeTab='details'">👤 Details</button>
+        <button class="tab-btn" [class.active]="activeTab==='items'"    (click)="activeTab='items'">📦 Items ({{ bill.items?.length || 0 }})</button>
+        <button class="tab-btn" [class.active]="activeTab==='payments'" (click)="activeTab='payments'">💳 Payments ({{ bill.payments?.length || 0 }})</button>
+      </div>
+    
+      <!-- Details Tab -->
+      <div class="card no-print" *ngIf="activeTab==='details'">
+        <div class="info-grid">
+          <div class="info-item"><span class="info-label">Customer</span><span class="info-val font-bold">{{ bill.customer?.fullName ?? bill.customerName ?? '—' }}</span></div>
+          <div class="info-item"><span class="info-label">Mobile</span><span class="info-val">{{ bill.customer?.mobileNumber ?? bill.customerMobile ?? '—' }}</span></div>
+          <div class="info-item" *ngIf="bill.customer?.village"><span class="info-label">Village</span><span class="info-val">{{ bill.customer?.village }}</span></div>
+          <div class="info-item"><span class="info-label">Bill Date</span><span class="info-val">{{ bill.billDate | date:'dd MMM yyyy' }}</span></div>
+          <div class="info-item"><span class="info-label">Status</span><span class="info-val"><span class="badge" [class]="statusClass(bill.paymentStatus)">{{ bill.paymentStatus }}</span></span></div>
+          <div class="info-item" *ngIf="totalGst > 0"><span class="info-label">GST ({{ bill.gstpercent ?? bill.gstPercent }}%)</span><span class="info-val">{{ fmt(totalGst) }}</span></div>
+          <div class="info-item" *ngIf="totalDiscount > 0"><span class="info-label">Discount</span><span class="info-val amount-paid">- {{ fmt(totalDiscount) }}</span></div>
+          <div class="info-item"><span class="info-label">Net Payable</span><span class="info-val amount-total font-bold">{{ fmt(bill.totalAmount) }}</span></div>
+        </div>
+      </div>
+    
+      <!-- Items Tab -->
+      <div class="card no-print" *ngIf="activeTab==='items'">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Product</th><th>Qty</th><th>Unit Price</th><th>Discount</th><th>GST %</th><th>Total</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let item of bill.items; let i=index">
+                <td class="text-muted">{{ i+1 }}</td>
+                <td class="font-bold">{{ item.productName }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ fmt(item.unitPrice) }}</td>
+                <td>{{ (item.discountAmount ?? 0) > 0 ? fmt(item.discountAmount) : '—' }}</td>
+                <td>{{ (item.gstPercent ?? 0) > 0 ? item.gstPercent + '%' : '—' }}</td>
+                <td class="amount-total font-bold">{{ fmt(item.totalAmount) }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr><td colspan="5"></td><td class="font-bold">Sub Total:</td><td class="font-bold">{{ fmt(subTotal) }}</td></tr>
+              <tr *ngIf="totalDiscount > 0"><td colspan="5"></td><td>Discount:</td><td class="amount-paid">- {{ fmt(totalDiscount) }}</td></tr>
+              <tr *ngIf="totalGst > 0"><td colspan="5"></td><td>GST:</td><td>+ {{ fmt(totalGst) }}</td></tr>
+              <tr class="grand-total-row"><td colspan="5"></td><td class="font-bold">Net Payable:</td><td class="amount-total font-bold">{{ fmt(bill.totalAmount) }}</td></tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    
+      <!-- Payments Tab -->
+      <div class="card no-print" *ngIf="activeTab==='payments'">
+        <div class="empty-state" *ngIf="!bill.payments?.length">
+          <div class="empty-icon">💳</div><h3>No payments yet</h3>
+          <button class="btn btn-primary mt-16" *ngIf="canAddPayment" (click)="showPaymentModal=true">Add Payment</button>
+        </div>
+        <div class="table-wrapper" *ngIf="bill.payments?.length">
+          <table>
+            <thead><tr><th>Date</th><th>Amount</th><th>Mode</th><th>Reference</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let p of bill.payments">
+                <td>{{ p.paymentDate | date:'dd MMM yyyy' }}</td>
+                <td class="amount-paid font-bold">{{ fmt(p.amount) }}</td>
+                <td><span class="badge badge-info">{{ p.paymentMode }}</span></td>
+                <td class="text-muted">{{ p.reference || '—' }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="grand-total-row">
+                <td class="font-bold">Total Paid:</td>
+                <td class="amount-paid font-bold">{{ fmt(bill.amountPaid) }}</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">💰 Payment Summary</span>
-        <span class="badge" [class]="statusClass(bill.paymentStatus)">
-          {{ bill.paymentStatus }}
-        </span>
+    
+    <!-- ============================================================
+         PRINT LAYOUT — only visible when printing
+         ============================================================ -->
+    <div class="print-only bill-print" *ngIf="!loading && bill">
+    
+      <!-- Shop Header -->
+      <div class="print-header">
+        <div class="print-shop-info">
+          <h1 class="print-shop-name">{{ bill.shop?.shopName ?? auth.getShopName() ?? 'AgroBilling' }}</h1>
+          <p *ngIf="bill.shop?.address">{{ bill.shop?.address }}<span *ngIf="bill.shop?.city">, {{ bill.shop?.city }}</span><span *ngIf="bill.shop?.state">, {{ bill.shop?.state }}</span></p>
+          <p *ngIf="bill.shop?.mobileNumber">📞 {{ bill.shop?.mobileNumber }}</p>
+          <p *ngIf="bill.shop?.email">✉ {{ bill.shop?.email }}</p>
+          <p *ngIf="bill.shop?.gstnumber" class="print-gst">GSTIN: {{ bill.shop?.gstnumber }}</p>
+        </div>
+        <div class="print-bill-meta">
+          <div class="print-bill-title">TAX INVOICE</div>
+          <table class="print-meta-table">
+            <tr><td>Bill No.</td><td><strong>{{ bill.billNumber }}</strong></td></tr>
+            <tr><td>Date</td><td>{{ bill.billDate | date:'dd MMM yyyy' }}</td></tr>
+            <tr><td>Status</td><td><strong>{{ bill.paymentStatus }}</strong></td></tr>
+          </table>
+        </div>
       </div>
-      <div class="info-list">
-        <div class="info-item"><span class="info-label">Total Amount</span><span class="info-val amount-total">{{ fmt(bill.totalAmount) }}</span></div>
-        <div class="info-item"><span class="info-label">Amount Paid</span><span class="info-val amount-paid">{{ fmt(bill.amountPaid) }}</span></div>
-        <div class="info-item"><span class="info-label">Balance Due</span><span class="info-val amount-pending">{{ fmt(bill.amountPending) }}</span></div>
-        <div class="info-item" *ngIf="(bill.gstAmount ?? 0) > 0"><span class="info-label">GST ({{ bill.gstPercent }}%)</span><span class="info-val">{{ fmt(bill.gstAmount) }}</span></div>
-        <div class="info-item" *ngIf="(bill.discountAmount ?? 0) > 0"><span class="info-label">Discount</span><span class="info-val amount-paid">- {{ fmt(bill.discountAmount) }}</span></div>
+    
+      <div class="print-divider"></div>
+    
+      <!-- Customer Info -->
+      <div class="print-customer">
+        <p class="print-section-label">Bill To:</p>
+        <p class="print-customer-name">{{ bill.customer?.fullName ?? bill.customerName ?? '—' }}</p>
+        <p *ngIf="bill.customer?.mobileNumber ?? bill.customerMobile">📞 {{ bill.customer?.mobileNumber ?? bill.customerMobile }}</p>
+        <p *ngIf="bill.customer?.village">Village: {{ bill.customer?.village }}<span *ngIf="bill.customer?.district">, {{ bill.customer?.district }}</span></p>
       </div>
-    </div>
-  </div>
-
-  <!-- Items -->
-  <div class="card mb-24">
-    <div class="card-header"><span class="card-title">📦 Bill Items</span></div>
-    <div class="table-wrapper">
-      <table>
+    
+      <div class="print-divider"></div>
+    
+      <!-- Items Table -->
+      <table class="print-items-table">
         <thead>
-          <tr><th>#</th><th>Product</th><th>Qty</th><th>Unit Price</th><th>Discount</th><th>GST</th><th>Total</th></tr>
+          <tr>
+            <th class="col-no">#</th>
+            <th class="col-product">Product</th>
+            <th class="col-qty">Qty</th>
+            <th class="col-price">Unit Price</th>
+            <th class="col-gst">GST</th>
+            <th class="col-total">Amount</th>
+          </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of bill.items; let i = index">
-            <td>{{ i+1 }}</td>
-            <td class="font-bold">{{ item.productName }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ fmt(item.unitPrice) }}</td>
-            <td>{{ (item.discountAmount ?? 0) > 0 ? fmt(item.discountAmount) : '—' }}</td>
-            <td>{{ (item.gstPercent ?? 0) > 0 ? (item.gstPercent + '%') : '—' }}</td>
-            <td class="amount-total font-bold">{{ fmt(item.totalAmount) }}</td>
+          <tr *ngFor="let item of bill.items; let i=index">
+            <td class="col-no">{{ i+1 }}</td>
+            <td class="col-product">{{ item.productName }}</td>
+            <td class="col-qty">{{ item.quantity }}</td>
+            <td class="col-price">{{ fmt(item.unitPrice) }}</td>
+            <td class="col-gst">{{ (item.gstPercent ?? 0) > 0 ? item.gstPercent + '%' : '—' }}</td>
+            <td class="col-total">{{ fmt(item.totalAmount) }}</td>
           </tr>
         </tbody>
       </table>
-    </div>
-  </div>
-
-  <!-- Payment History -->
-  <div class="card mb-24" *ngIf="bill.payments?.length">
-    <div class="card-header"><span class="card-title">💳 Payment History</span></div>
-    <div class="table-wrapper">
-      <table>
-        <thead><tr><th>Date</th><th>Bill No.</th><th>Amount</th><th>Mode</th><th>Reference</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let p of bill.payments">
-            <td>{{ p.paymentDate | date:'dd MMM yyyy' }}</td>
-            <td>{{ bill.billNumber }}</td>
-            <td class="amount-paid font-bold">{{ fmt(p.amount) }}</td>
-            <td><span class="badge badge-info">{{ p.paymentMode }}</span></td>
-            <td class="text-muted">{{ p.reference || '—' }}</td>
+    
+      <!-- Totals -->
+      <div class="print-totals">
+        <table class="print-totals-table">
+          <tr><td>Sub Total</td><td>{{ fmt(subTotal) }}</td></tr>
+          <tr *ngIf="totalDiscount > 0"><td>Discount</td><td class="discount-val">- {{ fmt(totalDiscount) }}</td></tr>
+          <tr *ngIf="totalGst > 0"><td>GST ({{ bill.gstpercent ?? bill.gstPercent }}%)</td><td>+ {{ fmt(totalGst) }}</td></tr>
+          <tr class="totals-net"><td><strong>Net Payable</strong></td><td><strong>{{ fmt(bill.totalAmount) }}</strong></td></tr>
+          <tr><td>Amount Paid</td><td class="paid-val">{{ fmt(bill.amountPaid) }}</td></tr>
+          <tr *ngIf="(bill.amountPending ?? 0) > 0" class="totals-due">
+            <td><strong>Balance Due</strong></td><td class="due-val"><strong>{{ fmt(bill.amountPending) }}</strong></td>
           </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
-
-<!-- Add Payment Modal -->
-<div class="modal-backdrop" *ngIf="showPaymentModal" (click)="showPaymentModal=false">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <span class="modal-title">💰 Add Payment</span>
-      <button class="modal-close" (click)="showPaymentModal=false">✕</button>
-    </div>
-    <form [formGroup]="paymentForm" (ngSubmit)="addPayment()">
-      <div class="form-group">
-        <label class="form-label">Amount (₹) *</label>
-        <input type="number" class="form-control" formControlName="amount"
-          [max]="maxPayable" placeholder="Enter amount" />
-        <p class="text-sm text-muted mt-8">Max payable: {{ fmt(maxPayable) }}</p>
+        </table>
       </div>
-      <div class="form-group">
-        <label class="form-label">Payment Mode *</label>
-        <select class="form-control" formControlName="paymentMode">
-          <option>Cash</option><option>UPI</option><option>Cheque</option><option>Bank Transfer</option>
-        </select>
+    
+      <!-- Payment History in Print -->
+      <div class="print-payments" *ngIf="bill.payments?.length">
+        <p class="print-section-label">Payment History:</p>
+        <table class="print-pay-table">
+          <thead><tr><th>Date</th><th>Amount</th><th>Mode</th><th>Reference</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let p of bill.payments">
+              <td>{{ p.paymentDate | date:'dd MMM yyyy' }}</td>
+              <td>{{ fmt(p.amount) }}</td>
+              <td>{{ p.paymentMode }}</td>
+              <td>{{ p.reference || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="form-group">
-        <label class="form-label">Reference / Transaction ID</label>
-        <input type="text" class="form-control" formControlName="reference" placeholder="UPI txn ID, cheque no..." />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Payment Date</label>
-        <input type="date" class="form-control" formControlName="paymentDate" />
-      </div>
-      <button type="submit" class="btn btn-primary w-full" [disabled]="paymentLoading">
-        {{ paymentLoading ? 'Saving...' : 'Save Payment' }}
-      </button>
-    </form>
-  </div>
-</div>
-
-<!-- Return Modal -->
-<div class="modal-backdrop" *ngIf="showReturnModal" (click)="showReturnModal=false">
-  <div class="modal modal-lg" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <span class="modal-title">↩️ Process Return</span>
-      <button class="modal-close" (click)="showReturnModal=false">✕</button>
-    </div>
-    <p class="text-muted mb-16">Select products to return and enter return quantity</p>
-    <div class="return-items">
-      <div class="return-item" *ngFor="let r of returnItems">
-        <input type="checkbox" [(ngModel)]="r.selected" />
-        <div class="return-info">
-          <span class="font-bold">{{ r.item.productName }}</span>
-          <span class="text-sm text-muted">Billed: {{ r.item.quantity }} · {{ fmt(r.item.unitPrice) }} each</span>
+    
+      <!-- Footer -->
+      <div class="print-footer">
+        <div class="print-footer-left">
+          <p>Thank you for your business!</p>
+          <p class="text-muted-print">This is a computer-generated invoice.</p>
         </div>
-        <div class="return-qty" *ngIf="r.selected">
-          <input type="number" class="form-control input-sm" [(ngModel)]="r.returnQty"
-            [max]="r.item.quantity ?? 0" min="0.001" step="0.001" placeholder="Return qty" style="width:100px" />
+        <div class="print-footer-right">
+          <div class="print-sign-box">Authorised Signatory</div>
         </div>
       </div>
     </div>
-    <button class="btn btn-danger w-full mt-16" (click)="submitReturn()">Process Return & Generate Credit Note</button>
-  </div>
-</div>
+    
+    <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+    
+    <!-- Add Payment Modal -->
+    <div class="modal-overlay" *ngIf="showPaymentModal" (click)="showPaymentModal=false">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>💰 Add Payment</h3>
+          <button class="btn-close" (click)="showPaymentModal=false">✕</button>
+        </div>
+        <form [formGroup]="paymentForm" (ngSubmit)="addPayment()">
+          <div class="form-group">
+            <label class="form-label">Amount (₹) *</label>
+            <input type="number" class="form-control" formControlName="amount"
+              [max]="maxPayable" min="0.01" />
+            <p class="text-xs text-muted mt-8">Max: {{ fmt(maxPayable) }}</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Mode *</label>
+            <select class="form-control" formControlName="paymentMode">
+              <option>Cash</option><option>UPI</option><option>Cheque</option><option>Bank Transfer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reference / Transaction ID</label>
+            <input type="text" class="form-control" formControlName="reference" placeholder="UPI txn ID, cheque no..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Date</label>
+            <input type="date" class="form-control" formControlName="paymentDate" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" (click)="showPaymentModal=false">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="paymentLoading">
+              {{ paymentLoading ? 'Saving...' : '✅ Save Payment' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Return Modal -->
+    <div class="modal-overlay" *ngIf="showReturnModal" (click)="showReturnModal=false">
+      <div class="modal-card modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>↩️ Process Return</h3>
+          <button class="btn-close" (click)="showReturnModal=false">✕</button>
+        </div>
+        <p class="text-muted mb-16">Select products to return and enter return quantity.</p>
+        <div class="return-items">
+          <div class="return-item" *ngFor="let r of returnItems">
+            <input type="checkbox" [(ngModel)]="r.selected" />
+            <div class="return-info">
+              <span class="font-bold">{{ r.item.productName }}</span>
+              <span class="text-sm text-muted">Billed: {{ r.item.quantity }} · {{ fmt(r.item.unitPrice) }} each</span>
+            </div>
+            <input *ngIf="r.selected" type="number" class="form-control input-sm"
+              [(ngModel)]="r.returnQty" [max]="r.item.quantity" min="0.001" step="0.001"
+              placeholder="Return qty" style="width:100px" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" (click)="showReturnModal=false">Cancel</button>
+          <button class="btn btn-danger" (click)="submitReturn()">Process Return</button>
+        </div>
+      </div>
+    </div>

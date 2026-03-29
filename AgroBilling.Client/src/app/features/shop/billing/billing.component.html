@@ -1,3 +1,5 @@
+<!-- src/app/features/shop/billing/billing.component.html -->
+
 <div class="page-container fade-in">
   <div class="page-header">
     <div>
@@ -37,11 +39,17 @@
     </div>
 
     <div class="table-wrapper" *ngIf="bills.length">
-      <table>
+      <table class="table">
         <thead>
           <tr>
-            <th>Bill No.</th><th>Customer</th><th>Date</th>
-            <th>Total</th><th>Paid</th><th>Pending</th><th>Status</th><th>Action</th>
+            <th>Bill No.</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Paid</th>
+            <th>Pending</th>
+            <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -50,16 +58,16 @@
               style="cursor:pointer">
             <td><span class="bill-no">{{ b.billNumber }}</span></td>
             <td>
-              <div class="cust-info">
-                <span class="cust-name">{{ b.customer?.fullName || b.customerName }}</span>
-                <span class="cust-mobile text-xs text-muted">{{ b.customer?.mobileNumber || b.customerMobile }}</span>
+              <div class="customer-info">
+                <span class="customer-name">{{ b.customer?.fullName || b.customerName || '-' }}</span>
+                <span class="customer-mobile text-xs text-muted">{{ b.customer?.mobileNumber || b.customerMobile || '' }}</span>
               </div>
             </td>
             <td class="text-muted">{{ b.billDate | date:'dd MMM yyyy' }}</td>
             <td class="amount-total">{{ fmt(b.totalAmount) }}</td>
             <td class="amount-paid">{{ fmt(b.amountPaid) }}</td>
             <td [class]="(b.amountPending ?? 0) > 0 ? 'amount-pending' : 'amount-paid'">{{ fmt(b.amountPending) }}</td>
-            <td><span class="badge" [class]="statusClass(b.paymentStatus)">{{ b.paymentStatus }}</span></td>
+            <td><span class="badge" [class]="statusClass(b.paymentStatus)">{{ b.paymentStatus || 'PENDING' }}</span></td>
             <td>
               <a [routerLink]="['/shop/billing', b.billId ?? b.id]"
                  class="btn btn-sm btn-outline"
@@ -70,7 +78,7 @@
       </table>
     </div>
 
-    <!-- ✅ PAGINATION -->
+    <!-- Pagination -->
     <div class="pagination" *ngIf="totalCount > pageSize">
       <button class="btn btn-sm btn-outline"
               (click)="prevPage()"

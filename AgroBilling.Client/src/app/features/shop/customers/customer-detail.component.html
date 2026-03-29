@@ -14,6 +14,9 @@
     <div class="flex gap-12">
       <a routerLink="/shop/billing/create" class="btn btn-primary">🧾 New Bill</a>
       <a routerLink="/shop/customers" class="btn btn-outline">← Back</a>
+      <button class="btn btn-gold" (click)="showBulkPayModal=true">
+        💰 Settle Account
+      </button>
     </div>
   </div>
 
@@ -108,6 +111,76 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!--payment model-->
+  <div class="modal-backdrop" *ngIf="showBulkPayModal" (click)="showBulkPayModal=false">
+    <div class="modal" (click)="$event.stopPropagation()">
+  
+      <div class="modal-header">
+        <span class="modal-title">💰 Settle Account</span>
+        <button class="modal-close" (click)="showBulkPayModal=false">✕</button>
+      </div>
+  
+      <!-- Outstanding summary -->
+      <div class="payment-outstanding-bar mb-16">
+        <span class="pob-label">Total Outstanding</span>
+        <span class="pob-value amount-pending">{{ fmt(totalPending) }}</span>
+      </div>
+  
+      <!-- Result after submit -->
+      <div *ngIf="bulkPayResult" class="bulk-result">
+        <p class="bulk-result-title">✅ Payment Distributed</p>
+        <div class="bulk-result-row" *ngFor="let d of bulkPayResult.details">
+          <span>Bill #{{ d.billNumber }}</span>
+          <span>{{ fmt(d.amountApplied) }}</span>
+          <span class="badge" [class]="d.newStatus === 'PAID' ? 'badge-success' : 'badge-warning'">
+            {{ d.newStatus }}
+          </span>
+        </div>
+        <div class="bulk-result-row" *ngIf="bulkPayResult.remaining > 0">
+          <span class="text-muted">Remaining (advance)</span>
+          <span class="amount-paid">{{ fmt(bulkPayResult.remaining) }}</span>
+        </div>
+        <button class="btn btn-outline w-full mt-16"
+          (click)="showBulkPayModal=false; bulkPayResult=null">Close</button>
+      </div>
+  
+      <!-- Form -->
+      <form *ngIf="!bulkPayResult" [formGroup]="bulkPayForm" (ngSubmit)="submitBulkPayment()">
+        <div class="form-group">
+          <label class="form-label">Amount Customer is Paying (₹) *</label>
+          <input type="number" class="form-control" formControlName="amount"
+            [placeholder]="'Max outstanding: ' + totalPending" />
+          <p class="text-xs text-muted mt-4">
+            Amount will be applied to oldest bills first automatically.
+          </p>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Payment Mode</label>
+            <select class="form-control" formControlName="paymentMode">
+              <option>Cash</option><option>UPI</option>
+              <option>Cheque</option><option>Bank Transfer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control" formControlName="paymentDate" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reference</label>
+          <input type="text" class="form-control" formControlName="reference" placeholder="UPI ID, cheque no..." />
+        </div>
+        <div class="modal-footer" style="padding-top:16px; border-top:1px solid var(--border); margin-top:8px">
+          <button type="button" class="btn btn-outline" (click)="showBulkPayModal=false">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="bulkPayLoading">
+            {{ bulkPayLoading ? 'Processing...' : '✅ Distribute Payment' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

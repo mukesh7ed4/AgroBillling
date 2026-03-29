@@ -10,12 +10,31 @@
     <a routerLink="/shop/purchases/create" class="btn btn-primary">🛒 New Purchase</a>
   </div>
 
+  <!-- Filter Bar -->
+  <div class="filter-bar card mb-24">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input [(ngModel)]="searchText" (ngModelChange)="onSearch()"
+        placeholder="Search by invoice no., supplier..." />
+      <button *ngIf="searchText" class="clear-btn" (click)="clearSearch()">✕</button>
+    </div>
+    <div class="filter-group">
+      <select class="form-control filter-select" [(ngModel)]="filterStatus" (ngModelChange)="onFilter()">
+        <option value="">All Status</option>
+        <option value="PAID">✅ Paid</option>
+        <option value="PARTIAL">🕐 Partial</option>
+        <option value="PENDING">❌ Pending</option>
+      </select>
+    </div>
+  </div>
+
   <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
 
   <div class="card" *ngIf="!loading">
     <div class="empty-state" *ngIf="!purchases.length">
       <div class="empty-icon">🛒</div>
-      <h3>No purchases yet</h3>
+      <h3>No purchases found</h3>
+      <p>Create your first purchase order to get started</p>
       <a routerLink="/shop/purchases/create" class="btn btn-primary mt-16">Create Purchase</a>
     </div>
 
@@ -23,47 +42,53 @@
       <table class="table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Supplier</th>
             <th>Invoice No.</th>
-            <th>Sub Total</th>
-            <th>GST</th>
-            <th>Net Payable</th>
+            <th>Supplier</th>
+            <th>Date</th>
+            <th>Total</th>
             <th>Paid</th>
             <th>Due</th>
             <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let p of purchases"
               [routerLink]="['/shop/purchases', p.purchaseId ?? p.id]"
-              style="cursor:pointer"
-              class="tr-hover">
-            <td>{{ p.purchaseDate | date:'dd MMM yyyy' }}</td>
-            <td class="font-bold">{{ p.supplier?.companyName || p.supplier?.name || p.supplierName || '—' }}</td>
-            <td class="text-muted">{{ p.invoiceNumber || '—' }}</td>
-            <td>{{ fmt(getSubTotal(p)) }}</td>
+              style="cursor:pointer">
+            <td><span class="bill-no">{{ p.invoiceNumber || '—' }}</span></td>
             <td>
-              <!-- Safe access with optional chaining and fallback -->
-              {{ (getGSTAmount(p) > 0 ? fmt(getGSTAmount(p)) : '—') }}
+              <div class="supplier-info">
+                <span class="supplier-name">{{ p.supplier?.companyName || p.supplierName || '—' }}</span>
+              </div>
             </td>
-            <td class="amount-total font-bold">{{ fmt(p.netPayable) }}</td>
+            <td class="text-muted">{{ p.purchaseDate | date:'dd MMM yyyy' }}</td>
+            <td class="amount-total">{{ fmt(p.netPayable) }}</td>
             <td class="amount-paid">{{ fmt(p.amountPaid) }}</td>
-            <td [class]="purchasePending(p) > 0 ? 'amount-pending' : 'amount-paid'">
-              {{ fmt(purchasePending(p)) }}
-            </td>
+            <td [class]="purchasePending(p) > 0 ? 'amount-pending' : 'amount-paid'">{{ fmt(purchasePending(p)) }}</td>
+            <td><span class="badge" [class]="statusClass(p.paymentStatus)">{{ p.paymentStatus || 'PENDING' }}</span></td>
             <td>
-              <span class="badge" [class]="statusClass(p.paymentStatus)">{{ p.paymentStatus || 'PENDING' }}</span>
+              <a [routerLink]="['/shop/purchases', p.purchaseId ?? p.id]"
+                 class="btn btn-sm btn-outline"
+                 (click)="$event.stopPropagation()">View</a>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="pagination" *ngIf="totalPages > 1">
-      <button class="btn btn-sm btn-outline" (click)="prevPage()" [disabled]="pageNumber===1">← Prev</button>
-      <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
-      <button class="btn btn-sm btn-outline" (click)="nextPage()" [disabled]="pageNumber===totalPages">Next →</button>
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalCount > pageSize">
+      <button class="btn btn-sm btn-outline"
+              (click)="prevPage()"
+              [disabled]="pageNumber === 1">← Prev</button>
+      <span class="page-info">
+        Page {{ pageNumber }} of {{ totalPages }}
+        <span class="text-muted">({{ totalCount }} total)</span>
+      </span>
+      <button class="btn btn-sm btn-outline"
+              (click)="nextPage()"
+              [disabled]="pageNumber >= totalPages">Next →</button>
     </div>
   </div>
 </div>

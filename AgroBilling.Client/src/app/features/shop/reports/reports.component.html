@@ -5,8 +5,14 @@
       <h1 class="page-title">Monthly Report</h1>
       <p class="page-subtitle">{{ monthLabel(selectedMonth) }}</p>
     </div>
-    <div class="flex gap-12 align-items-center">
-      <input type="month" class="form-control" [(ngModel)]="selectedMonth" (ngModelChange)="load()" style="width:180px" />
+    <div class="flex gap-12" style="align-items:center; flex-wrap:wrap">
+      <input type="month" class="form-control" [(ngModel)]="selectedMonth"
+        (ngModelChange)="load()" style="width:180px" />
+      <!-- ✅ Export button -->
+      <button class="btn btn-outline" (click)="exportData()" [disabled]="exporting">
+        <span *ngIf="exporting" class="btn-spinner"></span>
+        {{ exporting ? 'Preparing...' : '📥 Download My Data' }}
+      </button>
     </div>
   </div>
 
@@ -32,9 +38,12 @@
         <div class="stat-label">Total Expenses</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" [style.background]="netProfit >= 0 ? 'rgba(67,160,71,0.15)' : 'rgba(229,57,53,0.15)'"
+        <div class="stat-icon"
+          [style.background]="netProfit >= 0 ? 'rgba(67,160,71,0.15)' : 'rgba(229,57,53,0.15)'"
           [style.color]="netProfit >= 0 ? 'var(--green-400)' : '#EF5350'">📊</div>
-        <div class="stat-value" [class]="netProfit >= 0 ? 'amount-paid' : 'amount-pending'">{{ fmt(netProfit) }}</div>
+        <div class="stat-value" [class]="netProfit >= 0 ? 'amount-paid' : 'amount-pending'">
+          {{ fmt(netProfit) }}
+        </div>
         <div class="stat-label">Net Profit</div>
       </div>
     </div>
@@ -48,7 +57,10 @@
           <div class="report-row"><span class="text-muted">Paid Bills</span><span class="amount-paid">{{ sm.paidBills }}</span></div>
           <div class="report-row"><span class="text-muted">Partial Bills</span><span class="amount-pending">{{ sm.partialBills }}</span></div>
           <div class="report-row"><span class="text-muted">Pending Bills</span><span class="amount-pending">{{ sm.pendingBills }}</span></div>
-          <div class="report-row highlight"><span>Total Pending Recovery</span><span class="amount-pending font-bold">{{ fmt(sm.totalPending) }}</span></div>
+          <div class="report-row highlight">
+            <span>Total Pending Recovery</span>
+            <span class="amount-pending font-bold">{{ fmt(sm.totalPending) }}</span>
+          </div>
         </div>
       </div>
 
@@ -77,7 +89,10 @@
         <div class="report-rows">
           <div class="report-row"><span>Total Purchased</span><span class="amount-total font-bold">{{ fmt(dashboard.totalPurchased) }}</span></div>
           <div class="report-row"><span class="text-muted">Paid to Suppliers</span><span class="amount-paid">{{ fmt(dashboard.paidToSuppliers) }}</span></div>
-          <div class="report-row highlight"><span>Outstanding to Suppliers</span><span class="amount-pending font-bold">{{ fmt(supplierOutstanding) }}</span></div>
+          <div class="report-row highlight">
+            <span>Outstanding to Suppliers</span>
+            <span class="amount-pending font-bold">{{ fmt(supplierOutstanding) }}</span>
+          </div>
         </div>
       </div>
 
@@ -104,4 +119,11 @@
     </div>
 
   </ng-container>
+
+  <!-- Empty state when no data -->
+  <div class="empty-state" *ngIf="!loading && !dashboard">
+    <div class="empty-icon">📊</div>
+    <h3>No data for this month</h3>
+    <p>Start billing to see your monthly report here</p>
+  </div>
 </div>

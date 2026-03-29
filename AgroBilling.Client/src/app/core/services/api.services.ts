@@ -88,6 +88,11 @@ export class BillingService {
     return this.http.post<ApiResponse<CreditNote>>(`${API}/bills/${shopId}/return`, req);
   }
 
+  // ✅ Bulk payment — distributes amount across oldest pending bills
+  bulkPayment(shopId: number, req: any) {
+    return this.http.post<ApiResponse<any>>(`${API}/bills/${shopId}/bulk-payment`, req);
+  }
+
   getCreditNotes(shopId: number) {
     return this.http.get<ApiResponse<CreditNote[]>>(
       `${API}/bills/${shopId}/credit-notes`
@@ -146,6 +151,11 @@ export class ProductService {
 
   getProductById(id: number) {
     return this.http.get<ApiResponse<Product>>(`${API}/products/detail/${id}`);
+  }
+
+  // ✅ Full product detail with stock movements + purchase history
+  getProductDetail(id: number) {
+    return this.http.get<ApiResponse<any>>(`${API}/products/full/${id}`);
   }
 
   createProduct(shopId: number, req: CreateProductRequest) {
@@ -306,6 +316,14 @@ export class ReportService {
   getAdminDashboard() {
     return this.http.get<ApiResponse<Partial<AdminDashboard>>>(
       `${API}/admin/dashboard`
+    );
+  }
+
+  // ✅ Export all shop data as ZIP
+  exportShopData(shopId: number) {
+    return this.http.get(
+      `${API}/reports/${shopId}/export`,
+      { responseType: 'blob' }
     );
   }
 }

@@ -1,158 +1,194 @@
-/* ── BTN SPINNER ── */
+// ─────────────────────────────────────────────────────────────
+// SUPPLIERS LIST — Component Styles
+// ─────────────────────────────────────────────────────────────
+
+// ── Visibility helpers ────────────────────────────────────────
+.hide-on-mobile { display: block; }
+.show-on-mobile { display: none;  }
+
+// ── Supplier cards (mobile) — always declared, shown via media
+.supplier-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.supplier-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--card);
+  transition: border-color 0.18s;
+
+  &:active { border-color: var(--green-500); }
+}
+
+.sc-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sc-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--green-700), var(--green-500));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.9375rem;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.sc-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sc-name {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.sc-sub {
+  font-size: 0.75rem;
+  color: var(--text-2);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ✅ Ledger button — fixed width, never full-width on mobile
+.sc-btn {
+  flex-shrink: 0;
+  align-self: center;
+  white-space: nowrap;
+  width: auto !important;       // override global mobile btn width:100%
+  min-width: unset !important;
+  padding: 6px 14px !important;
+  font-size: 0.8125rem !important;
+}
+
+// GST badge row
+.sc-gst {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(67, 160, 71, 0.06);
+  border: 1px solid rgba(67, 160, 71, 0.12);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.sc-gst-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--green-400);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.sc-gst-val {
+  font-size: 0.75rem;
+  color: var(--text-2);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+// 3-col stats
+.sc-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  gap: 0;
+}
+
+.sc-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 2px;
+
+  &:not(:last-child) {
+    border-right: 1px solid var(--border);
+  }
+}
+
+.sc-stat-val {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sc-stat-lbl {
+  font-size: 0.625rem;
+  color: var(--text-3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+// ── Spinner ───────────────────────────────────────────────────
 .btn-spinner {
-  width: 15px;
-  height: 15px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   display: inline-block;
+  vertical-align: middle;
 }
 
-/* ── VISIBILITY HELPERS ── */
-.hide-on-mobile  { display: block; }
-.show-on-mobile  { display: none; }
-
-/* ═══════════════════════════════════════════
-   MOBILE SUPPLIER CARDS
-   ═══════════════════════════════════════════ */
+// ── Mobile ────────────────────────────────────────────────────
 @media (max-width: 768px) {
-  .hide-on-mobile { display: none !important; }
+  .hide-on-mobile { display: none  !important; }
   .show-on-mobile { display: block !important; }
-
-  .supplier-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .supplier-card {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    background: var(--card);
-    transition: border-color 0.18s;
-
-    &:hover { border-color: var(--green-600); }
-  }
-
-  /* Header row — avatar + info + ledger btn */
-  .sc-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-
-  .sc-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--green-700), var(--green-500));
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 0.875rem;
-    flex-shrink: 0;
-  }
-
-  .sc-info {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .sc-name {
-    font-family: var(--font-display);
-    font-size: 0.9375rem;
-    font-weight: 700;
-    color: var(--text-1);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .sc-sub {
-    font-size: 0.75rem;
-    color: var(--text-2);
-    margin-top: 2px;
-  }
-
-  .sc-btn {
-    flex-shrink: 0;
-    align-self: center;
-    white-space: nowrap;
-  }
-
-  /* GST badge */
-  .sc-gst {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    background: rgba(67, 160, 71, 0.06);
-    border-radius: 6px;
-    margin-bottom: 10px;
-  }
-
-  .sc-gst-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: var(--green-400);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-
-  .sc-gst-val {
-    font-size: 0.75rem;
-    color: var(--text-2);
-    font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-
-  /* 3-column stats row */
-  .sc-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
-    gap: 4px;
-  }
-
-  .sc-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 4px;
-  }
-
-  .sc-stat-val {
-    font-family: var(--font-display);
-    font-size: 0.875rem;
-    font-weight: 700;
-  }
-
-  .sc-stat-lbl {
-    font-size: 0.65rem;
-    color: var(--text-3);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-
-  .btn-spinner {
-    width: 12px;
-    height: 12px;
-    border-width: 1.5px;
-  }
 }
 
 @media (max-width: 480px) {
   .supplier-card { padding: 12px; }
-  .sc-name { font-size: 0.875rem; }
-  .sc-stat-val { font-size: 0.8125rem; }
+  .sc-avatar     { width: 38px; height: 38px; font-size: 0.8125rem; border-radius: 10px; }
+  .sc-name       { font-size: 0.875rem; }
+  .sc-stat-val   { font-size: 0.8125rem; }
+}
+
+/* ── Visibility Control (CLEAN FIX) ───────────────────────── */
+
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
 }

@@ -14,12 +14,18 @@ import { MonthlyDashboard, SalesSummary } from '../../../core/models/models';
 })
 export class ReportsComponent implements OnInit {
   dashboard: MonthlyDashboard | null = null;
-  loading = false;
+  loading   = false;
+  exporting = false;
+
   selectedMonth = new Date().toISOString().substring(0, 7);
 
   private readonly cdr = inject(ChangeDetectorRef);
 
-  constructor(private reportService: ReportService, private auth: AuthService) {}
+  constructor(
+    private reportService: ReportService,
+    private auth: AuthService
+  ) {}
+
   ngOnInit(): void {
     this.auth.runWhenShopReady(() => this.load());
   }
@@ -28,7 +34,7 @@ export class ReportsComponent implements OnInit {
     const [year, month] = this.selectedMonth.split('-').map(Number);
     const shopId = this.auth.getShopId();
     if (shopId == null) {
-      this.loading = false;
+      this.loading   = false;
       this.dashboard = null;
       this.cdr.detectChanges();
       return;
@@ -37,12 +43,8 @@ export class ReportsComponent implements OnInit {
     this.reportService.getMonthlyDashboard(shopId, year, month).subscribe({
       next: res => {
         const d = res.data;
-        if (d == null) {
-          this.dashboard = null;
-        } else {
-          this.dashboard = { ...d, salesSummary: { ...(d.salesSummary ?? {}) } };
-        }
-        this.loading = false;
+        this.dashboard = d ? { ...d, salesSummary: { ...(d.salesSummary ?? {}) } } : null;
+        this.loading   = false;
         this.cdr.detectChanges();
       },
       error: () => {
@@ -52,14 +54,39 @@ export class ReportsComponent implements OnInit {
     });
   }
 
+  // ✅ Export all data as ZIP
+  exportData(): void {
+    const shopId = this.auth.getShopId();
+    if (!shopId) return;
+    this.exporting = true;
+
+    this.reportService.exportShopData(shopId).subscribe({
+      next: (blob: Blob) => {
+        const url  = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href  = url;
+        link.download = `agrobilling-${new Date().toISOString().slice(0, 10)}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        this.exporting = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.exporting = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ── Computed ─────────────────────────────────────────────
   get netProfit(): number {
     if (!this.dashboard) return 0;
     const s = this.dashboard.salesSummary ?? {};
-    return (
-      (s.totalCollected ?? 0) -
-      (this.dashboard.totalExpenses ?? 0) -
-      (this.dashboard.paidToSuppliers ?? 0)
-    );
+    return (s.totalCollected ?? 0)
+         - (this.dashboard.totalExpenses   ?? 0)
+         - (this.dashboard.paidToSuppliers ?? 0);
   }
 
   get sm(): SalesSummary {
@@ -79,5 +106,11 @@ export class ReportsComponent implements OnInit {
       maximumFractionDigits: 0
     }).format(v ?? 0);
   }
-  monthLabel(m: string): string { const [y, mo] = m.split('-'); return new Date(+y, +mo-1).toLocaleString('en-IN', { month: 'long', year: 'numeric' }); }
+
+  monthLabel(m: string): string {
+    const [y, mo] = m.split('-');
+    return new Date(+y, +mo - 1).toLocaleString('en-IN', {
+      month: 'long', year: 'numeric'
+    });
+  }
 }

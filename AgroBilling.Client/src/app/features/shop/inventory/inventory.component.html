@@ -19,40 +19,51 @@
 
   <div class="card" *ngIf="!loading">
     <div class="empty-state" *ngIf="!products.length">
-      <div class="empty-icon">📦</div><h3>No products found</h3>
+      <div class="empty-icon">📦</div>
+      <h3>No products found</h3>
       <a routerLink="/shop/inventory/add" class="btn btn-primary mt-16">Add Product</a>
     </div>
+
     <div class="table-wrapper" *ngIf="products.length">
       <table>
         <thead>
-          <tr><th>Product</th><th>Category</th><th>Company</th><th>Unit</th><th>Purchase ₹</th><th>Selling ₹</th><th>Stock</th><th>GST%</th></tr>
+          <tr>
+            <th>Product</th><th>Category</th><th>Company</th>
+            <th>Unit</th><th>Purchase ₹</th><th>Selling ₹</th>
+            <th>GST %</th><th>Stock</th>
+          </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of products" [class.low-stock-row]="isLowStock(p)">
+          <!-- ✅ Clickable row → product detail -->
+          <tr *ngFor="let p of products"
+              [class.low-stock-row]="isLowStock(p)"
+              [routerLink]="['/shop/inventory', p.productId ?? p.id]"
+              style="cursor:pointer"
+              class="tr-hover">
             <td>
               <div class="font-bold">{{ p.productName }}</div>
               <div class="text-xs text-muted" *ngIf="isLowStock(p)">⚠️ Low Stock</div>
             </td>
-            <td class="text-muted">{{ p.categoryName }}</td>
+            <td class="text-muted">{{ p.categoryName || '—' }}</td>
             <td class="text-muted">{{ p.companyName || '—' }}</td>
             <td><span class="badge badge-muted">{{ p.unitShortName }}</span></td>
             <td>{{ fmt(p.purchasePrice) }}</td>
             <td class="amount-total font-bold">{{ fmt(p.sellingPrice) }}</td>
+            <td class="text-muted">{{ p.gstPercent }}%</td>
             <td>
               <span class="badge" [class]="isLowStock(p) ? 'badge-danger' : 'badge-success'">
                 {{ p.currentStock }} {{ p.unitShortName }}
               </span>
             </td>
-            <td class="text-muted">{{ p.gstPercent }}%</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <div class="pagination" *ngIf="totalPages > 1">
-      <button class="btn btn-sm btn-outline" (click)="prevPage()" [disabled]="pageNumber === 1">← Prev</button>
+      <button class="btn btn-sm btn-outline" (click)="prevPage()" [disabled]="pageNumber===1">← Prev</button>
       <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
-      <button class="btn btn-sm btn-outline" (click)="nextPage()" [disabled]="pageNumber === totalPages">Next →</button>
+      <button class="btn btn-sm btn-outline" (click)="nextPage()" [disabled]="pageNumber===totalPages">Next →</button>
     </div>
   </div>
 </div>

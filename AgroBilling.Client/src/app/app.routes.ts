@@ -61,6 +61,7 @@ export const routes: Routes = [
       { path: 'customers/:id',    loadComponent: () => import('./features/shop/customers/customer-detail.component').then(c => c.CustomerDetailComponent) },
       { path: 'inventory',        loadComponent: () => import('./features/shop/inventory/inventory.component').then(c => c.InventoryComponent) },
       { path: 'inventory/add',    loadComponent: () => import('./features/shop/inventory/add-product.component').then(c => c.AddProductComponent) },
+      { path: 'inventory/:id',    loadComponent: () => import('./features/shop/inventory/product-detail.component').then(c => c.ProductDetailComponent) },
       { path: 'suppliers',        loadComponent: () => import('./features/shop/suppliers/suppliers.component').then(c => c.SuppliersComponent) },
       { path: 'suppliers/:id',    loadComponent: () => import('./features/shop/suppliers/supplier-detail.component').then(c => c.SupplierDetailComponent) },
       { path: 'purchases',        loadComponent: () => import('./features/shop/purchases/purchases.component').then(c => c.PurchasesComponent) },

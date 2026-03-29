@@ -31,139 +31,132 @@
       </button>
     </div>
 
-    <!-- ── DESKTOP TABLE ── -->
-    <div class="table-wrapper hide-on-mobile" *ngIf="suppliers.length">
-      <table>
-        <thead>
-          <tr>
-            <th>Company</th>
-            <th>Contact Person</th>
-            <th>Mobile</th>
-            <th>GST No.</th>
-            <th>Total Purchased</th>
-            <th>Total Paid</th>
-            <th>Outstanding</th>
-            <th>Action</th>
-          </tr>
-        </thead>
+  
+<!-- ── DESKTOP TABLE ── -->
+<div class="desktop-only" *ngIf="suppliers.length">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Contact Person</th>
+          <th>Mobile</th>
+          <th>GST No.</th>
+          <th>Total Purchased</th>
+          <th>Total Paid</th>
+          <th>Outstanding</th>
+          <th>Action</th>
+        </tr>
+      </thead>
 
-        <tbody>
-          <tr *ngFor="let s of suppliers">
-            <td>
-              <span class="font-bold">{{ s.companyName || '—' }}</span>
-            </td>
+      <tbody>
+        <tr *ngFor="let s of suppliers">
+          <td><span class="font-bold">{{ s.companyName || '—' }}</span></td>
 
-            <td class="text-muted">
-              {{ s.contactPersonName || '—' }}
-            </td>
+          <td class="text-muted">{{ s.contactPersonName || '—' }}</td>
 
-            <td>
-              {{ s.mobileNumber || '—' }}
-            </td>
+          <td>{{ s.mobileNumber || '—' }}</td>
 
-            <!-- ✅ FIXED GST -->
-            <td class="text-muted">
-              {{ s.gstNumber || '—' }}
-            </td>
+          <td class="text-muted">{{ s.gstNumber || '—' }}</td>
 
-            <td class="amount-total">
-              {{ fmt(s.totalPurchased || 0) }}
-            </td>
+          <td class="amount-total">{{ fmt(s.totalPurchased || 0) }}</td>
 
-            <td class="amount-paid">
-              {{ fmt(s.totalPaid || 0) }}
-            </td>
+          <td class="amount-paid">{{ fmt(s.totalPaid || 0) }}</td>
 
-            <td>
-              <span
-                [class]="(s.outstandingDue || 0) > 0
-                  ? 'amount-pending font-bold'
-                  : 'amount-paid'">
-                {{ fmt(s.outstandingDue || 0) }}
-              </span>
-            </td>
-
-            <td>
-              <a
-                [routerLink]="['/shop/suppliers', s.supplierId]"
-                class="btn btn-sm btn-outline">
-                Ledger
-              </a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- ── MOBILE CARDS ── -->
-    <div class="supplier-cards show-on-mobile" *ngIf="suppliers.length">
-
-      <div class="supplier-card" *ngFor="let s of suppliers">
-
-        <div class="sc-header">
-
-          <!-- ✅ SAFE NAVIGATION FIX -->
-          <div class="sc-avatar">
-            {{ s.companyName?.substring(0, 2)?.toUpperCase() || '--' }}
-          </div>
-
-          <div class="sc-info">
-            <div class="sc-name">{{ s.companyName || '—' }}</div>
-
-            <div class="sc-sub" *ngIf="s.contactPersonName">
-              👤 {{ s.contactPersonName }}
-            </div>
-
-            <div class="sc-sub" *ngIf="s.mobileNumber">
-              📞 {{ s.mobileNumber }}
-            </div>
-          </div>
-
-          <a
-            [routerLink]="['/shop/suppliers', s.supplierId]"
-            class="btn btn-sm btn-outline sc-btn">
-            Ledger →
-          </a>
-
-        </div>
-
-        <!-- ✅ GST FIX -->
-        <div class="sc-gst" *ngIf="s.gstNumber">
-          <span class="sc-gst-label">GST</span>
-          <span class="sc-gst-val">{{ s.gstNumber }}</span>
-        </div>
-
-        <div class="sc-stats">
-
-          <div class="sc-stat">
-            <div class="sc-stat-val amount-total">
-              {{ fmt(s.totalPurchased || 0) }}
-            </div>
-            <div class="sc-stat-lbl">Purchased</div>
-          </div>
-
-          <div class="sc-stat">
-            <div class="sc-stat-val amount-paid">
-              {{ fmt(s.totalPaid || 0) }}
-            </div>
-            <div class="sc-stat-lbl">Paid</div>
-          </div>
-
-          <div class="sc-stat">
-            <div
-              class="sc-stat-val"
+          <td>
+            <span
               [class]="(s.outstandingDue || 0) > 0
-                ? 'amount-pending'
+                ? 'amount-pending font-bold'
                 : 'amount-paid'">
               {{ fmt(s.outstandingDue || 0) }}
-            </div>
-            <div class="sc-stat-lbl">Outstanding</div>
+            </span>
+          </td>
+
+          <td>
+            <a
+              [routerLink]="['/shop/suppliers', s.supplierId]"
+              class="btn btn-sm btn-outline">
+              Ledger
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── MOBILE CARDS ── -->
+<div class="mobile-only" *ngIf="suppliers.length">
+
+  <div class="supplier-cards">
+
+    <div class="supplier-card" *ngFor="let s of suppliers">
+
+      <div class="sc-header">
+
+        <div class="sc-avatar">
+          {{ s.companyName?.substring(0, 2)?.toUpperCase() || '--' }}
+        </div>
+
+        <div class="sc-info">
+          <div class="sc-name">{{ s.companyName || '—' }}</div>
+
+          <div class="sc-sub" *ngIf="s.contactPersonName">
+            👤 {{ s.contactPersonName }}
           </div>
 
+          <div class="sc-sub" *ngIf="s.mobileNumber">
+            📞 {{ s.mobileNumber }}
+          </div>
+        </div>
+
+        <a
+          [routerLink]="['/shop/suppliers', s.supplierId]"
+          class="btn btn-sm btn-outline sc-btn">
+          Ledger →
+        </a>
+
+      </div>
+
+      <div class="sc-gst" *ngIf="s.gstNumber">
+        <span class="sc-gst-label">GST</span>
+        <span class="sc-gst-val">{{ s.gstNumber }}</span>
+      </div>
+
+      <div class="sc-stats">
+
+        <div class="sc-stat">
+          <div class="sc-stat-val amount-total">
+            {{ fmt(s.totalPurchased || 0) }}
+          </div>
+          <div class="sc-stat-lbl">Purchased</div>
+        </div>
+
+        <div class="sc-stat">
+          <div class="sc-stat-val amount-paid">
+            {{ fmt(s.totalPaid || 0) }}
+          </div>
+          <div class="sc-stat-lbl">Paid</div>
+        </div>
+
+        <div class="sc-stat">
+          <div
+            class="sc-stat-val"
+            [class]="(s.outstandingDue || 0) > 0
+              ? 'amount-pending'
+              : 'amount-paid'">
+            {{ fmt(s.outstandingDue || 0) }}
+          </div>
+          <div class="sc-stat-lbl">Outstanding</div>
         </div>
 
       </div>
+
     </div>
+
+  </div>
+
+</div>
 
   </div>
 </div>

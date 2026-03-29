@@ -1,7 +1,30 @@
-// Add these to your styles for consistent UI
+// src/app/features/shop/purchases/purchase-detail.component.scss
 
-.text-end {
-    text-align: right;
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  
+  .info-label {
+    color: var(--text-2);
+    font-size: 0.875rem;
+  }
+  
+  .info-val {
+    font-weight: 600;
+    font-size: 0.9375rem;
   }
   
   .tabs-bar {
@@ -94,35 +117,6 @@
     }
   }
   
-  .info-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-  }
-  
-  .info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-color);
-    
-    &:last-child {
-      border-bottom: none;
-    }
-    
-    .info-label {
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-    
-    .info-val {
-      font-size: 14px;
-      font-weight: 500;
-    }
-  }
-  
   .summary-row {
     border-top: 1px solid var(--border);
     
@@ -148,4 +142,92 @@
   .amount-total {
     color: var(--text-1);
     font-weight: 600;
+  }
+  
+  .text-end {
+    text-align: right;
+  }
+  
+  /* Modal styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+  }
+  
+  .btn-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: var(--text-2);
+    
+    &:hover {
+      color: var(--text-1);
+    }
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .grid-4 {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    
+    .tabs-bar {
+      width: 100%;
+      overflow-x: auto;
+    }
+    
+    .tab-btn {
+      white-space: nowrap;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .grid-4 {
+      grid-template-columns: 1fr;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+    }
   }
