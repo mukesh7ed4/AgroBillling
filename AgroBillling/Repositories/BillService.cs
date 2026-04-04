@@ -17,6 +17,7 @@ namespace AgroBillling.DAL.Repositories
         Task<Bill> CreateBillAsync(int shopId, CreateBillDto dto);
         Task<BillPayment> AddPaymentAsync(AddPaymentDto dto);
         Task<CreditNote> ProcessReturnAsync(int shopId, CreateReturnDto dto);
+        Task<BulkPaymentResultDto> BulkPaymentAsync(int shopId, BulkPaymentDto dto);
     }
 
     public class BillService : IBillService
@@ -26,7 +27,7 @@ namespace AgroBillling.DAL.Repositories
 
         public BillService(AgroBillingDbContext context, IShopRepository shopRepo)
         {
-            _context  = context;
+            _context = context;
             _shopRepo = shopRepo;
         }
 
@@ -43,28 +44,28 @@ namespace AgroBillling.DAL.Repositories
                 // One SQL round-trip; no SaveChanges on Shops (was a major slowdown).
                 var billNo = await _shopRepo.GetNextBillNumberAsync(shopId);
 
-                var subTotal  = dto.Items.Sum(i => i.TotalAmount);
+                var subTotal = dto.Items.Sum(i => i.TotalAmount);
                 var gstAmount = Math.Round(subTotal * dto.GstPercent / 100, 2);
-                var total     = subTotal - dto.DiscountAmount + gstAmount;
-                var status    = dto.AmountPaid >= total ? "PAID" :
-                                dto.AmountPaid > 0      ? "PARTIAL" : "PENDING";
+                var total = subTotal - dto.DiscountAmount + gstAmount;
+                var status = dto.AmountPaid >= total ? "PAID" :
+                                dto.AmountPaid > 0 ? "PARTIAL" : "PENDING";
 
                 var bill = new Bill
                 {
-                    ShopId         = shopId,
-                    CustomerId     = dto.CustomerId,
-                    BillNumber     = billNo.ToString(),
-                    BillDate       = dto.BillDate,
-                    SubTotal       = subTotal,
+                    ShopId = shopId,
+                    CustomerId = dto.CustomerId,
+                    BillNumber = billNo.ToString(),
+                    BillDate = dto.BillDate,
+                    SubTotal = subTotal,
                     DiscountAmount = dto.DiscountAmount,
-                    Gstpercent     = dto.GstPercent,
-                    Gstamount      = gstAmount,
-                    TotalAmount    = total,
-                    AmountPaid     = dto.AmountPaid,
-                    PaymentStatus  = status,
-                    Notes          = dto.Notes,
-                    IsReturn       = false,
-                    CreatedAt      = DateTime.Now
+                    Gstpercent = dto.GstPercent,
+                    Gstamount = gstAmount,
+                    TotalAmount = total,
+                    AmountPaid = dto.AmountPaid,
+                    PaymentStatus = status,
+                    Notes = dto.Notes,
+                    IsReturn = false,
+                    CreatedAt = DateTime.Now
                 };
 
                 await _context.Bills.AddAsync(bill);
@@ -78,15 +79,15 @@ namespace AgroBillling.DAL.Repositories
                 {
                     billItems.Add(new BillItem
                     {
-                        BillId         = bill.BillId,
-                        ProductId      = item.ProductId,
-                        ProductName    = item.ProductName,
-                        Quantity       = item.Quantity,
-                        UnitPrice      = item.UnitPrice,
+                        BillId = bill.BillId,
+                        ProductId = item.ProductId,
+                        ProductName = item.ProductName,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice,
                         DiscountAmount = item.DiscountAmount,
-                        Gstpercent     = item.GstPercent,
-                        Gstamount      = item.GstAmount,
-                        TotalAmount    = item.TotalAmount
+                        Gstpercent = item.GstPercent,
+                        Gstamount = item.GstAmount,
+                        TotalAmount = item.TotalAmount
                     });
 
                     products.TryGetValue(item.ProductId, out var product);
@@ -96,30 +97,30 @@ namespace AgroBillling.DAL.Repositories
                         product.CurrentStock -= item.Quantity;
                         movements.Add(new StockMovement
                         {
-                            ShopId         = shopId,
-                            ProductId      = item.ProductId,
-                            MovementType   = "SALE",
-                            ReferenceType  = "BILL",
-                            ReferenceId    = bill.BillId,
+                            ShopId = shopId,
+                            ProductId = item.ProductId,
+                            MovementType = "SALE",
+                            ReferenceType = "BILL",
+                            ReferenceId = bill.BillId,
                             QuantityChange = -item.Quantity,
-                            StockBefore    = stockBefore,
-                            StockAfter     = product.CurrentStock,
-                            CreatedAt      = now
+                            StockBefore = stockBefore,
+                            StockAfter = product.CurrentStock,
+                            CreatedAt = now
                         });
                     }
                     else
                     {
                         movements.Add(new StockMovement
                         {
-                            ShopId         = shopId,
-                            ProductId      = item.ProductId,
-                            MovementType   = "SALE",
-                            ReferenceType  = "BILL",
-                            ReferenceId    = bill.BillId,
+                            ShopId = shopId,
+                            ProductId = item.ProductId,
+                            MovementType = "SALE",
+                            ReferenceType = "BILL",
+                            ReferenceId = bill.BillId,
                             QuantityChange = -item.Quantity,
-                            StockBefore    = item.Quantity,
-                            StockAfter     = 0,
-                            CreatedAt      = now
+                            StockBefore = item.Quantity,
+                            StockAfter = 0,
+                            CreatedAt = now
                         });
                     }
                 }
@@ -131,13 +132,13 @@ namespace AgroBillling.DAL.Repositories
                 {
                     await _context.BillPayments.AddAsync(new BillPayment
                     {
-                        BillId      = bill.BillId,
-                        ShopId      = shopId,
-                        CustomerId  = dto.CustomerId,
+                        BillId = bill.BillId,
+                        ShopId = shopId,
+                        CustomerId = dto.CustomerId,
                         PaymentDate = dto.BillDate,
-                        Amount      = dto.AmountPaid,
+                        Amount = dto.AmountPaid,
                         PaymentMode = "Cash",
-                        CreatedAt   = now
+                        CreatedAt = now
                     });
                 }
 
@@ -168,15 +169,15 @@ namespace AgroBillling.DAL.Repositories
 
                 var payment = new BillPayment
                 {
-                    BillId      = dto.BillId,
-                    ShopId      = bill.ShopId,
-                    CustomerId  = bill.CustomerId,
+                    BillId = dto.BillId,
+                    ShopId = bill.ShopId,
+                    CustomerId = bill.CustomerId,
                     PaymentDate = dto.PaymentDate,
-                    Amount      = dto.Amount,
+                    Amount = dto.Amount,
                     PaymentMode = dto.PaymentMode,
-                    Reference   = dto.Reference,
-                    Notes       = dto.Notes,
-                    CreatedAt   = DateTime.Now
+                    Reference = dto.Reference,
+                    Notes = dto.Notes,
+                    CreatedAt = DateTime.Now
                 };
 
                 await _context.BillPayments.AddAsync(payment);
@@ -185,7 +186,7 @@ namespace AgroBillling.DAL.Repositories
                 bill.AmountPaid = totalPaid;
                 bill.PaymentStatus =
                     totalPaid >= bill.TotalAmount ? "PAID" :
-                    totalPaid > 0                 ? "PARTIAL" : "PENDING";
+                    totalPaid > 0 ? "PARTIAL" : "PENDING";
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -208,15 +209,15 @@ namespace AgroBillling.DAL.Repositories
 
                 var creditNote = new CreditNote
                 {
-                    ShopId         = shopId,
-                    CustomerId     = dto.CustomerId,
+                    ShopId = shopId,
+                    CustomerId = dto.CustomerId,
                     OriginalBillId = dto.OriginalBillId,
                     CreditNoteDate = dto.ReturnDate,
-                    CreditAmount   = creditAmount,
+                    CreditAmount = creditAmount,
                     AdjustedAmount = 0,
-                    Status         = "OPEN",
-                    Notes          = dto.Notes,
-                    CreatedAt      = DateTime.Now
+                    Status = "OPEN",
+                    Notes = dto.Notes,
+                    CreatedAt = DateTime.Now
                 };
 
                 await _context.CreditNotes.AddAsync(creditNote);
@@ -236,11 +237,11 @@ namespace AgroBillling.DAL.Repositories
                     cnItems.Add(new CreditNoteItem
                     {
                         CreditNoteId = creditNote.CreditNoteId,
-                        ProductId    = item.ProductId,
-                        ProductName  = item.ProductName,
-                        Quantity     = item.Quantity,
-                        UnitPrice    = item.UnitPrice,
-                        TotalAmount  = item.TotalAmount
+                        ProductId = item.ProductId,
+                        ProductName = item.ProductName,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice,
+                        TotalAmount = item.TotalAmount
                     });
 
                     returnProducts.TryGetValue(item.ProductId, out var product);
@@ -250,30 +251,30 @@ namespace AgroBillling.DAL.Repositories
                         product.CurrentStock += item.Quantity;
                         movements.Add(new StockMovement
                         {
-                            ShopId         = shopId,
-                            ProductId      = item.ProductId,
-                            MovementType   = "RETURN_IN",
-                            ReferenceType  = "CREDIT_NOTE",
-                            ReferenceId    = creditNote.CreditNoteId,
+                            ShopId = shopId,
+                            ProductId = item.ProductId,
+                            MovementType = "RETURN_IN",
+                            ReferenceType = "CREDIT_NOTE",
+                            ReferenceId = creditNote.CreditNoteId,
                             QuantityChange = item.Quantity,
-                            StockBefore    = stockBefore,
-                            StockAfter     = product.CurrentStock,
-                            CreatedAt      = now
+                            StockBefore = stockBefore,
+                            StockAfter = product.CurrentStock,
+                            CreatedAt = now
                         });
                     }
                     else
                     {
                         movements.Add(new StockMovement
                         {
-                            ShopId         = shopId,
-                            ProductId      = item.ProductId,
-                            MovementType   = "RETURN_IN",
-                            ReferenceType  = "CREDIT_NOTE",
-                            ReferenceId    = creditNote.CreditNoteId,
+                            ShopId = shopId,
+                            ProductId = item.ProductId,
+                            MovementType = "RETURN_IN",
+                            ReferenceType = "CREDIT_NOTE",
+                            ReferenceId = creditNote.CreditNoteId,
                             QuantityChange = item.Quantity,
-                            StockBefore    = -item.Quantity,
-                            StockAfter     = 0,
-                            CreatedAt      = now
+                            StockBefore = -item.Quantity,
+                            StockAfter = 0,
+                            CreatedAt = now
                         });
                     }
                 }
@@ -291,6 +292,67 @@ namespace AgroBillling.DAL.Repositories
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        // ✅ BULK PAYMENT — distributes amount across oldest pending bills first
+        public async Task<BulkPaymentResultDto> BulkPaymentAsync(int shopId, BulkPaymentDto dto)
+        {
+            var bills = await _context.Bills
+                .Where(b => b.ShopId == shopId
+                         && b.CustomerId == dto.CustomerId
+                         && b.PaymentStatus != "PAID"
+                         && b.IsReturn == false)
+                .OrderBy(b => b.BillDate)
+                .ThenBy(b => b.BillId)
+                .ToListAsync();
+
+            var remaining = dto.Amount;
+            var result = new BulkPaymentResultDto { TotalPaid = dto.Amount };
+            var payDate = dto.PaymentDate == default
+                ? DateOnly.FromDateTime(DateTime.Now) : dto.PaymentDate;
+
+            foreach (var bill in bills)
+            {
+                if (remaining <= 0) break;
+
+                var due = bill.AmountPending ?? (bill.TotalAmount - bill.AmountPaid);
+                if (due <= 0) continue;
+
+                var apply = Math.Min(remaining, due);
+                remaining -= apply;
+
+                _context.BillPayments.Add(new BillPayment
+                {
+                    BillId = bill.BillId,
+                    ShopId = shopId,
+                    CustomerId = bill.CustomerId,   // ✅ Required NOT NULL
+                    Amount = apply,
+                    PaymentMode = dto.PaymentMode,
+                    Reference = dto.Reference,
+                    Notes = string.IsNullOrWhiteSpace(dto.Notes) ? "Bulk payment" : dto.Notes,
+                    PaymentDate = payDate,
+                    CreatedAt = DateTime.Now
+                });
+
+                bill.AmountPaid += apply;
+                bill.AmountPending = bill.TotalAmount - bill.AmountPaid;
+                bill.PaymentStatus = bill.AmountPaid >= bill.TotalAmount ? "PAID" : "PARTIAL";
+
+                result.Details.Add(new BillPaymentSummary
+                {
+                    BillId = bill.BillId,
+                    BillNumber = bill.BillNumber,
+                    AmountApplied = apply,
+                    NewStatus = bill.PaymentStatus
+                });
+
+                if (bill.PaymentStatus == "PAID") result.BillsSettled++;
+                else result.BillsPartial++;
+            }
+
+            result.Remaining = remaining;
+            await _context.SaveChangesAsync();
+            return result;
         }
     }
 }

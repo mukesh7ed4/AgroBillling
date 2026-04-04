@@ -1,5 +1,4 @@
 <Solution>
   <Project Path="AgroBilling.API/AgroBilling.API.csproj" />
-  <Project Path="AgroBillingApp/AgroBillingApp.csproj" />
   <Project Path="AgroBillling/AgroBillling.DAL.csproj" />
 </Solution>

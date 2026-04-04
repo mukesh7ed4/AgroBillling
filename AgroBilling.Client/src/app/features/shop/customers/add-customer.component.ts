@@ -13,20 +13,23 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./add-customer.component.scss']
 })
 export class AddCustomerComponent {
-  private readonly fb = inject(FormBuilder);
+  private readonly fb  = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
+
   submitting = false;
+  error      = '';
+
   form = this.fb.group({
-    fullName:       ['', Validators.required],
-    fatherName:     [''],
-    mobileNumber:   ['', [Validators.required, Validators.pattern(/^[6-9]\d{9}$/)]],
-    alternateMobile:[''],
-    village:        [''],
-    tehsil:         [''],
-    district:       [''],
-    state:          ['Haryana'],
-    landAcres:      [null],
-    openingBalance: [0]
+    fullName:        ['', Validators.required],
+    fatherName:      [''],
+    mobileNumber:    ['', [Validators.required, Validators.pattern(/^[6-9]\d{9}$/)]],
+    alternateMobile: [''],
+    village:         [''],
+    tehsil:          [''],
+    district:        [''],
+    state:           ['Haryana'],
+    landAcres:       [null as number | null],
+    openingBalance:  [0]
   });
 
   constructor(
@@ -38,18 +41,27 @@ export class AddCustomerComponent {
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.submitting = true;
+    this.error = '';
     const shopId = this.auth.getShopId()!;
+
     this.customerService.createCustomer(shopId, this.form.value as any).subscribe({
       next: res => {
         this.submitting = false;
-        const id = res.data.customerId ?? res.data.id;
-        this.router.navigate(['/shop/customers', id]);
+        const id = res?.data?.customerId ?? res?.data?.id ?? (res as any)?.customerId;
+        if (id) {
+          this.router.navigate(['/shop/customers', id]);
+        } else {
+          this.router.navigate(['/shop/customers']);
+        }
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err: any) => {
         this.submitting = false;
+        this.error = err?.error?.message || 'Failed to add customer. Please try again.';
         this.cdr.detectChanges();
       }
     });
   }
+
+  get f() { return this.form.controls; }
 }

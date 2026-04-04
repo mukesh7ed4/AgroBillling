@@ -2,3 +2,26 @@
 // Ya yeh ek line:
 @use '../login/login.component.scss';
 // Agar import nahi karna toh login.component.scss ka sara content copy karo yahan
+
+.spinner-small {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--text-muted);
+  border-top-color: var(--green-500);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+}

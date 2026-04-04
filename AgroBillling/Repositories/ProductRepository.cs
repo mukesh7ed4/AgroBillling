@@ -1,5 +1,6 @@
 // ================================================
 //  AgroBilling.DAL / Repositories / ProductRepository.cs
+//  ✅ Fixed — removed wrong .Include(p => p.Gstpercent)
 // ================================================
 
 using System.Collections.Concurrent;
@@ -47,17 +48,15 @@ namespace AgroBillling.DAL.Repositories
             _cache.Set(cacheKey, value, CacheOptions);
         }
 
-        public async Task<IEnumerable<Product>> GetByShopIdAsync(int shopId, string? search = null, int? categoryId = null)
+        public async Task<IEnumerable<Product>> GetByShopIdAsync(
+            int shopId, string? search = null, int? categoryId = null)
         {
-            var cacheKey = Key("all", shopId, search ?? "", categoryId ?? -1);
-            if (_cache.TryGetValue(cacheKey, out IEnumerable<Product>? cached) && cached != null)
-                return cached;
-
             var query = _context.Products
                 .AsNoTracking()
-                .Include(p => p.Category)
-                .Include(p => p.Unit)
-                .Include(p => p.Supplier)
+                .Include(p => p.Category)   // ✅ navigation property
+                .Include(p => p.Unit)        // ✅ navigation property
+                .Include(p => p.Supplier)    // ✅ navigation property
+                                             
                 .Where(p => p.ShopId == shopId && p.IsActive == true);
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -69,9 +68,7 @@ namespace AgroBillling.DAL.Repositories
             if (categoryId.HasValue)
                 query = query.Where(p => p.CategoryId == categoryId.Value);
 
-            var list = await query.OrderBy(p => p.ProductName).ToListAsync();
-            SetCache(cacheKey, list);
-            return list;
+            return await query.OrderBy(p => p.ProductName).ToListAsync();
         }
 
         public async Task<(IReadOnlyList<Product> Items, int TotalCount)> GetPagedByShopIdAsync(
@@ -129,6 +126,19 @@ namespace AgroBillling.DAL.Repositories
             SetCache(cacheKey, list);
             return list;
         }
+
+        public async Task<Product?> GetDetailAsync(int productId) =>
+            await _context.Products
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(p => p.Category)
+                .Include(p => p.Unit)
+                .Include(p => p.Supplier)
+                .Include(p => p.StockMovements)
+                .Include(p => p.PurchaseOrderItems)
+                    .ThenInclude(i => i.Purchase)
+                        .ThenInclude(po => po.Supplier)
+                .FirstOrDefaultAsync(p => p.ProductId == productId);
 
         public async Task UpdateStockAsync(int productId, decimal quantityChange)
         {

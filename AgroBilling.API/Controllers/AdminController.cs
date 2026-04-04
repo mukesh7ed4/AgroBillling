@@ -18,24 +18,24 @@ namespace AgroBillling.API.Controllers
     [Authorize(Roles = "ADMIN")]
     public class AdminController : ControllerBase
     {
-        private readonly IShopRepository          _shopRepo;
-        private readonly ISubscriptionRepository  _subRepo;
-        private readonly INotificationRepository  _notifRepo;
-        private readonly IReportRepository        _reportRepo;
-        private readonly AgroBillingDbContext     _context;
+        private readonly IShopRepository _shopRepo;
+        private readonly ISubscriptionRepository _subRepo;
+        private readonly INotificationRepository _notifRepo;
+        private readonly IReportRepository _reportRepo;
+        private readonly AgroBillingDbContext _context;
 
         public AdminController(
-            IShopRepository         shopRepo,
+            IShopRepository shopRepo,
             ISubscriptionRepository subRepo,
             INotificationRepository notifRepo,
-            IReportRepository       reportRepo,
-            AgroBillingDbContext    context)
+            IReportRepository reportRepo,
+            AgroBillingDbContext context)
         {
-            _shopRepo   = shopRepo;
-            _subRepo    = subRepo;
-            _notifRepo  = notifRepo;
+            _shopRepo = shopRepo;
+            _subRepo = subRepo;
+            _notifRepo = notifRepo;
             _reportRepo = reportRepo;
-            _context    = context;
+            _context = context;
         }
 
         // ─── DASHBOARD ───
@@ -54,10 +54,10 @@ namespace AgroBillling.API.Controllers
 
             return Ok(new PagedResponse<Shop>
             {
-                Items      = items.ToList(),
+                Items = items.ToList(),
                 TotalCount = total,
                 PageNumber = page,
-                PageSize   = pageSize
+                PageSize = pageSize
             });
         }
 
@@ -67,23 +67,23 @@ namespace AgroBillling.API.Controllers
             var passwordHash = HashPassword(dto.Password);
             var shop = new Shop
             {
-                OwnerName           = dto.OwnerName,
-                ShopName            = dto.ShopName,
-                MobileNumber        = dto.MobileNumber,
-                AlternateMobile     = dto.AlternateMobile,
-                Email               = dto.Email,
-                Address             = dto.Address,
-                City                = dto.City,
-                State               = dto.State,
-                PinCode             = dto.PinCode,
-                Gstnumber           = dto.GstNumber ?? "",
-                Gstpercent          = dto.GstPercent,
-                BillStartNumber     = dto.BillStartNumber,
+                OwnerName = dto.OwnerName,
+                ShopName = dto.ShopName,
+                MobileNumber = dto.MobileNumber,
+                AlternateMobile = dto.AlternateMobile,
+                Email = dto.Email,
+                Address = dto.Address,
+                City = dto.City,
+                State = dto.State,
+                PinCode = dto.PinCode,
+                Gstnumber = dto.GstNumber ?? "",
+                Gstpercent = dto.GstPercent,
+                BillStartNumber = dto.BillStartNumber,
                 CurrentBillSequence = 0,
-                PasswordHash        = passwordHash,
-                IsActive            = true,
-                CreatedAt           = DateTime.Now,
-                CreatedByAdminId    = GetAdminId()
+                PasswordHash = passwordHash,
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                CreatedByAdminId = GetAdminId()
             };
 
             await _shopRepo.AddAsync(shop);
@@ -95,23 +95,23 @@ namespace AgroBillling.API.Controllers
                 var today = DateOnly.FromDateTime(DateTime.Now);
                 await _subRepo.AddAsync(new ShopSubscription
                 {
-                    ShopId    = shop.ShopId,
-                    PlanId    = dto.PlanId,
+                    ShopId = shop.ShopId,
+                    PlanId = dto.PlanId,
                     StartDate = today,
-                    EndDate   = today.AddDays(plan.DurationDays),
-                    AmountPaid= 0,
-                    IsActive  = true,
+                    EndDate = today.AddDays(plan.DurationDays),
+                    AmountPaid = 0,
+                    IsActive = true,
                     CreatedAt = DateTime.Now
                 });
 
                 // Notification
                 await _notifRepo.AddAsync(new AdminNotification
                 {
-                    ShopId           = shop.ShopId,
+                    ShopId = shop.ShopId,
                     NotificationType = "NEW_SIGNUP",
-                    Message          = $"New shop registered: {shop.ShopName} ({shop.OwnerName})",
-                    IsRead           = false,
-                    CreatedAt        = DateTime.Now
+                    Message = $"New shop registered: {shop.ShopName} ({shop.OwnerName})",
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
                 });
             }
 
@@ -130,19 +130,19 @@ namespace AgroBillling.API.Controllers
             await _subRepo.DeactivateAllByShopIdAsync(shopId);
 
             var today = DateOnly.FromDateTime(DateTime.Now);
-            var sub   = new ShopSubscription
+            var sub = new ShopSubscription
             {
-                ShopId           = shopId,
-                PlanId           = dto.PlanId,
-                StartDate        = today,
-                EndDate          = today.AddDays(plan.DurationDays),
-                AmountPaid       = dto.AmountPaid,
-                PaymentMode      = dto.PaymentMode,
+                ShopId = shopId,
+                PlanId = dto.PlanId,
+                StartDate = today,
+                EndDate = today.AddDays(plan.DurationDays),
+                AmountPaid = dto.AmountPaid,
+                PaymentMode = dto.PaymentMode,
                 PaymentReference = dto.PaymentRef,
-                IsActive         = true,
-                ExtendedByAdminId= GetAdminId(),
-                Notes            = dto.Notes,
-                CreatedAt        = DateTime.Now
+                IsActive = true,
+                ExtendedByAdminId = GetAdminId(),
+                Notes = dto.Notes,
+                CreatedAt = DateTime.Now
             };
 
             await _subRepo.AddAsync(sub);

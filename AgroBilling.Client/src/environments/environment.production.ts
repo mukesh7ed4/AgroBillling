@@ -1,4 +1,5 @@
+// environment.ts (development)
 export const environment = {
-  production: true,
-  apiUrl: '/api'
+  production: false,
+  apiUrl: 'http://localhost:5249'  // Changed from '/api'
 };

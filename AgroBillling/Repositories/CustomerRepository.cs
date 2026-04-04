@@ -48,13 +48,39 @@ namespace AgroBillling.DAL.Repositories
             }
 
             var total = await query.CountAsync();
-            var items = await query
+
+            // ✅ Join with bills to get TotalBills + TotalPending per customer
+            var customers = await query
                 .OrderBy(c => c.FullName)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            return (items, total);
+            // Get bill stats for these customers in one query
+            var customerIds = customers.Select(c => c.CustomerId).ToList();
+            var billStats = await _context.Bills
+                .AsNoTracking()
+                .Where(b => customerIds.Contains(b.CustomerId) && b.IsReturn == false)
+                .GroupBy(b => b.CustomerId)
+                .Select(g => new
+                {
+                    CustomerId = g.Key,
+                    TotalBills = g.Count(),
+                    TotalPending = g.Sum(b => b.AmountPending ?? (b.TotalAmount - b.AmountPaid))
+                })
+                .ToDictionaryAsync(x => x.CustomerId);
+
+            //// Populate NotMapped fields
+            //foreach (var c in customers)
+            //{
+            //    if (billStats.TryGetValue(c.CustomerId, out var stats))
+            //    {
+            //        c.TotalBills = stats.TotalBills;
+            //        c.TotalPending = stats.TotalPending < 0 ? 0 : stats.TotalPending;
+            //    }
+            //}
+
+            return (customers, total);
         }
 
         public async Task<Customer?> GetByMobileAsync(int shopId, string mobile) =>
@@ -96,14 +122,14 @@ namespace AgroBillling.DAL.Repositories
                 .Take(billsTake)
                 .Select(b => new Bill
                 {
-                    BillId         = b.BillId,
-                    CustomerId     = b.CustomerId,
-                    BillNumber     = b.BillNumber,
-                    BillDate       = b.BillDate,
-                    TotalAmount    = b.TotalAmount,
-                    AmountPaid     = b.AmountPaid,
-                    AmountPending  = b.AmountPending,
-                    PaymentStatus  = b.PaymentStatus
+                    BillId = b.BillId,
+                    CustomerId = b.CustomerId,
+                    BillNumber = b.BillNumber,
+                    BillDate = b.BillDate,
+                    TotalAmount = b.TotalAmount,
+                    AmountPaid = b.AmountPaid,
+                    AmountPending = b.AmountPending,
+                    PaymentStatus = b.PaymentStatus
                 })
                 .ToListAsync();
 
@@ -122,17 +148,17 @@ namespace AgroBillling.DAL.Repositories
                 orderby cn.CreditNoteDate descending
                 select new CreditNote
                 {
-                    CreditNoteId    = cn.CreditNoteId,
-                    ShopId          = cn.ShopId,
-                    CustomerId      = cn.CustomerId,
-                    OriginalBillId  = cn.OriginalBillId,
-                    CreditNoteDate  = cn.CreditNoteDate,
-                    CreditAmount    = cn.CreditAmount,
-                    AdjustedAmount  = cn.AdjustedAmount,
+                    CreditNoteId = cn.CreditNoteId,
+                    ShopId = cn.ShopId,
+                    CustomerId = cn.CustomerId,
+                    OriginalBillId = cn.OriginalBillId,
+                    CreditNoteDate = cn.CreditNoteDate,
+                    CreditAmount = cn.CreditAmount,
+                    AdjustedAmount = cn.AdjustedAmount,
                     RemainingCredit = cn.RemainingCredit,
-                    Status          = cn.Status,
-                    Notes           = cn.Notes,
-                    CreatedAt       = cn.CreatedAt,
+                    Status = cn.Status,
+                    Notes = cn.Notes,
+                    CreatedAt = cn.CreatedAt,
                     OriginalBill = bill == null
                         ? null
                         : new Bill { BillId = bill.BillId, BillNumber = bill.BillNumber }
@@ -141,14 +167,14 @@ namespace AgroBillling.DAL.Repositories
 
             return new CustomerLedgerDto
             {
-                Customer               = customer,
-                Bills                  = bills,
-                Payments               = payments,
-                CreditNotes            = creditNotes,
-                BillsTotalCount        = billsTotalCount,
-                PaymentsTotalCount     = paymentsTotalCount,
-                CreditNotesTotalCount  = creditNotesTotalCount,
-                LedgerTotalBilled      = ledgerTotalBilled,
+                Customer = customer,
+                Bills = bills,
+                Payments = payments,
+                CreditNotes = creditNotes,
+                BillsTotalCount = billsTotalCount,
+                PaymentsTotalCount = paymentsTotalCount,
+                CreditNotesTotalCount = creditNotesTotalCount,
+                LedgerTotalBilled = ledgerTotalBilled,
                 LedgerTotalPaidOnBills = ledgerTotalPaidOnBills
             };
         }

@@ -1,3 +1,14 @@
+// ================================================
+//  src/app/core/services/auth.service.ts
+//  REPLACE existing file completely
+//
+//  Changes:
+//  1. refreshSubscriptionStatus() method added — login ke baad bhi
+//     server se fresh status fetch kar sakta hai
+//  2. isSubscriptionExpiredByDate() helper — date-based check
+//  3. setPendingPaymentRequest() — PENDING status support
+// ================================================
+
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -11,7 +22,8 @@ import {
   take,
   map,
   filter,
-  defaultIfEmpty
+  defaultIfEmpty,
+  catchError
 } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/models';
@@ -19,16 +31,16 @@ import { clearHttpGetCache } from '../interceptors/http-cache.interceptor';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly router    = inject(Router);
-  private readonly http      = inject(HttpClient);
-  private readonly tokenKey  = 'access_token';
-  private readonly roleKey   = 'ab_role';
-  private readonly shopIdKey = 'ab_shop_id';
+  private readonly router       = inject(Router);
+  private readonly http         = inject(HttpClient);
+  private readonly tokenKey     = 'access_token';
+  private readonly roleKey      = 'ab_role';
+  private readonly shopIdKey    = 'ab_shop_id';
   private readonly shopNameKey  = 'ab_shop_name';
   private readonly subStatusKey = 'ab_sub_status';
   private readonly subExpiryKey = 'ab_sub_expiry';
 
-  private _shopId$    = new BehaviorSubject<number | null>(this.readShopIdFromLocalStorage());
+  private _shopId$     = new BehaviorSubject<number | null>(this.readShopIdFromLocalStorage());
   private _isLoggedIn$ = new BehaviorSubject<boolean>(this.hasValidToken());
 
   readonly shopId$     = this._shopId$.asObservable();
@@ -70,37 +82,117 @@ export class AuthService {
     return !this.isJwtExpired(t);
   }
 
-  // ✅ SIGNUP — saves token + shopId + shopName if backend returns them
+  // ✅ Check expiry by date (guard use karta hai)
+  isSubscriptionExpiredByDate(): boolean {
+    const expiry = this.getSubscriptionExpiry();
+    if (!expiry) return true;
+    const expiryDate = new Date(expiry);
+    expiryDate.setHours(23, 59, 59, 999);
+    return new Date() > expiryDate;
+  }
+
+  // ✅ Days remaining — header warning ke liye
+  getDaysUntilExpiry(): number | null {
+    const expiry = this.getSubscriptionExpiry();
+    if (!expiry) return null;
+    const expiryDate = new Date(expiry);
+    expiryDate.setHours(23, 59, 59, 999);
+    const diff = expiryDate.getTime() - new Date().getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  }
+
+  // ✅ SIGNUP
   signup(body: any): Observable<ApiResponse<any>> {
     return this.http
       .post<ApiResponse<any>>(`${environment.apiUrl}/auth/signup`, body)
       .pipe(
         tap(res => {
           const data = res.data as any;
-
           const token = data?.token || data?.access_token;
           if (token) {
             localStorage.setItem(this.tokenKey, token);
             this._isLoggedIn$.next(true);
           }
-
           const shopId = data?.shopId;
           if (shopId) {
             localStorage.setItem(this.shopIdKey, shopId.toString());
             this._shopId$.next(shopId);
           }
-
           const shopName = data?.shopName;
-          if (shopName) {
-            localStorage.setItem(this.shopNameKey, shopName);
-          }
-
-          // ✅ Signup response se subscription status save karo
+          if (shopName) localStorage.setItem(this.shopNameKey, shopName);
           if (data?.subscriptionStatus) {
             this.setSubscriptionStatus(data.subscriptionStatus, data.subscriptionExpiry);
           }
         })
       );
+  }
+
+  // ✅ FIXED LOGIN
+  login(body: { email: string; password: string }): Observable<ApiResponse<any>> {
+    return this.http
+      .post<ApiResponse<any>>(`${environment.apiUrl}/auth/login`, body)
+      .pipe(
+        tap(res => {
+          const data  = res.data;
+          const token = data?.token;
+
+          if (token) {
+            localStorage.setItem(this.tokenKey, token);
+            const payload = this.decodeJwtPayload(token);
+            const longClaimRole = payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+            const role = String(
+              payload?.['role'] ?? payload?.['Role'] ?? longClaimRole ?? ''
+            ).toUpperCase();
+            localStorage.setItem(this.roleKey, role);
+          }
+
+          const sid = data?.shopId;
+          if (sid != null) {
+            localStorage.setItem(this.shopIdKey, String(sid));
+            this._shopId$.next(sid);
+          } else if (token) {
+            const fromJwt = this.parseShopIdFromPayload(this.decodeJwtPayload(token));
+            if (fromJwt != null) {
+              localStorage.setItem(this.shopIdKey, String(fromJwt));
+              this._shopId$.next(fromJwt);
+            }
+          }
+
+          if (data?.shopName) localStorage.setItem(this.shopNameKey, data.shopName);
+
+          // ✅ Login pe fresh subscription status server se aata hai — save karo
+          if (data?.subscriptionStatus) {
+            this.setSubscriptionStatus(data.subscriptionStatus, data.subscriptionExpiry);
+          }
+
+          this._isLoggedIn$.next(this.hasValidToken());
+        })
+      );
+  }
+
+  // ✅ NEW: Server se fresh subscription status fetch karo
+  // Call this when: app starts + after payment submission
+  refreshSubscriptionStatus(): Observable<boolean> {
+    const shopId = this.getShopId();
+    if (!shopId || !this.hasValidToken()) return of(false);
+
+    return this.http
+      .get<ApiResponse<any>>(`${environment.apiUrl}/payments/shop-status`)
+      .pipe(
+        tap(res => {
+          // Payment status check — agar PENDING hai toh mark karo
+          if (res.data?.status === 'PENDING') {
+            this.setSubscriptionStatus('PENDING', this.getSubscriptionExpiry() ?? undefined);
+          }
+        }),
+        map(() => true),
+        catchError(() => of(false))
+      );
+  }
+
+  // ✅ Payment submit hone ke baad PENDING status set karo
+  setPendingPaymentStatus(): void {
+    this.setSubscriptionStatus('PENDING', this.getSubscriptionExpiry() ?? undefined);
   }
 
   private isJwtExpired(token: string): boolean {
@@ -118,7 +210,7 @@ export class AuthService {
       const part = token.split('.')[1];
       if (!part) return null;
       const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
-      const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+      const padded  = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
       return JSON.parse(atob(padded)) as Record<string, unknown>;
     } catch {
       return null;
@@ -131,16 +223,12 @@ export class AuthService {
     return this.decodeJwtPayload(t);
   }
 
-  // ✅ FIXED — ClaimTypes.Role ka long key bhi check karta hai
   isAdmin(): boolean {
     const r = localStorage.getItem(this.roleKey);
     if (r === 'ADMIN' || r === 'admin') return true;
-
     const p = this.jwtPayload();
     const longClaimRole = p?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-    const role = String(
-      p?.['role'] ?? p?.['Role'] ?? longClaimRole ?? ''
-    ).toUpperCase();
+    const role = String(p?.['role'] ?? p?.['Role'] ?? longClaimRole ?? '').toUpperCase();
     return role === 'ADMIN';
   }
 
@@ -148,12 +236,9 @@ export class AuthService {
     if (this.isAdmin()) return false;
     const r = localStorage.getItem(this.roleKey);
     if (r === 'SHOP' || r === 'shop') return true;
-
     const p = this.jwtPayload();
     const longClaimRole = p?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-    const role = String(
-      p?.['role'] ?? p?.['Role'] ?? longClaimRole ?? ''
-    ).toUpperCase();
+    const role = String(p?.['role'] ?? p?.['Role'] ?? longClaimRole ?? '').toUpperCase();
     if (role === 'SHOP') return true;
     return this.getShopId() != null && this.hasValidToken();
   }
@@ -176,10 +261,7 @@ export class AuthService {
   private hydrateShopIdFromJwtIfMissing(): void {
     if (this._shopId$.value != null) return;
     const fromLs = this.readShopIdFromLocalStorage();
-    if (fromLs != null) {
-      this._shopId$.next(fromLs);
-      return;
-    }
+    if (fromLs != null) { this._shopId$.next(fromLs); return; }
     const sid = this.parseShopIdFromPayload(this.jwtPayload());
     if (sid != null) {
       localStorage.setItem(this.shopIdKey, String(sid));
@@ -191,10 +273,7 @@ export class AuthService {
     const subj = this._shopId$.value;
     if (subj != null) return subj;
     const fromLs = this.readShopIdFromLocalStorage();
-    if (fromLs != null) {
-      this._shopId$.next(fromLs);
-      return fromLs;
-    }
+    if (fromLs != null) { this._shopId$.next(fromLs); return fromLs; }
     const p = this.jwtPayload();
     const n = this.parseShopIdFromPayload(p);
     if (n != null) {
@@ -215,55 +294,6 @@ export class AuthService {
   setSubscriptionStatus(status: string, expiry?: string): void {
     localStorage.setItem(this.subStatusKey, status);
     if (expiry) localStorage.setItem(this.subExpiryKey, expiry);
-  }
-
-  // ✅ FIXED LOGIN — role extraction improved, handles ClaimTypes.Role long key
-  login(body: { email: string; password: string }): Observable<ApiResponse<any>> {
-    return this.http
-      .post<ApiResponse<any>>(`${environment.apiUrl}/auth/login`, body)
-      .pipe(
-        tap(res => {
-          const data  = res.data;
-          const token = data?.token;
-
-          if (token) {
-            localStorage.setItem(this.tokenKey, token);
-
-            const payload = this.decodeJwtPayload(token);
-
-            // ✅ ClaimTypes.Role long key + short key dono check karo
-            const longClaimRole = payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-            const role = String(
-              payload?.['role'] ?? payload?.['Role'] ?? longClaimRole ?? ''
-            ).toUpperCase();
-
-            localStorage.setItem(this.roleKey, role);
-          }
-
-          const sid = data?.shopId;
-          if (sid != null) {
-            localStorage.setItem(this.shopIdKey, String(sid));
-            this._shopId$.next(sid);
-          } else if (token) {
-            const fromJwt = this.parseShopIdFromPayload(this.decodeJwtPayload(token));
-            if (fromJwt != null) {
-              localStorage.setItem(this.shopIdKey, String(fromJwt));
-              this._shopId$.next(fromJwt);
-            }
-          }
-
-          if (data?.shopName) {
-            localStorage.setItem(this.shopNameKey, data.shopName);
-          }
-
-          // ✅ Subscription status save karo
-          if (data?.subscriptionStatus) {
-            this.setSubscriptionStatus(data.subscriptionStatus, data.subscriptionExpiry);
-          }
-
-          this._isLoggedIn$.next(this.hasValidToken());
-        })
-      );
   }
 
   getShopName(): string | null {

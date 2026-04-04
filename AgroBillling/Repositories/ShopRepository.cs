@@ -1,5 +1,6 @@
 // ================================================
 //  AgroBilling.DAL / Repositories / ShopRepository.cs
+//  ✅ FIXED — PostgreSQL compatible (removed SQL Server syntax)
 // ================================================
 
 using System.Collections.Generic;
@@ -15,7 +16,9 @@ namespace AgroBillling.DAL.Repositories
         public ShopRepository(AgroBillingDbContext context) : base(context) { }
 
         public async Task<Shop?> GetByEmailAsync(string email) =>
-            await _context.Shops.AsNoTracking().FirstOrDefaultAsync(s => s.Email == email);
+            await _context.Shops
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Email == email);
 
         public async Task<IEnumerable<Shop>> GetAllWithSubscriptionsAsync() =>
             await _context.Shops
@@ -25,8 +28,8 @@ namespace AgroBillling.DAL.Repositories
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();
 
-        public async Task<(IReadOnlyList<Shop> Items, int TotalCount)> GetPagedWithSubscriptionsAsync(
-            string? search, int page, int pageSize)
+        public async Task<(IReadOnlyList<Shop> Items, int TotalCount)>
+            GetPagedWithSubscriptionsAsync(string? search, int page, int pageSize)
         {
             var query = _context.Shops.AsNoTracking();
 
@@ -53,20 +56,15 @@ namespace AgroBillling.DAL.Repositories
             return (items, total);
         }
 
-        /// <summary>
-        /// Atomically increments sequence and returns the next bill number (no SaveChanges on Shops).
-        /// Uses row lock; runs inside the caller's EF transaction when one is active.
-        /// </summary>
+        // ✅ FIXED: PostgreSQL syntax — no SQL Server hints
         public async Task<int> GetNextBillNumberAsync(int shopId)
         {
-            var rows = await _context.Database.ExecuteSqlInterpolatedAsync($"""
-                UPDATE dbo.Shops WITH (UPDLOCK, ROWLOCK)
-                SET CurrentBillSequence = CurrentBillSequence + 1
-                WHERE ShopID = {shopId};
+            // PostgreSQL: FOR UPDATE row lock
+            await _context.Database.ExecuteSqlInterpolatedAsync($"""
+                UPDATE "Shops"
+                SET "CurrentBillSequence" = "CurrentBillSequence" + 1
+                WHERE "ShopID" = {shopId}
                 """);
-
-            if (rows == 0)
-                return 1;
 
             var next = await _context.Shops
                 .AsNoTracking()

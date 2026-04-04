@@ -22,7 +22,6 @@ namespace AgroBillling.DAL.Repositories.Interfaces
     {
         Task<Shop?> GetByEmailAsync(string email);
         Task<IEnumerable<Shop>> GetAllWithSubscriptionsAsync();
-        /// <summary>Search + paging in the database (avoids loading all shops into memory).</summary>
         Task<(IReadOnlyList<Shop> Items, int TotalCount)> GetPagedWithSubscriptionsAsync(string? search, int page, int pageSize);
         Task<int> GetNextBillNumberAsync(int shopId);
     }
@@ -55,6 +54,7 @@ namespace AgroBillling.DAL.Repositories.Interfaces
         Task<IEnumerable<Product>> GetLowStockAsync(int shopId);
         Task UpdateStockAsync(int productId, decimal quantityChange);
         void InvalidateProductCache(int shopId);
+        Task<Product?> GetDetailAsync(int productId);  // ✅ Full product detail
     }
 
     // ─── SUPPLIER ───
@@ -117,7 +117,7 @@ namespace AgroBillling.DAL.Repositories.Interfaces
     // ─── AUTH ───
     public interface IAuthRepository
     {
-        Task<Shop?> ValidateShopAsync(string email, string passwordHash);
-        Task<AdminUser?> ValidateAdminAsync(string email, string passwordHash);
+        Task<Shop?> ValidateShopAsync(string email, string plainPassword);
+        Task<AdminUser?> ValidateAdminAsync(string email, string plainPassword);
     }
 }

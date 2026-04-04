@@ -1,118 +1,200 @@
 <div class="login-page">
-    <div class="login-left">
-      <div class="brand-area">
-        <div class="brand-logo">
-          <span class="logo-leaf">🌿</span>
-          <span class="logo-text">AgroBilling</span>
-        </div>
-        <p class="brand-tagline">14 Din Free Trial</p>
-        <p class="brand-sub">Koi credit card nahi chahiye. Aaj hi shuru karo.</p>
+  <div class="login-left">
+    <div class="brand-area">
+      <div class="brand-logo">
+        <span class="logo-leaf">🌿</span>
+        <span class="logo-text">AgroBilling</span>
       </div>
-      <div class="features-list">
-        <div class="feat-item"><span class="feat-icon">✅</span><span>14 days completely free</span></div>
-        <div class="feat-item"><span class="feat-icon">🧾</span><span>Unlimited billing</span></div>
-        <div class="feat-item"><span class="feat-icon">📦</span><span>Full inventory access</span></div>
-        <div class="feat-item"><span class="feat-icon">👥</span><span>Customer management</span></div>
-        <div class="feat-item"><span class="feat-icon">📊</span><span>Reports & analytics</span></div>
-      </div>
-      <div class="art-circles">
-        <div class="art-circle c1"></div>
-        <div class="art-circle c2"></div>
-        <div class="art-circle c3"></div>
-      </div>
+      <p class="brand-tagline">14 Din Free Trial</p>
+      <p class="brand-sub">Koi credit card nahi chahiye. Aaj hi shuru karo.</p>
     </div>
-  
-    <div class="login-right">
-      <div class="login-card fade-in">
-        <button class="theme-toggle" (click)="theme.toggleTheme()">
-          {{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}
-        </button>
-  
+    <div class="features-list">
+      <div class="feat-item"><span class="feat-icon">✅</span><span>14 days completely free</span></div>
+      <div class="feat-item"><span class="feat-icon">🧾</span><span>Unlimited billing</span></div>
+      <div class="feat-item"><span class="feat-icon">📦</span><span>Full inventory access</span></div>
+      <div class="feat-item"><span class="feat-icon">👥</span><span>Customer management</span></div>
+      <div class="feat-item"><span class="feat-icon">📊</span><span>Reports & analytics</span></div>
+    </div>
+    <div class="art-circles">
+      <div class="art-circle c1"></div>
+      <div class="art-circle c2"></div>
+      <div class="art-circle c3"></div>
+    </div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-card fade-in">
+      <button class="theme-toggle" (click)="theme.toggleTheme()">
+        {{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}
+      </button>
+
+      <!-- STEP 1: SIGNUP FORM -->
+      <ng-container *ngIf="step === 'form'">
         <h1 class="login-title">Start Free Trial</h1>
         <p class="login-subtitle">14 days free — no payment needed</p>
-  
+
         <div class="alert alert-danger" *ngIf="error">
           <span>⚠️</span> {{ error }}
         </div>
-  
+
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label">Shop Name *</label>
-              <input type="text" class="form-control" formControlName="shopName"
-                placeholder="e.g. Kisan Agro Store"
+              <input type="text" class="form-control" formControlName="shopName" placeholder="e.g. Kisan Agro Store"
                 [class.is-invalid]="f['shopName'].invalid && f['shopName'].touched" />
               <div class="form-error" *ngIf="f['shopName'].invalid && f['shopName'].touched">Required</div>
             </div>
             <div class="form-group">
               <label class="form-label">Owner Name *</label>
-              <input type="text" class="form-control" formControlName="ownerName"
-                placeholder="Your full name"
+              <input type="text" class="form-control" formControlName="ownerName" placeholder="Your full name"
                 [class.is-invalid]="f['ownerName'].invalid && f['ownerName'].touched" />
               <div class="form-error" *ngIf="f['ownerName'].invalid && f['ownerName'].touched">Required</div>
             </div>
           </div>
-  
+
           <div class="grid-2">
+            <!-- Mobile Number Field -->
             <div class="form-group">
               <label class="form-label">Mobile *</label>
-              <input type="tel" class="form-control" formControlName="mobileNumber"
-                placeholder="10-digit number"
-                [class.is-invalid]="f['mobileNumber'].invalid && f['mobileNumber'].touched" />
-              <div class="form-error" *ngIf="f['mobileNumber'].invalid && f['mobileNumber'].touched">Valid mobile required</div>
+              <input type="tel" class="form-control" formControlName="mobileNumber" placeholder="10-digit number"
+                [class.is-invalid]="(f['mobileNumber'].invalid && f['mobileNumber'].touched) || f['mobileNumber'].errors?.['mobileExists']" />
+
+              <div class="form-error"
+                *ngIf="f['mobileNumber'].invalid && f['mobileNumber'].touched && !f['mobileNumber'].errors?.['mobileExists']">
+                Valid 10-digit mobile required
+              </div>
+
+              <div class="form-error" *ngIf="f['mobileNumber'].errors?.['mobileExists']">
+                ⚠️ {{ f['mobileNumber'].errors?.['mobileExists'] }}
+              </div>
+
+              <div class="form-hint"
+                *ngIf="f['mobileNumber'].status === 'PENDING' && f['mobileNumber'].value?.length === 10">
+                🔄 Checking mobile number...
+              </div>
             </div>
+
+            <!-- Email Field -->
             <div class="form-group">
               <label class="form-label">Email *</label>
-              <input type="email" class="form-control" formControlName="email"
-                placeholder="your@email.com"
-                [class.is-invalid]="f['email'].invalid && f['email'].touched" />
-              <div class="form-error" *ngIf="f['email'].invalid && f['email'].touched">Valid email required</div>
+              <input type="email" class="form-control" formControlName="email" placeholder="your@email.com"
+                [class.is-invalid]="(f['email'].invalid && f['email'].touched) || f['email'].errors?.['invalidEmail'] || f['email'].errors?.['emailExists']" />
+
+              <div class="form-error"
+                *ngIf="f['email'].invalid && f['email'].touched && !f['email'].errors?.['invalidEmail'] && !f['email'].errors?.['emailExists']">
+                Valid email required
+              </div>
+
+              <div class="form-error" *ngIf="f['email'].errors?.['invalidEmail']">
+                ⚠️ {{ f['email'].errors?.['invalidEmail'] }}
+              </div>
+
+              <div class="form-error" *ngIf="f['email'].errors?.['emailExists']">
+                ⚠️ {{ f['email'].errors?.['emailExists'] }}
+              </div>
+
+              <div class="form-hint" *ngIf="f['email'].status === 'PENDING' && f['email'].value?.includes('@')">
+                🔄 Validating email...
+              </div>
             </div>
           </div>
-  
+
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label">City *</label>
-              <input type="text" class="form-control" formControlName="city"
-                placeholder="e.g. Rohtak"
+              <input type="text" class="form-control" formControlName="city" placeholder="e.g. Rohtak"
                 [class.is-invalid]="f['city'].invalid && f['city'].touched" />
+              <div class="form-error" *ngIf="f['city'].invalid && f['city'].touched">Required</div>
             </div>
             <div class="form-group">
               <label class="form-label">State</label>
               <input type="text" class="form-control" formControlName="state" />
             </div>
           </div>
-  
+
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label">Password *</label>
-              <input type="password" class="form-control" formControlName="password"
-                placeholder="Min 6 characters"
+              <input type="password" class="form-control" formControlName="password" placeholder="Min 6 characters"
                 [class.is-invalid]="f['password'].invalid && f['password'].touched" />
               <div class="form-error" *ngIf="f['password'].invalid && f['password'].touched">Min 6 characters</div>
             </div>
             <div class="form-group">
               <label class="form-label">Confirm Password *</label>
-              <input type="password" class="form-control" formControlName="confirmPass"
-                placeholder="Repeat password"
+              <input type="password" class="form-control" formControlName="confirmPass" placeholder="Repeat password"
                 [class.is-invalid]="form.errors?.['mismatch'] && f['confirmPass'].touched" />
               <div class="form-error" *ngIf="form.errors?.['mismatch'] && f['confirmPass'].touched">Passwords do not match</div>
             </div>
           </div>
-  
+
           <button type="submit" class="btn btn-primary w-full btn-lg mt-8" [disabled]="submitting">
             <span *ngIf="submitting" class="btn-spinner"></span>
             {{ submitting ? 'Creating Account...' : '🚀 Start Free Trial' }}
           </button>
         </form>
-  
+
         <div class="signup-link mt-16 text-center">
           <p class="text-muted">Already have an account?
             <a routerLink="/auth/login" class="text-green font-bold">Sign In →</a>
           </p>
         </div>
-  
-        <p class="login-footer">&copy; {{ year }} AgroBilling. All rights reserved.</p>
-      </div>
+      </ng-container>
+
+      <!-- STEP 2: OTP VERIFICATION -->
+      <ng-container *ngIf="step === 'otp'">
+        <div class="otp-icon">📧</div>
+        <h1 class="login-title">Verify Your Email</h1>
+        <p class="login-subtitle">
+          OTP bheja gaya hai:<br />
+          <strong>{{ signupEmail }}</strong>
+        </p>
+
+        <div class="alert alert-danger" *ngIf="otpError">
+          <span>⚠️</span> {{ otpError }}
+        </div>
+
+        <div class="alert alert-success" *ngIf="resendMsg">
+          <span>✅</span> {{ resendMsg }}
+        </div>
+
+        <div class="form-group mt-16">
+          <label class="form-label" style="text-align:center;display:block">
+            6-Digit OTP Enter Karo
+          </label>
+          <input type="text" class="form-control otp-input" [(ngModel)]="otpValue" maxlength="6" placeholder="------"
+            inputmode="numeric"
+            style="font-size:2rem;letter-spacing:14px;text-align:center;font-weight:700;height:64px" />
+        </div>
+
+        <button class="btn btn-primary w-full btn-lg mt-16" (click)="verifyOtp()"
+          [disabled]="verifying || otpValue.length !== 6">
+          <span *ngIf="verifying" class="btn-spinner"></span>
+          {{ verifying ? 'Verifying...' : '✅ Verify & Start' }}
+        </button>
+
+        <div class="text-center mt-16">
+          <p class="text-muted" style="font-size:0.875rem">
+            OTP nahi aaya?
+            <button class="btn-link" (click)="resendOtp()" [disabled]="resending"
+              style="background:none;border:none;color:var(--green-400);cursor:pointer;font-weight:600">
+              {{ resending ? 'Sending...' : 'Resend OTP' }}
+            </button>
+          </p>
+          <p class="text-muted" style="font-size:0.75rem;margin-top:8px">
+            ⏰ OTP 10 minutes mein expire ho jaata hai
+          </p>
+        </div>
+
+        <div class="text-center mt-8">
+          <button class="btn-link" (click)="step='form'"
+            style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.8125rem">
+            ← Wapas jaao
+          </button>
+        </div>
+      </ng-container>
+
+      <p class="login-footer">&copy; {{ year }} AgroBilling. All rights reserved.</p>
     </div>
   </div>
+</div>

@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 
+// Vitest uses global imports, but you need to import them
+import { describe, it, expect, beforeEach } from 'vitest';
+
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -18,6 +21,7 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
+    // Update this based on your actual app component
     expect(compiled.querySelector('h1')?.textContent).toContain('Hello, AgroBilling.Client');
   });
 });

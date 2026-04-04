@@ -1,100 +1,168 @@
 // ================================================
 //  AgroBillling.API / Controllers / SuppliersController.cs
+//  ✅ FIXED - Same pattern as ProductsController
 // ================================================
 
 using AgroBillling.DAL.Models;
 using AgroBillling.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AgroBillling.API.Controllers
 {
     [ApiController]
     [Route("api/suppliers")]
-    [Authorize(Roles = "SHOP")]
+    [Authorize]
     public class SuppliersController : ControllerBase
     {
-        private readonly ISupplierRepository  _repo;
-        private readonly IPurchaseRepository  _purchaseRepo;
+        private readonly ISupplierRepository _repo;
+        private readonly IPurchaseRepository _purchaseRepo;
 
         public SuppliersController(ISupplierRepository repo, IPurchaseRepository purchaseRepo)
         {
-            _repo         = repo;
+            _repo = repo;
             _purchaseRepo = purchaseRepo;
         }
 
+        // ─── HELPER METHODS ───────────────────────────────────────
+
+        private int? GetCurrentShopId()
+        {
+            var claim = User.FindFirst("shopId")?.Value
+                ?? User.FindFirst("ShopId")?.Value
+                ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return int.TryParse(claim, out var shopId) ? shopId : null;
+        }
+
+        private string GetUserRole()
+        {
+            var role = User.FindFirst(ClaimTypes.Role)?.Value
+                    ?? User.FindFirst("role")?.Value
+                    ?? User.FindFirst("Role")?.Value;
+
+            return role ?? "";
+        }
+
+        private bool IsShopAuthorized(int shopId)
+        {
+            var role = GetUserRole();
+            if (role == "ADMIN") return true;
+
+            var currentShopId = GetCurrentShopId();
+            if (!currentShopId.HasValue) return false;
+
+            return currentShopId.Value == shopId;
+        }
+
+        // ─── ENDPOINTS ───────────────────────────────────────────
+
         [HttpGet("{shopId}")]
+        [Authorize]
         public async Task<IActionResult> GetAll(int shopId)
         {
             if (!IsShopAuthorized(shopId)) return Forbid();
+
             var suppliers = await _repo.GetByShopIdAsync(shopId);
             return Ok(ApiResponse<IEnumerable<Supplier>>.Ok(suppliers));
         }
 
         [HttpGet("{supplierId}/ledger")]
+        [Authorize]
         public async Task<IActionResult> GetLedger(int supplierId)
         {
+            var supplier = await _repo.GetByIdAsync(supplierId);
+            if (supplier == null)
+                return NotFound(ApiResponse<string>.Fail("Supplier not found"));
+
+            if (!IsShopAuthorized(supplier.ShopId))
+                return Forbid();
+
             var ledger = await _repo.GetLedgerAsync(supplierId);
             return Ok(ApiResponse<SupplierLedgerDto>.Ok(ledger));
         }
 
         [HttpPost("{shopId}")]
-        public async Task<IActionResult> Create(int shopId, [FromBody] Supplier dto)
+        [Authorize]
+        public async Task<IActionResult> Create(int shopId, [FromBody] CreateSupplierDto dto)
         {
             if (!IsShopAuthorized(shopId)) return Forbid();
 
-            dto.ShopId    = shopId;
-            dto.IsActive  = true;
-            dto.CreatedAt = DateTime.Now;
+            var supplier = new Supplier
+            {
+                ShopId = shopId,
+                CompanyName = dto.CompanyName,
+                ContactPersonName = dto.ContactPersonName,
+                MobileNumber = dto.MobileNumber,
+                Email = dto.Email,
+                Address = dto.Address,
+                Gstnumber = dto.GstNumber ?? "",
+                OpeningBalance = dto.OpeningBalance,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
 
-            await _repo.AddAsync(dto);
-            return Ok(ApiResponse<Supplier>.Ok(dto, "Supplier added successfully"));
+            await _repo.AddAsync(supplier);
+            return Ok(ApiResponse<Supplier>.Ok(supplier, "Supplier added successfully"));
         }
 
         [HttpPut("{supplierId}")]
+        [Authorize]
         public async Task<IActionResult> Update(int supplierId, [FromBody] Supplier dto)
         {
             var supplier = await _repo.GetByIdAsync(supplierId);
-            if (supplier == null) return NotFound(ApiResponse<string>.Fail("Supplier not found"));
+            if (supplier == null)
+                return NotFound(ApiResponse<string>.Fail("Supplier not found"));
 
-            supplier.CompanyName       = dto.CompanyName;
+            if (!IsShopAuthorized(supplier.ShopId))
+                return Forbid();
+
+            supplier.CompanyName = dto.CompanyName;
             supplier.ContactPersonName = dto.ContactPersonName;
-            supplier.MobileNumber      = dto.MobileNumber;
-            supplier.Email             = dto.Email;
-            supplier.Address           = dto.Address;
-            supplier.Gstnumber         = dto.Gstnumber ?? "";
+            supplier.MobileNumber = dto.MobileNumber;
+            supplier.Email = dto.Email;
+            supplier.Address = dto.Address;
+            supplier.Gstnumber = dto.Gstnumber ?? "";
 
             await _repo.UpdateAsync(supplier);
             return Ok(ApiResponse<Supplier>.Ok(supplier));
         }
 
         [HttpPost("{supplierId}/payment")]
+        [Authorize]
         public async Task<IActionResult> AddPayment(int supplierId, [FromBody] AddSupplierPaymentDto dto)
         {
             var supplier = await _repo.GetByIdAsync(supplierId);
-            if (supplier == null) return NotFound(ApiResponse<string>.Fail("Supplier not found"));
+            if (supplier == null)
+                return NotFound(ApiResponse<string>.Fail("Supplier not found"));
+
+            if (!IsShopAuthorized(supplier.ShopId))
+                return Forbid();
 
             var payment = new SupplierPayment
             {
-                ShopId      = supplier.ShopId,
-                SupplierId  = supplierId,
-                PurchaseId  = dto.PurchaseId,
+                ShopId = supplier.ShopId,
+                SupplierId = supplierId,
+                PurchaseId = dto.PurchaseId,
                 PaymentDate = dto.PaymentDate,
-                Amount      = dto.Amount,
+                Amount = dto.Amount,
                 PaymentMode = dto.PaymentMode,
-                Reference   = dto.Reference,
-                Notes       = dto.Notes,
-                CreatedAt   = DateTime.Now
+                Reference = dto.Reference,
+                Notes = dto.Notes,
+                CreatedAt = DateTime.UtcNow
             };
 
             await _purchaseRepo.AddSupplierPaymentAsync(payment);
             return Ok(ApiResponse<SupplierPayment>.Ok(payment, "Payment recorded"));
         }
 
-        private bool IsShopAuthorized(int shopId)
+        [HttpGet("debug/claims")]
+        [Authorize]
+        public IActionResult DebugClaims()
         {
-            var claim = User.FindFirst("shopId")?.Value;
-            return int.TryParse(claim, out var id) && id == shopId;
+            var claims = User.Claims.Select(c => new { c.Type, c.Value });
+            return Ok(claims);
         }
     }
 }

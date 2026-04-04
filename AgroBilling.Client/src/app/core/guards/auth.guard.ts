@@ -1,3 +1,8 @@
+// ================================================
+//  src/app/core/guards/auth.guard.ts
+//  REPLACE existing file completely
+// ================================================
+
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { take, map } from 'rxjs';
@@ -46,18 +51,44 @@ export const shopGuard: CanActivateFn = () => {
   );
 };
 
-// ✅ Subscription check — trial/subscription expire pe /subscribe pe bhejo
+// ✅ FIXED subscriptionGuard — no redirect loop
+// Sirf 2 cases mein block karo:
+// 1. Token nahi — shopGuard already handle karta hai, yahan true return karo
+// 2. EXPIRED status AND expiry date past mein — tabhi /subscribe bhejo
+// Baaki sab cases mein ALLOW karo — 403 se handle hoga
 export const subscriptionGuard: CanActivateFn = () => {
   const auth   = inject(AuthService);
   const router = inject(Router);
 
-  if (!auth.hasValidToken()) return true; // shopGuard already handles
+  // Token check shopGuard karta hai — yahan sirf subscription dekho
+  if (!auth.hasValidToken()) return true;
 
   const status = auth.getSubscriptionStatus();
+  const expiry = auth.getSubscriptionExpiry();
 
-  if (status === 'ACTIVE' || status === 'TRIAL') return true;
+  // ✅ ACTIVE ya TRIAL — hamesha allow karo
+  if (status === 'ACTIVE' || status === 'TRIAL') {
+    // Agar expiry date bhi past mein hai tab block karo
+    if (expiry) {
+      const expiryDate = new Date(expiry);
+      expiryDate.setHours(23, 59, 59, 999);
+      if (new Date() > expiryDate) {
+        auth.setSubscriptionStatus('EXPIRED', expiry);
+        router.navigate(['/subscribe']);
+        return false;
+      }
+    }
+    return true;
+  }
 
-  // Expired ya no subscription — subscribe page pe bhejo
-  router.navigate(['/subscribe']);
-  return false;
+  // ✅ EXPIRED — block karo
+  if (status === 'EXPIRED') {
+    router.navigate(['/subscribe']);
+    return false;
+  }
+
+  // ✅ Status null/undefined/PENDING/unknown — ALLOW karo
+  // Agar subscription nahi hai toh login pe fresh status aayega
+  // Guard ko assume nahi karna chahiye — server se 401/403 aayega
+  return true;
 };

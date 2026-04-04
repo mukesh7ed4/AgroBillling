@@ -300,12 +300,12 @@ export class ReportService {
       .get<ApiResponse<MonthlyDashboard>>(
         `${API}/reports/${shopId}/monthly?year=${year}&month=${month}`
       )
-      .pipe(
-        retry({
-          count: 2,
-          delay: (_err, retryCount) => timer(200 * retryCount)
-        })
-      );
+      // .pipe(
+      //   retry({
+      //     count: 2,
+      //     delay: (_err, retryCount) => timer(200 * retryCount)
+      //   })
+      // );
   }
 
   /** Alias used by shop dashboard & reports screens */

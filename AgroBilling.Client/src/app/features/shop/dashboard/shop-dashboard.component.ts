@@ -18,10 +18,10 @@ export class ShopDashboardComponent implements OnInit {
 
   private auth          = inject(AuthService);
   private reportService = inject(ReportService);
-  private cdr           = inject(ChangeDetectorRef);   // ← THE FIX
+  private cdr           = inject(ChangeDetectorRef);
 
   dashboard: MonthlyDashboard | null = null;
-  loading = true;
+  loading = false;
 
   currentMonth = new Date().getMonth() + 1;
   currentYear  = new Date().getFullYear();
@@ -32,34 +32,36 @@ export class ShopDashboardComponent implements OnInit {
   }
 
   loadDashboard(): void {
-    this.auth
-      .ensureShopId$()
+    this.loading = true;
+
+    this.auth.ensureShopId$()
       .pipe(
         take(1),
         switchMap(shopId => {
-          if (shopId == null) {
-            this.loading = false;
-            this.dashboard = null;
-            this.cdr.detectChanges();
+          if (!shopId) {
             return of(null);
           }
 
-          this.loading = true;
-          return this.reportService
-            .getMonthlyDashboard(shopId, this.currentYear, this.currentMonth)
-            .pipe(
-              finalize(() => {
-                // If request is cancelled/unsubscribed, we still must stop spinner.
-                this.loading = false;
-                this.cdr.detectChanges();
-              })
-            );
+          return this.reportService.getMonthlyDashboard(
+            shopId,
+            this.currentYear,
+            this.currentMonth
+          );
+        }),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
         next: res => {
-          if (!res) return;
+          if (!res) {
+            this.dashboard = null;
+            return;
+          }
+
           const d = (res as any)?.data ?? res ?? {};
+
           this.dashboard = {
             totalPurchased:   d.totalPurchased   ?? 0,
             paidToSuppliers:  d.paidToSuppliers  ?? 0,
@@ -68,12 +70,12 @@ export class ShopDashboardComponent implements OnInit {
             topProducts:      d.topProducts      ?? [],
             expenseBreakdown: d.expenseBreakdown ?? []
           };
-          this.cdr.detectChanges(); // required fix: update view even if OnPush/async order changes
+
+          this.cdr.detectChanges();
         },
         error: () => {
           this.dashboard = null;
-          this.loading = false;
-          this.cdr.detectChanges(); // required fix: stop spinner + update view
+          this.cdr.detectChanges();
         }
       });
   }

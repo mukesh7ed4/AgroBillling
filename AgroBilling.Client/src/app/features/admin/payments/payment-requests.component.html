@@ -1,0 +1,130 @@
+<!-- ================================================
+     src/app/features/admin/payments/payment-requests.component.html
+     NEW FILE
+     ================================================ -->
+
+     <div class="page-container fade-in">
+      <div class="page-header">
+        <div>
+          <p class="breadcrumb">Admin <span>/ Payment Requests</span></p>
+          <h1 class="page-title">💳 Payment Requests</h1>
+          <p class="page-subtitle">{{ requests.length }} pending approval</p>
+        </div>
+        <button class="btn btn-outline" (click)="load()">🔄 Refresh</button>
+      </div>
+    
+      <!-- Loading -->
+      <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+    
+      <!-- Error -->
+      <div class="alert alert-danger" *ngIf="error && !loading">{{ error }}</div>
+    
+      <!-- Empty -->
+      <div class="card" *ngIf="!loading && !error && requests.length === 0">
+        <div class="empty-state">
+          <div class="empty-icon">✅</div>
+          <h3>No pending requests</h3>
+          <p class="text-muted">Sab pending requests clear hain.</p>
+        </div>
+      </div>
+    
+      <!-- Table -->
+      <div class="card" *ngIf="!loading && requests.length > 0">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Shop</th>
+                <th>Plan</th>
+                <th>Amount</th>
+                <th>Transaction ID</th>
+                <th>Payer</th>
+                <th>Submitted</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of requests">
+                <td>
+                  <div class="font-bold">{{ r.shopName }}</div>
+                  <div class="text-muted text-sm">{{ r.ownerName }}</div>
+                  <div class="text-muted text-xs">📞 {{ r.mobileNumber }}</div>
+                </td>
+                <td>
+                  <span class="badge" [class.badge-primary]="r.planType === 'yearly'" [class.badge-muted]="r.planType === 'monthly'">
+                    {{ r.planType | titlecase }}
+                  </span>
+                </td>
+                <td class="font-bold text-green">₹{{ r.amount | number }}</td>
+                <td>
+                  <code class="txn-id">{{ r.transactionId }}</code>
+                </td>
+                <td>
+                  <div>{{ r.payerName }}</div>
+                  <div class="text-muted text-sm">{{ r.payerMobile }}</div>
+                </td>
+                <td class="text-muted text-sm">{{ timeAgo(r.createdAt) }}</td>
+                <td>
+                  <div class="action-btns">
+                    <button class="btn btn-sm btn-success" (click)="openApprove(r)">✅ Approve</button>
+                    <button class="btn btn-sm btn-danger" (click)="openReject(r)">❌ Reject</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ── REVIEW MODAL ── -->
+    <div class="modal-backdrop" *ngIf="reviewingRequest" (click)="closeModal()"></div>
+    <div class="modal" *ngIf="reviewingRequest">
+      <div class="modal-header">
+        <h3>{{ reviewAction === 'APPROVE' ? '✅ Approve Payment' : '❌ Reject Payment' }}</h3>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+    
+      <div class="modal-body">
+        <!-- Request summary -->
+        <div class="review-summary">
+          <div class="rs-row"><span>Shop</span><strong>{{ reviewingRequest.shopName }}</strong></div>
+          <div class="rs-row"><span>Owner</span><strong>{{ reviewingRequest.ownerName }}</strong></div>
+          <div class="rs-row"><span>Plan</span><strong>{{ reviewingRequest.planType | titlecase }}</strong></div>
+          <div class="rs-row"><span>Amount</span><strong class="text-green">₹{{ reviewingRequest.amount | number }}</strong></div>
+          <div class="rs-row"><span>TxnID</span><code>{{ reviewingRequest.transactionId }}</code></div>
+          <div class="rs-row"><span>Payer</span><strong>{{ reviewingRequest.payerName }} ({{ reviewingRequest.payerMobile }})</strong></div>
+        </div>
+    
+        <!-- Approve info -->
+        <div class="alert alert-success" *ngIf="reviewAction === 'APPROVE'">
+          <strong>✅ Action:</strong> Is shop ki subscription activate ho jaayegi.
+          {{ reviewingRequest.planType === 'yearly' ? '365 din' : '30 din' }} ke liye valid hogi.
+        </div>
+    
+        <!-- Notes field -->
+        <div class="form-group mt-16">
+          <label class="form-label">
+            Admin Notes {{ reviewAction === 'REJECT' ? '*' : '(optional)' }}
+          </label>
+          <textarea class="form-control" rows="3" [(ngModel)]="adminNotes"
+            [placeholder]="reviewAction === 'APPROVE' ? 'e.g. Payment verified via UPI statement' : 'Reason for rejection (required)'">
+          </textarea>
+        </div>
+    
+        <div class="alert alert-danger mt-8" *ngIf="reviewError">{{ reviewError }}</div>
+      </div>
+    
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeModal()" [disabled]="submitting">Cancel</button>
+        <button
+          class="btn"
+          [class.btn-success]="reviewAction === 'APPROVE'"
+          [class.btn-danger]="reviewAction === 'REJECT'"
+          (click)="confirmReview()"
+          [disabled]="submitting">
+          <span *ngIf="submitting" class="btn-spinner"></span>
+          {{ submitting ? 'Processing...' : (reviewAction === 'APPROVE' ? '✅ Confirm Approve' : '❌ Confirm Reject') }}
+        </button>
+      </div>
+    </div>

@@ -21,6 +21,7 @@ export class AdminLayoutComponent {
     '/admin/shops':         'Manage Shops',
     '/admin/subscriptions': 'Subscriptions',
     '/admin/notifications': 'Notifications',
+    '/admin/payments': 'Payment Requests',
   };
 
   constructor(private router: Router) {

@@ -95,6 +95,32 @@ namespace AgroBillling.DAL.Models
         public decimal OpeningBalance { get; set; } = 0;
     }
 
+    public class BulkPaymentDto
+    {
+        public int CustomerId { get; set; }
+        public decimal Amount { get; set; }
+        public string PaymentMode { get; set; } = "Cash";
+        public string? Reference { get; set; }
+        public string? Notes { get; set; }
+        public DateOnly PaymentDate { get; set; }
+    }
+
+    public class BulkPaymentResultDto
+    {
+        public decimal TotalPaid { get; set; }
+        public decimal Remaining { get; set; }     // agar amount zyada ho gayi
+        public int BillsSettled { get; set; }      // kitne bills PAID ho gaye
+        public int BillsPartial { get; set; }      // kitne partially pay hue
+        public List<BillPaymentSummary> Details { get; set; } = new();
+    }
+
+    public class BillPaymentSummary
+    {
+        public int BillId { get; set; }
+        public string BillNumber { get; set; } = "";
+        public decimal AmountApplied { get; set; }
+        public string NewStatus { get; set; } = "";
+    }
     public class CustomerLedgerDto
     {
         public Customer? Customer { get; set; }
@@ -196,6 +222,7 @@ namespace AgroBillling.DAL.Models
     public class PurchaseItemDto
     {
         public int ProductId { get; set; }
+        public string? ProductName { get; set; }  // ✅ For new inline products
         public decimal Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal GstPercent { get; set; } = 0;
@@ -292,9 +319,23 @@ namespace AgroBillling.DAL.Models
 
     public class AdminDashboardDto
     {
+        public int TotalShops { get; set; }
+        public int ActiveSubscriptions { get; set; }
         public List<ShopAlertDto> ExpiringSoon { get; set; } = new();
         public List<ShopAlertDto> Expired { get; set; } = new();
         public List<ShopSummaryDto> AllShops { get; set; } = new();
+    }
+
+    // ─── OTP DTOs ───
+    public class VerifyOtpDto
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Otp { get; set; } = string.Empty;
+    }
+
+    public class ResendOtpDto
+    {
+        public string Email { get; set; } = string.Empty;
     }
 
     public class SignupDto
@@ -306,5 +347,114 @@ namespace AgroBillling.DAL.Models
         public string City { get; set; } = string.Empty;
         public string? State { get; set; }
         public string Password { get; set; } = string.Empty;
+    }
+
+
+
+
+    // ─── PAYMENT REQUEST DTOs ─────────────────────────────────
+
+    // Shop submits karta hai
+    public class SubmitPaymentRequestDto
+    {
+        public int ShopId { get; set; }
+        public string PlanType { get; set; } = string.Empty;  // "monthly" / "yearly"
+        public decimal Amount { get; set; }
+        public string TransactionId { get; set; } = string.Empty;
+        public string PayerName { get; set; } = string.Empty;
+        public string PayerMobile { get; set; } = string.Empty;
+    }
+
+    // Admin list mein dikhta hai
+    public class PaymentRequestSummaryDto
+    {
+        public int RequestId { get; set; }
+        public int ShopId { get; set; }
+        public string ShopName { get; set; } = string.Empty;
+        public string OwnerName { get; set; } = string.Empty;
+        public string MobileNumber { get; set; } = string.Empty;
+        public string PlanType { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public string TransactionId { get; set; } = string.Empty;
+        public string PayerName { get; set; } = string.Empty;
+        public string PayerMobile { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+    }
+
+    // ─── PAYMENT REQUEST DTOs ───
+    public class CreatePaymentRequestDto
+    {
+        public int PlanId { get; set; }
+        public decimal Amount { get; set; }
+        public string TransactionId { get; set; } = string.Empty;
+        public string PayerName { get; set; } = string.Empty;
+        public string PayerMobile { get; set; } = string.Empty;
+    }
+
+    public class PaymentRequestDto
+    {
+        public int RequestId { get; set; }
+        public int ShopId { get; set; }
+        public string ShopName { get; set; } = string.Empty;
+        public string OwnerName { get; set; } = string.Empty;
+        public string MobileNumber { get; set; } = string.Empty;
+        public int PlanId { get; set; }
+        public string PlanName { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public string TransactionId { get; set; } = string.Empty;
+        public string PayerName { get; set; } = string.Empty;
+        public string PayerMobile { get; set; } = string.Empty;
+        public string Status { get; set; } = "PENDING";
+        public string? AdminNotes { get; set; }
+        public DateTime RequestedAt { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+    }
+
+    public class ApprovePaymentDto
+    {
+        public string? AdminNotes { get; set; }
+    }
+
+    public class RejectPaymentDto
+    {
+        public string? AdminNotes { get; set; }
+    }
+
+    // ─── FORGOT PASSWORD DTOs ───
+    public class ForgotPasswordDto
+    {
+        public string Email { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordDto
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Otp { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+    }
+
+    public class ChangePasswordDto
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+    }
+
+    public class CreateSupplierDto
+    {
+        public string CompanyName { get; set; } = string.Empty;
+        public string? ContactPersonName { get; set; }
+        public string? MobileNumber { get; set; }
+        public string? Email { get; set; }
+        public string? Address { get; set; }
+        public string? GstNumber { get; set; }
+        public decimal OpeningBalance { get; set; } = 0;
+    }
+
+    // Admin approve/reject karta hai
+    public class ReviewPaymentRequestDto
+    {
+        public string Action { get; set; } = string.Empty;  // "APPROVE" / "REJECT"
+        public string? AdminNotes { get; set; }
     }
 }

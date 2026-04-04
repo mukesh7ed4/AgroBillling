@@ -21,7 +21,7 @@ namespace AgroBillling.DAL.Repositories
         public async Task<MonthlyDashboardDto> GetMonthlyDashboardAsync(int shopId, int year, int month)
         {
             var startDate = new DateOnly(year, month, 1);
-            var endDate   = startDate.AddMonths(1).AddDays(-1);
+            var endDate = startDate.AddMonths(1).AddDays(-1);
 
             // Sequential: same DbContext must not run multiple queries concurrently (EF Core).
             var bills = await _context.Bills
@@ -64,7 +64,7 @@ namespace AgroBillling.DAL.Repositories
                 .Select(g => new TopProductDto
                 {
                     ProductName = g.Key,
-                    TotalQty    = g.Sum(bi => bi.Quantity),
+                    TotalQty = g.Sum(bi => bi.Quantity),
                     TotalAmount = g.Sum(bi => bi.TotalAmount)
                 })
                 .OrderByDescending(p => p.TotalAmount)
@@ -73,13 +73,13 @@ namespace AgroBillling.DAL.Repositories
 
             var salesSummary = new ShopDashboardStatsDto
             {
-                TotalBills       = bills.Count,
-                TotalSales       = bills.Sum(b => b.TotalAmount),
-                TotalCollected   = bills.Sum(b => b.AmountPaid),
-                TotalPending     = bills.Sum(b => b.AmountPending ?? 0),
-                PaidBills        = bills.Count(b => b.PaymentStatus == "PAID"),
-                PartialBills     = bills.Count(b => b.PaymentStatus == "PARTIAL"),
-                PendingBills     = bills.Count(b => b.PaymentStatus == "PENDING")
+                TotalBills = bills.Count,
+                TotalSales = bills.Sum(b => b.TotalAmount),
+                TotalCollected = bills.Sum(b => b.AmountPaid),
+                TotalPending = bills.Sum(b => b.AmountPending ?? 0),
+                PaidBills = bills.Count(b => b.PaymentStatus == "PAID"),
+                PartialBills = bills.Count(b => b.PaymentStatus == "PARTIAL"),
+                PendingBills = bills.Count(b => b.PaymentStatus == "PENDING")
             };
 
             var expenseBreakdown = expenses
@@ -94,12 +94,12 @@ namespace AgroBillling.DAL.Repositories
 
             return new MonthlyDashboardDto
             {
-                SalesSummary      = salesSummary,
-                ExpenseBreakdown  = expenseBreakdown,
-                TotalExpenses     = expenses.Sum(e => e.Amount),
-                TotalPurchased    = purchases.Sum(p => p.NetPayable),
-                PaidToSuppliers   = supplierPayments.Sum(p => p.Amount),
-                TopProducts       = topProducts
+                SalesSummary = salesSummary,
+                ExpenseBreakdown = expenseBreakdown,
+                TotalExpenses = expenses.Sum(e => e.Amount),
+                TotalPurchased = purchases.Sum(p => p.NetPayable),
+                PaidToSuppliers = supplierPayments.Sum(p => p.Amount),
+                TopProducts = topProducts
             };
         }
 
@@ -120,12 +120,12 @@ namespace AgroBillling.DAL.Repositories
                 .Where(s => s.EndDate >= today && s.EndDate <= in7Days)
                 .Select(s => new ShopAlertDto
                 {
-                    ShopId       = s.ShopId,
-                    ShopName     = s.Shop.ShopName,
-                    OwnerName    = s.Shop.OwnerName,
+                    ShopId = s.ShopId,
+                    ShopName = s.Shop.ShopName,
+                    OwnerName = s.Shop.OwnerName,
                     MobileNumber = s.Shop.MobileNumber,
-                    EndDate      = s.EndDate,
-                    DaysLeft     = s.EndDate.DayNumber - today.DayNumber
+                    EndDate = s.EndDate,
+                    DaysLeft = s.EndDate.DayNumber - today.DayNumber
                 })
                 .OrderBy(s => s.DaysLeft)
                 .ToList();
@@ -134,12 +134,12 @@ namespace AgroBillling.DAL.Repositories
                 .Where(s => s.EndDate < today)
                 .Select(s => new ShopAlertDto
                 {
-                    ShopId       = s.ShopId,
-                    ShopName     = s.Shop.ShopName,
-                    OwnerName    = s.Shop.OwnerName,
+                    ShopId = s.ShopId,
+                    ShopName = s.Shop.ShopName,
+                    OwnerName = s.Shop.OwnerName,
                     MobileNumber = s.Shop.MobileNumber,
-                    EndDate      = s.EndDate,
-                    DaysLeft     = s.EndDate.DayNumber - today.DayNumber // negative
+                    EndDate = s.EndDate,
+                    DaysLeft = s.EndDate.DayNumber - today.DayNumber // negative
                 })
                 .OrderBy(s => s.EndDate)
                 .ToList();
@@ -147,25 +147,30 @@ namespace AgroBillling.DAL.Repositories
             var allShops = activeSubs
                 .Select(s => new ShopSummaryDto
                 {
-                    ShopId       = s.ShopId,
-                    ShopName     = s.Shop.ShopName,
-                    OwnerName    = s.Shop.OwnerName,
+                    ShopId = s.ShopId,
+                    ShopName = s.Shop.ShopName,
+                    OwnerName = s.Shop.OwnerName,
                     MobileNumber = s.Shop.MobileNumber,
-                    City         = s.Shop.City,
-                    StartDate    = s.StartDate,
-                    EndDate      = s.EndDate,
-                    DaysLeft     = s.EndDate.DayNumber - today.DayNumber,
-                    PlanName     = s.Plan?.PlanName ?? "—",
-                    IsActive     = s.Shop.IsActive
+                    City = s.Shop.City,
+                    StartDate = s.StartDate,
+                    EndDate = s.EndDate,
+                    DaysLeft = s.EndDate.DayNumber - today.DayNumber,
+                    PlanName = s.Plan?.PlanName ?? "—",
+                    IsActive = s.Shop.IsActive
                 })
                 .OrderBy(s => s.EndDate)
                 .ToList();
 
+            var totalShops = await _context.Shops.CountAsync(s => s.IsActive == true);
+            var activeCount = activeSubs.Count(s => s.EndDate >= today);
+
             return new AdminDashboardDto
             {
+                TotalShops = totalShops,
+                ActiveSubscriptions = activeCount,
                 ExpiringSoon = expiringSoon,
-                Expired      = expired,
-                AllShops     = allShops
+                Expired = expired,
+                AllShops = allShops
             };
         }
     }

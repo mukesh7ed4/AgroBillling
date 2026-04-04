@@ -1,7 +1,7 @@
 /* ============================================================
    AGROBILLING — HEADER COMPONENT STYLES
-   Desktop/Tablet: Sticky top bar with collapsible user dropdown
-   Mobile (≤768px): Slim bar + avatar opens profile sheet
+   REPLACE existing file completely
+   Change: Expiry banner styles added at bottom
    ============================================================ */
 
 /* ─── BASE HEADER ─── */
@@ -203,7 +203,6 @@
   }
 }
 
-/* Profile header inside dropdown */
 .dropdown-profile {
   display: flex;
   align-items: center;
@@ -288,6 +287,16 @@
   }
 }
 
+/* ─── Subscription info row in dropdown ─── */
+.dropdown-sub-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 /* ─── TABLET (≤1024px) ─── */
 @media (max-width: 1024px) {
   .app-header {
@@ -315,7 +324,6 @@
     height: 56px;
   }
 
-  /* Hide desktop menu btn — bottom nav handles navigation */
   .menu-btn { display: none; }
 
   .header-title {
@@ -329,17 +337,13 @@
     border-radius: 8px;
   }
 
-  /* Hide desktop user chip on mobile */
   .user-chip { display: none; }
-
-  /* Show avatar-only button on mobile */
   .user-avatar-mob { display: flex; }
 
-  /* Dropdown becomes a bottom-anchored sheet on mobile */
   .user-dropdown {
     position: fixed;
     top: auto;
-    bottom: 70px; /* sits above the bottom nav bar */
+    bottom: 70px;
     right: 10px;
     left: 10px;
     width: auto;
@@ -364,18 +368,54 @@
 /* ─── SMALL MOBILE (≤480px) ─── */
 @media (max-width: 480px) {
   .app-header { height: 52px; padding: 0 10px; }
-
   .header-title { font-size: 0.875rem; max-width: 130px; }
-
   .icon-btn { padding: 4px 7px; font-size: 0.8rem; }
-
   .user-avatar-mob { width: 30px; height: 30px; font-size: 0.7rem; }
+  .user-dropdown { bottom: 64px; right: 8px; left: 8px; }
+}
 
-  .user-dropdown {
-    bottom: 64px;
-    right: 8px;
-    left: 8px;
+/* ─── EXPIRY WARNING BANNER ─── */
+.expiry-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 151;   /* header se upar */
+
+  &.expiry-warning {
+    background: #fff3cd;
+    color: #856404;
+    border-bottom: 1px solid #ffc107;
   }
+
+  &.expiry-critical {
+    background: #f8d7da;
+    color: #721c24;
+    border-bottom: 1px solid #f5c6cb;
+    animation: pulse-banner 2s infinite;
+  }
+
+  .expiry-banner-btn {
+    background: #856404;
+    color: #fff;
+    padding: 3px 12px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+
+@keyframes pulse-banner {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.85; }
 }
 
 /* ─── Animations ─── */

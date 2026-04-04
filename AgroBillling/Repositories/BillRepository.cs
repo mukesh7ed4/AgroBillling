@@ -40,27 +40,27 @@ namespace AgroBillling.DAL.Repositories
                 .Take(pageSize)
                 .Select(b => new Bill
                 {
-                    BillId         = b.BillId,
-                    ShopId         = b.ShopId,
-                    CustomerId     = b.CustomerId,
-                    BillNumber     = b.BillNumber,
-                    BillDate       = b.BillDate,
-                    SubTotal       = b.SubTotal,
+                    BillId = b.BillId,
+                    ShopId = b.ShopId,
+                    CustomerId = b.CustomerId,
+                    BillNumber = b.BillNumber,
+                    BillDate = b.BillDate,
+                    SubTotal = b.SubTotal,
                     DiscountAmount = b.DiscountAmount,
-                    Gstpercent     = b.Gstpercent,
-                    Gstamount      = b.Gstamount,
-                    TotalAmount    = b.TotalAmount,
-                    AmountPaid     = b.AmountPaid,
-                    AmountPending  = b.AmountPending,
-                    PaymentStatus  = b.PaymentStatus,
-                    Notes          = b.Notes,
-                    IsReturn       = b.IsReturn,
+                    Gstpercent = b.Gstpercent,
+                    Gstamount = b.Gstamount,
+                    TotalAmount = b.TotalAmount,
+                    AmountPaid = b.AmountPaid,
+                    AmountPending = b.AmountPending,
+                    PaymentStatus = b.PaymentStatus,
+                    Notes = b.Notes,
+                    IsReturn = b.IsReturn,
                     OriginalBillId = b.OriginalBillId,
-                    CreatedAt      = b.CreatedAt,
+                    CreatedAt = b.CreatedAt,
                     Customer = new Customer
                     {
-                        CustomerId   = b.Customer.CustomerId,
-                        FullName     = b.Customer.FullName,
+                        CustomerId = b.Customer.CustomerId,
+                        FullName = b.Customer.FullName,
                         MobileNumber = b.Customer.MobileNumber
                     }
                 })
@@ -80,8 +80,10 @@ namespace AgroBillling.DAL.Repositories
             await _context.Bills
                 .AsNoTracking()
                 .AsSplitQuery()
+                .Include(b => b.Shop)          // ✅ Shop details for print
                 .Include(b => b.Customer)
                 .Include(b => b.BillItems)
+                    .ThenInclude(i => i.Product)
                 .Include(b => b.BillPayments)
                 .FirstOrDefaultAsync(b => b.BillId == billId);
 
@@ -112,7 +114,7 @@ namespace AgroBillling.DAL.Repositories
             bill.AmountPaid = totalPaid;
             bill.PaymentStatus =
                 totalPaid >= bill.TotalAmount ? "PAID" :
-                totalPaid > 0                ? "PARTIAL" : "PENDING";
+                totalPaid > 0 ? "PARTIAL" : "PENDING";
 
             await _context.SaveChangesAsync();
         }

@@ -1,19 +1,32 @@
+<!-- ================================================
+     src/app/layout/header/header.component.html
+     REPLACE existing file completely
+     Original structure RESTORED — expiry banner safely added at top
+     ================================================ -->
+
+<!-- ✅ Expiry Warning Banner — 7 din se kam bachne par dikhega (sirf shop ke liye) -->
+<div [class]="expiryBannerClass" *ngIf="showExpiryWarning">
+  <span>{{ expiryMessage }}</span>
+  <a href="/subscribe" class="expiry-banner-btn">Subscribe Now →</a>
+</div>
+
 <header class="app-header" [class.expanded]="sidebarCollapsed">
 
   <div class="header-left">
-    <!-- Hide menu btn on mobile — bottom nav handles navigation -->
     <button class="menu-btn" (click)="toggleSidebar.emit()">☰</button>
     <h2 class="header-title">{{ pageTitle }}</h2>
   </div>
 
   <div class="header-right">
-    <!-- Theme toggle (visible on both desktop & mobile) -->
-    <button class="icon-btn" (click)="theme.toggleTheme()" [title]="theme.currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'">
+    <!-- Theme toggle -->
+    <button class="icon-btn" (click)="theme.toggleTheme()"
+      [title]="theme.currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'">
       {{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}
     </button>
 
-    <!-- Language toggle (visible on both desktop & mobile) -->
-    <button class="icon-btn" (click)="theme.toggleLang()" [title]="theme.currentLang === 'en' ? 'Switch to Hindi' : 'Switch to English'">
+    <!-- Language toggle -->
+    <button class="icon-btn" (click)="theme.toggleLang()"
+      [title]="theme.currentLang === 'en' ? 'Switch to Hindi' : 'Switch to English'">
       🌐
     </button>
 
@@ -51,6 +64,16 @@
   </div>
 
   <div class="dropdown-divider"></div>
+
+  <!-- Subscription days remaining (shop only) -->
+  <div class="dropdown-sub-info" *ngIf="!isAdmin && daysLeft !== null">
+    <span class="di-icon">📅</span>
+    <span *ngIf="daysLeft > 7" style="color:#2E7D32">{{ daysLeft }} days remaining</span>
+    <span *ngIf="daysLeft <= 7 && daysLeft >= 0" style="color:#856404">⚠️ {{ daysLeft }} days left!</span>
+    <span *ngIf="daysLeft < 0" style="color:#c62828">Expired</span>
+  </div>
+
+  <div class="dropdown-divider" *ngIf="!isAdmin && daysLeft !== null"></div>
 
   <!-- Actions -->
   <button class="dropdown-item" (click)="theme.toggleTheme(); closeUserMenu()">

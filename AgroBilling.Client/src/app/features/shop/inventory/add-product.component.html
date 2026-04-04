@@ -29,9 +29,12 @@
           <select class="form-control" formControlName="categoryId"
             [class.is-invalid]="form.get('categoryId')?.invalid && form.get('categoryId')?.touched">
             <option value="">-- Select Category --</option>
-            <option *ngFor="let c of categories" [value]="c.categoryId ?? c.id">{{ c.categoryName ?? c.name }}</option>
+            <option *ngFor="let c of categories" [value]="c.categoryId ?? c.id">
+              {{ c.categoryName ?? c.name }}
+            </option>
           </select>
           <div class="form-error" *ngIf="form.get('categoryId')?.invalid && form.get('categoryId')?.touched">Category is required</div>
+          <div class="text-muted text-xs" *ngIf="categories.length === 0">⚠️ No categories found. Please add categories first.</div>
         </div>
 
         <div class="form-group">
@@ -39,16 +42,22 @@
           <select class="form-control" formControlName="unitId"
             [class.is-invalid]="form.get('unitId')?.invalid && form.get('unitId')?.touched">
             <option value="">-- Select Unit --</option>
-            <option *ngFor="let u of units" [value]="u.unitId ?? u.id">{{ (u.unitName ?? u.name) + ' (' + (u.shortName ?? u.symbol ?? '') + ')' }}</option>
+            <option *ngFor="let u of units" [value]="u.unitId ?? u.id">
+              {{ (u.unitName ?? u.name) + ' (' + (u.shortName ?? u.symbol ?? '') + ')' }}
+            </option>
           </select>
+          <div class="text-muted text-xs" *ngIf="units.length === 0">⚠️ No units found. Units should be pre-loaded in database.</div>
         </div>
 
         <div class="form-group">
           <label class="form-label">Primary Supplier</label>
           <select class="form-control" formControlName="supplierId">
             <option value="">-- Select Supplier (Optional) --</option>
-            <option *ngFor="let s of suppliers" [value]="s.supplierId">{{ s.companyName }}</option>
+            <option *ngFor="let s of suppliers" [value]="s.supplierId">
+              {{ s.companyName }}
+            </option>
           </select>
+          <div class="text-muted text-xs" *ngIf="suppliers.length === 0">⚠️ No suppliers found. Add suppliers first.</div>
         </div>
 
         <div class="form-group">

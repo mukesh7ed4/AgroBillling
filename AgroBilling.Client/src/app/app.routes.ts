@@ -1,3 +1,9 @@
+// ================================================
+//  src/app/app.routes.ts
+//  REPLACE existing file completely
+//  Change: admin/payment-requests route added
+// ================================================
+
 import { Routes } from '@angular/router';
 import { adminGuard, shopGuard, subscriptionGuard, authGuard } from './core/guards/auth.guard';
 
@@ -37,10 +43,27 @@ export const routes: Routes = [
       import('./layout/admin-layout/admin-layout.component').then(c => c.AdminLayoutComponent),
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard',     loadComponent: () => import('./features/admin/dashboard/admin-dashboard.component').then(c => c.AdminDashboardComponent) },
-      { path: 'shops',         loadComponent: () => import('./features/admin/shops/shops.component').then(c => c.ShopsComponent) },
-      { path: 'subscriptions', loadComponent: () => import('./features/admin/subscriptions/subscriptions.component').then(c => c.SubscriptionsComponent) },
-      { path: 'notifications', loadComponent: () => import('./features/admin/notifications/notifications.component').then(c => c.NotificationsComponent) },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/admin/dashboard/admin-dashboard.component').then(c => c.AdminDashboardComponent)
+      },
+      {
+        path: 'shops',
+        loadComponent: () => import('./features/admin/shops/shops.component').then(c => c.ShopsComponent)
+      },
+      {
+        path: 'subscriptions',
+        loadComponent: () => import('./features/admin/subscriptions/subscriptions.component').then(c => c.SubscriptionsComponent)
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/admin/notifications/notifications.component').then(c => c.NotificationsComponent)
+      },
+      // ✅ NEW: Payment requests approval page
+      {
+        path: 'payment-requests',
+        loadComponent: () => import('./features/admin/payments/payment-requests.component').then(c => c.PaymentRequestsComponent)
+      },
     ]
   },
 
@@ -66,10 +89,10 @@ export const routes: Routes = [
       { path: 'suppliers/:id',    loadComponent: () => import('./features/shop/suppliers/supplier-detail.component').then(c => c.SupplierDetailComponent) },
       { path: 'purchases',        loadComponent: () => import('./features/shop/purchases/purchases.component').then(c => c.PurchasesComponent) },
       { path: 'purchases/create', loadComponent: () => import('./features/shop/purchases/create-purchase.component').then(c => c.CreatePurchaseComponent) },
+      { path: 'purchases/:id',    loadComponent: () => import('./features/shop/purchases/purchase-detail.component').then(c => c.PurchaseDetailComponent) },
       { path: 'expenses',         loadComponent: () => import('./features/shop/expenses/expenses.component').then(c => c.ExpensesComponent) },
       { path: 'reports',          loadComponent: () => import('./features/shop/reports/reports.component').then(c => c.ReportsComponent) },
       { path: 'profile',          loadComponent: () => import('./features/shop/profile/profile.component').then(c => c.ProfileComponent) },
-      { path: 'purchases/:id', loadComponent: () => import('./features/shop/purchases/purchase-detail.component').then(c => c.PurchaseDetailComponent) },
     ]
   },
 

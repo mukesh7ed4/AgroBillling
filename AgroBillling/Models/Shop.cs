@@ -40,6 +40,11 @@ public partial class Shop
 
     public bool IsActive { get; set; }
 
+    // ✅ Email OTP Verification
+    public bool IsEmailVerified { get; set; }
+    public string? EmailOtp { get; set; }
+    public DateTime? OtpExpiresAt { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public int CreatedByAdminId { get; set; }

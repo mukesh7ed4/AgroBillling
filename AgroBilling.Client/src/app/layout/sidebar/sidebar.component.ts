@@ -1,3 +1,9 @@
+// ================================================
+//  src/app/layout/sidebar/sidebar.component.ts
+//  REPLACE existing file completely
+//  Change: adminNav mein '💳 Payment Requests' added
+// ================================================
+
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd, NavigationStart } from '@angular/router';
@@ -23,10 +29,12 @@ export class SidebarComponent implements OnInit {
   moreSheetOpen = false;
 
   adminNav: NavItem[] = [
-    { label: 'Dashboard',     labelHi: 'डैशबोर्ड', icon: '📊', route: '/admin/dashboard' },
-    { label: 'Shops',         labelHi: 'दुकानें',    icon: '🏪', route: '/admin/shops' },
-    { label: 'Subscriptions', labelHi: 'सदस्यता',   icon: '📅', route: '/admin/subscriptions' },
-    { label: 'Notifications', labelHi: 'सूचनाएं',   icon: '🔔', route: '/admin/notifications' },
+    { label: 'Dashboard',        labelHi: 'डैशबोर्ड', icon: '📊', route: '/admin/dashboard' },
+    { label: 'Shops',            labelHi: 'दुकानें',    icon: '🏪', route: '/admin/shops' },
+    { label: 'Subscriptions',    labelHi: 'सदस्यता',   icon: '📅', route: '/admin/subscriptions' },
+    // ✅ NEW — Payment requests approval
+    { label: 'Payment Requests', labelHi: 'भुगतान',    icon: '💳', route: '/admin/payment-requests' },
+    { label: 'Notifications',    labelHi: 'सूचनाएं',   icon: '🔔', route: '/admin/notifications' },
   ];
 
   shopNav: NavItem[] = [
@@ -43,10 +51,7 @@ export class SidebarComponent implements OnInit {
 
   get navItems(): NavItem[] { return this.isAdmin ? this.adminNav : this.shopNav; }
 
-  /** First 4 nav items shown directly in the bottom bar */
   get primaryMobileNav(): NavItem[] { return this.navItems.slice(0, 4); }
-
-  /** Remaining items shown inside the "More" sheet */
   get secondaryMobileNav(): NavItem[] { return this.navItems.slice(4); }
 
   constructor(public auth: AuthService, public theme: ThemeService, private router: Router) {}
@@ -57,34 +62,18 @@ export class SidebarComponent implements OnInit {
 
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe((e: any) => {
-        this.currentRoute = e.urlAfterRedirects;
-      });
+      .subscribe((e: any) => { this.currentRoute = e.urlAfterRedirects; });
 
-    // Close the "More" sheet automatically on any navigation
     this.router.events
       .pipe(filter(e => e instanceof NavigationStart))
-      .subscribe(() => {
-        this.moreSheetOpen = false;
-      });
+      .subscribe(() => { this.moreSheetOpen = false; });
   }
 
   isActive(route: string): boolean { return this.currentRoute.startsWith(route); }
-
   logout(): void { this.auth.logout(); }
-
   get shopName(): string { return this.auth.getShopName() || 'My Shop'; }
-
-  /** Toggle the mobile "More" bottom sheet */
   toggleMoreSheet(): void { this.moreSheetOpen = !this.moreSheetOpen; }
-
-  /** Close the mobile "More" bottom sheet */
   closeMoreSheet(): void { this.moreSheetOpen = false; }
-
-  /**
-   * Returns true if any route inside the secondary (hidden) nav items
-   * is currently active — used to show the green dot on the "More" button
-   */
   hasActiveInMore(): boolean {
     return this.secondaryMobileNav.some(item => this.isActive(item.route));
   }
