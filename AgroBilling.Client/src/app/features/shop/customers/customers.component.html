@@ -1,81 +1,137 @@
-<div class="page-container fade-in">
-  <div class="page-header">
+<div class="cust-page fade-in">
+
+  <!-- Header -->
+  <div class="page-top">
     <div>
       <p class="breadcrumb">Home <span>/ Customers</span></p>
-      <h1 class="page-title">Customers</h1>
-      <p class="page-subtitle">{{ totalCount }} registered customers</p>
+      <h1 class="page-heading">Customers</h1>
+      <p class="page-sub">{{ totalCount }} registered customers</p>
     </div>
-    <a routerLink="/shop/customers/add" class="btn btn-primary">👤 Add Customer</a>
+    <a routerLink="/shop/customers/add" class="btn btn-primary">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Customer
+    </a>
   </div>
 
-  <div class="filter-bar card mb-24">
-    <div class="search-bar">
-      <span class="search-icon">🔍</span>
+  <!-- Filter Row -->
+  <div class="filter-row">
+    <div class="search-wrap">
+      <svg class="search-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input [(ngModel)]="searchText" (ngModelChange)="onSearch()"
-        placeholder="Search by name, mobile, village..." />
+        placeholder="Search by name, mobile, village…" class="search-input" />
       <button *ngIf="searchText" class="clear-btn" (click)="searchText=''; onSearch()">✕</button>
     </div>
   </div>
 
-  <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+  <!-- Loading -->
+  <div class="load-wrap" *ngIf="loading">
+    <div class="load-spinner"></div>
+  </div>
 
-  <div class="card" *ngIf="!loading">
-    <div class="empty-state" *ngIf="!customers.length">
-      <div class="empty-icon">👥</div>
+  <!-- Content -->
+  <div class="main-card" *ngIf="!loading">
+
+    <!-- Empty -->
+    <div class="empty-box" *ngIf="!customers.length">
+      <div class="empty-ico">👥</div>
       <h3>No customers found</h3>
       <p>Add your first customer to get started</p>
       <a routerLink="/shop/customers/add" class="btn btn-primary mt-16">Add Customer</a>
     </div>
 
-    <div class="table-wrapper" *ngIf="customers.length">
-      <table>
+    <!-- Desktop Table -->
+    <div class="tbl-wrap" *ngIf="customers.length">
+      <table class="list-tbl">
         <thead>
           <tr>
-            <th>Name</th><th>Father's Name</th><th>Mobile</th>
-            <th>Village</th><th>Pending</th><th>Bills</th><th>Action</th>
+            <th>Customer</th>
+            <th>Father's Name</th>
+            <th>Mobile</th>
+            <th>Village</th>
+            <th class="num-col">Pending</th>
+            <th class="num-col">Bills</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let c of customers"
               [routerLink]="['/shop/customers', c.customerId ?? c.id]"
-              style="cursor:pointer">
+              class="list-row">
             <td>
-              <div class="cust-avatar-row">
-                <div class="cust-avatar">{{ (c.fullName || c.name || '?')[0] }}</div>
-                <span class="font-bold">{{ c.fullName || c.name }}</span>
+              <div class="row-cell">
+                <div class="row-avatar">{{ (c.fullName || c.name || '?')[0] }}</div>
+                <div class="row-cell-info">
+                  <span class="primary">{{ c.fullName || c.name }}</span>
+                </div>
               </div>
             </td>
-            <td class="text-muted">{{ c.fatherName || '—' }}</td>
-            <td>{{ c.mobileNumber || c.phone }}</td>
-            <td class="text-muted">{{ c.village || '—' }}<span *ngIf="c.district">, {{ c.district }}</span></td>
-            <td>
-              <span [class]="(c.totalPending || 0) > 0 ? 'amount-pending font-bold' : 'amount-paid'">
+            <td class="dim">{{ c.fatherName || '—' }}</td>
+            <td class="mono">{{ c.mobileNumber || c.phone }}</td>
+            <td class="dim">{{ c.village || '—' }}<span *ngIf="c.district">, {{ c.district }}</span></td>
+            <td class="num-col">
+              <span [class]="(c.totalPending || 0) > 0 ? 'clr-red' : 'clr-green'">
                 {{ fmt(c.totalPending || 0) }}
               </span>
             </td>
-            <td><span class="badge badge-muted">{{ c.totalBills || 0 }} bills</span></td>
+            <td class="num-col">
+              <span class="status-chip chip-pending" *ngIf="(c.totalBills || 0) === 0">0</span>
+              <span class="fw-bold" *ngIf="(c.totalBills || 0) > 0">{{ c.totalBills }}</span>
+            </td>
             <td>
               <a [routerLink]="['/shop/customers', c.customerId ?? c.id]"
-                 class="btn btn-sm btn-outline"
-                 (click)="$event.stopPropagation()">Ledger</a>
+                 class="view-btn" (click)="$event.stopPropagation()">Ledger</a>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- ✅ PAGINATION — always show when totalCount > pageSize -->
-    <div class="pagination" *ngIf="totalCount > pageSize">
-      <button class="btn btn-sm btn-outline"
-              (click)="prevPage()"
-              [disabled]="pageNumber === 1">← Prev</button>
-      <span class="page-info">
-        Page {{ pageNumber }} of {{ totalPages }}
-        <span class="text-muted">({{ totalCount }} total)</span>
-      </span>
-      <button class="btn btn-sm btn-outline"
-              (click)="nextPage()"
-              [disabled]="pageNumber >= totalPages">Next →</button>
+    <!-- Mobile Cards -->
+    <div class="mob-cards" *ngIf="customers.length">
+      <div class="mob-card" *ngFor="let c of customers"
+           [routerLink]="['/shop/customers', c.customerId ?? c.id]">
+        <div class="mob-card-top">
+          <div class="row-cell">
+            <div class="row-avatar">{{ (c.fullName || c.name || '?')[0] }}</div>
+            <div class="row-cell-info">
+              <span class="primary">{{ c.fullName || c.name }}</span>
+              <span class="secondary">{{ c.mobileNumber || c.phone }}</span>
+            </div>
+          </div>
+          <a [routerLink]="['/shop/customers', c.customerId ?? c.id]"
+             class="view-btn" (click)="$event.stopPropagation()">Ledger →</a>
+        </div>
+        <div class="mob-card-row">
+          <div class="mob-col">
+            <span class="mob-label">Village</span>
+            <span class="mob-val dim">{{ c.village || '—' }}</span>
+          </div>
+          <div class="mob-col">
+            <span class="mob-label">Bills</span>
+            <span class="mob-val fw-bold">{{ c.totalBills || 0 }}</span>
+          </div>
+          <div class="mob-col" style="text-align:right">
+            <span class="mob-label">Pending</span>
+            <span class="mob-val" [class.clr-red]="(c.totalPending || 0) > 0" [class.clr-green]="(c.totalPending || 0) === 0">
+              {{ fmt(c.totalPending || 0) }}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Pagination -->
+    <div class="pagination-row" *ngIf="totalCount > pageSize">
+      <button class="pag-btn" (click)="prevPage()" [disabled]="pageNumber === 1">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Prev
+      </button>
+      <span class="pag-info">Page {{ pageNumber }} of {{ totalPages }} · {{ totalCount }} total</span>
+      <button class="pag-btn" (click)="nextPage()" [disabled]="pageNumber >= totalPages">
+        Next
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
   </div>
 </div>

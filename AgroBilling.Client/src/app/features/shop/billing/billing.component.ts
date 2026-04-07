@@ -16,13 +16,14 @@ import { Bill } from '../../../core/models/models';
 export class BillingComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
 
-  bills: Bill[] = [];
-  loading = true;
-  searchText = '';
-  filterStatus = '';
-  pageNumber = 1;
+  bills: Bill[]     = [];
+  loading           = true;
+  searchText        = '';
+  filterStatus      = '';
+  searchFocused     = false;
+  pageNumber        = 1;
   readonly pageSize = 10;
-  totalCount = 0;
+  totalCount        = 0;
 
   constructor(
     private billingService: BillingService,
@@ -35,80 +36,67 @@ export class BillingComponent implements OnInit {
 
   load(): void {
     const shopId = this.auth.getShopId();
-    if (shopId == null) {
-      this.loading = false;
-      this.cdr.detectChanges();
-      return;
-    }
+    if (shopId == null) { this.loading = false; this.cdr.detectChanges(); return; }
     this.loading = true;
-    const params: Record<string, unknown> = {
-      page: this.pageNumber,
-      pageSize: this.pageSize
-    };
-    if (this.searchText) params['search'] = this.searchText;
+    const params: Record<string, unknown> = { page: this.pageNumber, pageSize: this.pageSize };
+    if (this.searchText)   params['search'] = this.searchText;
     if (this.filterStatus) params['status'] = this.filterStatus;
     this.billingService.getBills(shopId, params).subscribe({
       next: res => {
-        this.bills = res.items;
+        this.bills      = res.items;
         this.totalCount = res.totalCount;
-        this.loading = false;
+        this.loading    = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
-  }
+  get totalPages(): number { return Math.max(1, Math.ceil(this.totalCount / this.pageSize)); }
 
-  onSearch(): void {
-    this.pageNumber = 1;
-    this.load();
+  onSearch(): void   { this.pageNumber = 1; this.load(); }
+  
+  clearSearch(): void { 
+    this.searchText = ''; 
+    this.onSearch(); 
   }
-
+  
+  // ADD THIS METHOD - replaces onFilter() calls
   onFilter(): void {
     this.pageNumber = 1;
     this.load();
   }
+  
+  prevPage(): void   { if (this.pageNumber > 1) { this.pageNumber--; this.load(); } }
+  nextPage(): void   { if (this.pageNumber < this.totalPages) { this.pageNumber++; this.load(); } }
 
-  clearSearch(): void {
-    this.searchText = '';
-    this.onSearch();
-  }
-
-  prevPage(): void {
-    if (this.pageNumber > 1) {
-      this.pageNumber--;
-      this.load();
-    }
-  }
-
-  nextPage(): void {
-    if (this.pageNumber < this.totalPages) {
-      this.pageNumber++;
-      this.load();
-    }
+  setFilter(status: string): void {
+    this.filterStatus = status;
+    this.pageNumber = 1;
+    this.load();
   }
 
   fmt(v: number | undefined): string {
     return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 2
+      style: 'currency', currency: 'INR', maximumFractionDigits: 0
     }).format(v ?? 0);
   }
 
-  statusClass(s: string | undefined): string {
-    if (s === 'PAID') return 'badge-success';
-    if (s === 'PARTIAL') return 'badge-warning';
-    return 'badge-danger';
+  // Returns customer initial for avatar
+  getInitial(b: Bill): string {
+    const name = b.customer?.fullName || (b as any).customerName || '?';
+    return name.charAt(0).toUpperCase();
   }
 
-  statusLabel(s: string | undefined): string {
-    return s ?? '';
+  // Returns CSS class for status badge - RENAME OR ADD chipClass
+  statusClass(s: string | undefined): string {
+    if (s === 'PAID')    return 'chip-paid';
+    if (s === 'PARTIAL') return 'chip-partial';
+    return 'chip-pending';
+  }
+  
+  // ADD THIS METHOD to match template
+  chipClass(s: string | undefined): string {
+    return this.statusClass(s);
   }
 }

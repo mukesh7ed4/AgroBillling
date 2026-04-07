@@ -140,6 +140,12 @@ export class PurchasesComponent implements OnInit {
     }).format(amount);
   }
 
+   chipClass(status: string | undefined): string {
+    if (status === 'PAID')    return 'chip-paid';
+    if (status === 'PARTIAL') return 'chip-partial';
+    return 'chip-pending';
+  }
+
   statusClass(status: string | undefined): string {
     if (!status) return 'badge-danger';
     const upperStatus = status.toUpperCase();

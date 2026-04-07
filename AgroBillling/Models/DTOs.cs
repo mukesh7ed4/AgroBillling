@@ -1,7 +1,3 @@
-// ================================================
-//  AGROBILLING — ALL DTOs
-//  AgroBilling.DAL / Models / DTOs.cs
-// ================================================
 
 namespace AgroBillling.DAL.Models
 {

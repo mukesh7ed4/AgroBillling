@@ -1,94 +1,139 @@
-<!-- src/app/features/shop/purchases/purchases.component.html -->
+<div class="pur-page fade-in">
 
-<div class="page-container fade-in">
-  <div class="page-header">
+  <!-- Header -->
+  <div class="page-top">
     <div>
       <p class="breadcrumb">Home <span>/ Purchases</span></p>
-      <h1 class="page-title">Purchases</h1>
-      <p class="page-subtitle">{{ totalCount }} total purchase orders</p>
+      <h1 class="page-heading">Purchases</h1>
+      <p class="page-sub">{{ totalCount }} total purchase orders</p>
     </div>
-    <a routerLink="/shop/purchases/create" class="btn btn-primary">🛒 New Purchase</a>
+    <a routerLink="/shop/purchases/create" class="btn btn-primary">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Purchase
+    </a>
   </div>
 
-  <!-- Filter Bar -->
-  <div class="filter-bar card mb-24">
-    <div class="search-bar">
-      <span class="search-icon">🔍</span>
+  <!-- Filter Row -->
+  <div class="filter-row">
+    <div class="search-wrap">
+      <svg class="search-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input [(ngModel)]="searchText" (ngModelChange)="onSearch()"
-        placeholder="Search by invoice no., supplier..." />
+        placeholder="Search by invoice no., supplier…" class="search-input" />
       <button *ngIf="searchText" class="clear-btn" (click)="clearSearch()">✕</button>
     </div>
-    <div class="filter-group">
-      <select class="form-control filter-select" [(ngModel)]="filterStatus" (ngModelChange)="onFilter()">
-        <option value="">All Status</option>
-        <option value="PAID">✅ Paid</option>
-        <option value="PARTIAL">🕐 Partial</option>
-        <option value="PENDING">❌ Pending</option>
-      </select>
+    <div class="filter-tabs">
+      <button class="ftab" [class.ftab-active]="filterStatus === ''"        (click)="filterStatus=''; onFilter()">All</button>
+      <button class="ftab ftab-green"  [class.ftab-active]="filterStatus === 'PAID'"    (click)="filterStatus='PAID'; onFilter()">Paid</button>
+      <button class="ftab ftab-amber"  [class.ftab-active]="filterStatus === 'PARTIAL'" (click)="filterStatus='PARTIAL'; onFilter()">Partial</button>
+      <button class="ftab ftab-red"    [class.ftab-active]="filterStatus === 'PENDING'" (click)="filterStatus='PENDING'; onFilter()">Pending</button>
     </div>
   </div>
 
-  <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+  <!-- Loading -->
+  <div class="load-wrap" *ngIf="loading">
+    <div class="load-spinner"></div>
+  </div>
 
-  <div class="card" *ngIf="!loading">
-    <div class="empty-state" *ngIf="!purchases.length">
-      <div class="empty-icon">🛒</div>
+  <!-- Content -->
+  <div class="main-card" *ngIf="!loading">
+
+    <!-- Empty -->
+    <div class="empty-box" *ngIf="!purchases.length">
+      <div class="empty-ico">🛒</div>
       <h3>No purchases found</h3>
       <p>Create your first purchase order to get started</p>
       <a routerLink="/shop/purchases/create" class="btn btn-primary mt-16">Create Purchase</a>
     </div>
 
-    <div class="table-wrapper" *ngIf="purchases.length">
-      <table class="table">
+    <!-- Desktop Table -->
+    <div class="tbl-wrap" *ngIf="purchases.length">
+      <table class="list-tbl">
         <thead>
           <tr>
             <th>Invoice No.</th>
             <th>Supplier</th>
             <th>Date</th>
-            <th>Total</th>
-            <th>Paid</th>
-            <th>Due</th>
+            <th class="num-col">Total</th>
+            <th class="num-col">Paid</th>
+            <th class="num-col">Due</th>
             <th>Status</th>
-            <th>Action</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let p of purchases"
               [routerLink]="['/shop/purchases', p.purchaseId ?? p.id]"
-              style="cursor:pointer">
-            <td><span class="bill-no">{{ p.invoiceNumber || '—' }}</span></td>
+              class="list-row">
             <td>
-              <div class="supplier-info">
-                <span class="supplier-name">{{ p.supplier?.companyName || p.supplierName || '—' }}</span>
+              <span class="no-chip">{{ p.invoiceNumber || '—' }}</span>
+            </td>
+            <td>
+              <div class="row-cell">
+                <div class="row-avatar sup-ava">{{ (p.supplier?.companyName || p.supplierName || '?')[0] }}</div>
+                <span class="primary">{{ p.supplier?.companyName || p.supplierName || '—' }}</span>
               </div>
             </td>
-            <td class="text-muted">{{ p.purchaseDate | date:'dd MMM yyyy' }}</td>
-            <td class="amount-total">{{ fmt(p.netPayable) }}</td>
-            <td class="amount-paid">{{ fmt(p.amountPaid) }}</td>
-            <td [class]="purchasePending(p) > 0 ? 'amount-pending' : 'amount-paid'">{{ fmt(purchasePending(p)) }}</td>
-            <td><span class="badge" [class]="statusClass(p.paymentStatus)">{{ p.paymentStatus || 'PENDING' }}</span></td>
+            <td class="dim date-col">{{ p.purchaseDate | date:'dd MMM yy' }}</td>
+            <td class="num-col fw-bold">{{ fmt(p.netPayable) }}</td>
+            <td class="num-col clr-green">{{ fmt(p.amountPaid) }}</td>
+            <td class="num-col" [class.clr-red]="purchasePending(p) > 0" [class.clr-green]="purchasePending(p) === 0">
+              {{ fmt(purchasePending(p)) }}
+            </td>
+            <td>
+              <span class="status-chip" [class]="chipClass(p.paymentStatus)">
+                {{ p.paymentStatus || 'PENDING' }}
+              </span>
+            </td>
             <td>
               <a [routerLink]="['/shop/purchases', p.purchaseId ?? p.id]"
-                 class="btn btn-sm btn-outline"
-                 (click)="$event.stopPropagation()">View</a>
+                 class="view-btn" (click)="$event.stopPropagation()">View</a>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Pagination -->
-    <div class="pagination" *ngIf="totalCount > pageSize">
-      <button class="btn btn-sm btn-outline"
-              (click)="prevPage()"
-              [disabled]="pageNumber === 1">← Prev</button>
-      <span class="page-info">
-        Page {{ pageNumber }} of {{ totalPages }}
-        <span class="text-muted">({{ totalCount }} total)</span>
-      </span>
-      <button class="btn btn-sm btn-outline"
-              (click)="nextPage()"
-              [disabled]="pageNumber >= totalPages">Next →</button>
+    <!-- Mobile Cards -->
+    <div class="mob-cards" *ngIf="purchases.length">
+      <div class="mob-card" *ngFor="let p of purchases"
+           [routerLink]="['/shop/purchases', p.purchaseId ?? p.id]">
+        <div class="mob-card-top">
+          <div>
+            <span class="no-chip">{{ p.invoiceNumber || '—' }}</span>
+            <p class="primary" style="margin-top:6px">{{ p.supplier?.companyName || p.supplierName || '—' }}</p>
+            <p class="secondary dim">{{ p.purchaseDate | date:'dd MMM yyyy' }}</p>
+          </div>
+          <span class="status-chip" [class]="chipClass(p.paymentStatus)">{{ p.paymentStatus || 'PENDING' }}</span>
+        </div>
+        <div class="mob-card-row">
+          <div class="mob-col">
+            <span class="mob-label">Total</span>
+            <span class="mob-val fw-bold">{{ fmt(p.netPayable) }}</span>
+          </div>
+          <div class="mob-col">
+            <span class="mob-label">Paid</span>
+            <span class="mob-val clr-green">{{ fmt(p.amountPaid) }}</span>
+          </div>
+          <div class="mob-col" style="text-align:right">
+            <span class="mob-label">Due</span>
+            <span class="mob-val" [class.clr-red]="purchasePending(p) > 0">{{ fmt(purchasePending(p)) }}</span>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Pagination -->
+    <div class="pagination-row" *ngIf="totalCount > pageSize">
+      <button class="pag-btn" (click)="prevPage()" [disabled]="pageNumber === 1">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Prev
+      </button>
+      <span class="pag-info">Page {{ pageNumber }} of {{ totalPages }} · {{ totalCount }} total</span>
+      <button class="pag-btn" (click)="nextPage()" [disabled]="pageNumber >= totalPages">
+        Next
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
   </div>
 </div>

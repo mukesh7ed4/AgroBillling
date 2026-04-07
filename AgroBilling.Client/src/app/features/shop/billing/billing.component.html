@@ -1,76 +1,96 @@
-<!-- src/app/features/shop/billing/billing.component.html -->
+<!-- billing.component.html — Premium Redesign -->
+<div class="billing-page fade-in">
 
-<div class="page-container fade-in">
-  <div class="page-header">
+  <!-- Header -->
+  <div class="page-top">
     <div>
       <p class="breadcrumb">Home <span>/ Billing</span></p>
-      <h1 class="page-title">Bills</h1>
-      <p class="page-subtitle">{{ totalCount }} total bills</p>
+      <h1 class="page-heading">Bills</h1>
+      <p class="page-sub">{{ totalCount }} total bills</p>
     </div>
-    <a routerLink="/shop/billing/create" class="btn btn-primary">🧾 Create New Bill</a>
+    <a routerLink="/shop/billing/create" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Create Bill
+    </a>
   </div>
 
   <!-- Filters -->
-  <div class="filter-bar card mb-24">
-    <div class="search-bar">
-      <span class="search-icon">🔍</span>
+  <div class="filter-row">
+    <div class="search-wrap">
+      <svg class="search-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input [(ngModel)]="searchText" (ngModelChange)="onSearch()"
-        placeholder="Search by bill no, customer name..." />
+        placeholder="Search bill no, customer…" class="search-input" />
       <button *ngIf="searchText" class="clear-btn" (click)="clearSearch()">✕</button>
     </div>
-    <div class="filter-group">
-      <select class="form-control filter-select" [(ngModel)]="filterStatus" (ngModelChange)="onFilter()">
-        <option value="">All Status</option>
-        <option value="PAID">✅ Paid</option>
-        <option value="PARTIAL">🕐 Partial</option>
-        <option value="PENDING">❌ Pending</option>
-      </select>
+    <div class="filter-tabs">
+      <button class="ftab" [class.ftab-active]="filterStatus === ''"        (click)="filterStatus=''; onFilter()">All</button>
+      <button class="ftab ftab-green"  [class.ftab-active]="filterStatus === 'PAID'"    (click)="filterStatus='PAID'; onFilter()">Paid</button>
+      <button class="ftab ftab-amber"  [class.ftab-active]="filterStatus === 'PARTIAL'" (click)="filterStatus='PARTIAL'; onFilter()">Partial</button>
+      <button class="ftab ftab-red"    [class.ftab-active]="filterStatus === 'PENDING'" (click)="filterStatus='PENDING'; onFilter()">Pending</button>
     </div>
   </div>
 
-  <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+  <!-- Loading -->
+  <div class="load-wrap" *ngIf="loading">
+    <div class="load-spinner"></div>
+  </div>
 
-  <div class="card" *ngIf="!loading">
-    <div class="empty-state" *ngIf="!bills.length">
-      <div class="empty-icon">🧾</div>
+  <!-- Content -->
+  <div class="bills-card" *ngIf="!loading">
+
+    <!-- Empty -->
+    <div class="empty-box" *ngIf="!bills.length">
+      <div class="empty-ico">🧾</div>
       <h3>No bills found</h3>
       <p>Create your first bill to get started</p>
       <a routerLink="/shop/billing/create" class="btn btn-primary mt-16">Create Bill</a>
     </div>
 
-    <div class="table-wrapper" *ngIf="bills.length">
-      <table class="table">
+    <!-- Desktop Table -->
+    <div class="tbl-wrap" *ngIf="bills.length">
+      <table class="bills-tbl">
         <thead>
           <tr>
             <th>Bill No.</th>
             <th>Customer</th>
             <th>Date</th>
-            <th>Total</th>
-            <th>Paid</th>
-            <th>Pending</th>
+            <th class="num-col">Total</th>
+            <th class="num-col">Paid</th>
+            <th class="num-col">Pending</th>
             <th>Status</th>
-            <th>Action</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let b of bills"
               [routerLink]="['/shop/billing', b.billId ?? b.id]"
-              style="cursor:pointer">
-            <td><span class="bill-no">{{ b.billNumber }}</span></td>
+              class="bill-row">
             <td>
-              <div class="customer-info">
-                <span class="customer-name">{{ b.customer?.fullName || b.customerName || '-' }}</span>
-                <span class="customer-mobile text-xs text-muted">{{ b.customer?.mobileNumber || b.customerMobile || '' }}</span>
+              <span class="bill-no-chip">{{ b.billNumber }}</span>
+            </td>
+            <td>
+              <div class="cust-cell">
+                <div class="cust-avatar-sm">{{ (b.customer?.fullName || b.customerName || '?')[0] }}</div>
+                <div class="cust-info-sm">
+                  <span class="cust-name-sm">{{ b.customer?.fullName || b.customerName || '—' }}</span>
+                  <span class="cust-mob-sm">{{ b.customer?.mobileNumber || b.customerMobile || '' }}</span>
+                </div>
               </div>
             </td>
-            <td class="text-muted">{{ b.billDate | date:'dd MMM yyyy' }}</td>
-            <td class="amount-total">{{ fmt(b.totalAmount) }}</td>
-            <td class="amount-paid">{{ fmt(b.amountPaid) }}</td>
-            <td [class]="(b.amountPending ?? 0) > 0 ? 'amount-pending' : 'amount-paid'">{{ fmt(b.amountPending) }}</td>
-            <td><span class="badge" [class]="statusClass(b.paymentStatus)">{{ b.paymentStatus || 'PENDING' }}</span></td>
+            <td class="date-cell">{{ b.billDate | date:'dd MMM yy' }}</td>
+            <td class="num-col fw-bold">{{ fmt(b.totalAmount) }}</td>
+            <td class="num-col clr-green">{{ fmt(b.amountPaid) }}</td>
+            <td class="num-col" [class.clr-red]="(b.amountPending ?? 0) > 0" [class.clr-green]="(b.amountPending ?? 0) === 0">
+              {{ fmt(b.amountPending) }}
+            </td>
+            <td>
+              <span class="status-chip" [class]="chipClass(b.paymentStatus)">
+                {{ b.paymentStatus || 'PENDING' }}
+              </span>
+            </td>
             <td>
               <a [routerLink]="['/shop/billing', b.billId ?? b.id]"
-                 class="btn btn-sm btn-outline"
+                 class="view-btn"
                  (click)="$event.stopPropagation()">View</a>
             </td>
           </tr>
@@ -78,18 +98,51 @@
       </table>
     </div>
 
-    <!-- Pagination -->
-    <div class="pagination" *ngIf="totalCount > pageSize">
-      <button class="btn btn-sm btn-outline"
-              (click)="prevPage()"
-              [disabled]="pageNumber === 1">← Prev</button>
-      <span class="page-info">
-        Page {{ pageNumber }} of {{ totalPages }}
-        <span class="text-muted">({{ totalCount }} total)</span>
-      </span>
-      <button class="btn btn-sm btn-outline"
-              (click)="nextPage()"
-              [disabled]="pageNumber >= totalPages">Next →</button>
+    <!-- Mobile Cards -->
+    <div class="mob-cards" *ngIf="bills.length">
+      <div class="mob-bill-card" *ngFor="let b of bills"
+           [routerLink]="['/shop/billing', b.billId ?? b.id]">
+        <div class="mob-card-top">
+          <span class="bill-no-chip">{{ b.billNumber }}</span>
+          <span class="status-chip" [class]="chipClass(b.paymentStatus)">{{ b.paymentStatus || 'PENDING' }}</span>
+        </div>
+        <div class="mob-card-cust">
+          <div class="cust-avatar-sm">{{ (b.customer?.fullName || b.customerName || '?')[0] }}</div>
+          <span class="cust-name-sm">{{ b.customer?.fullName || b.customerName || '—' }}</span>
+        </div>
+        <div class="mob-card-row">
+          <div class="mob-card-col">
+            <span class="mob-label">Total</span>
+            <span class="mob-val fw-bold">{{ fmt(b.totalAmount) }}</span>
+          </div>
+          <div class="mob-card-col">
+            <span class="mob-label">Paid</span>
+            <span class="mob-val clr-green">{{ fmt(b.amountPaid) }}</span>
+          </div>
+          <div class="mob-card-col">
+            <span class="mob-label">Pending</span>
+            <span class="mob-val" [class.clr-red]="(b.amountPending ?? 0) > 0">{{ fmt(b.amountPending) }}</span>
+          </div>
+          <div class="mob-card-col">
+            <span class="mob-label">Date</span>
+            <span class="mob-val">{{ b.billDate | date:'dd MMM' }}</span>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Pagination -->
+    <div class="pagination-row" *ngIf="totalCount > pageSize">
+      <button class="pag-btn" (click)="prevPage()" [disabled]="pageNumber === 1">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Prev
+      </button>
+      <span class="pag-info">Page {{ pageNumber }} of {{ totalPages }}</span>
+      <button class="pag-btn" (click)="nextPage()" [disabled]="pageNumber >= totalPages">
+        Next
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
   </div>
 </div>

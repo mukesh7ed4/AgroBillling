@@ -1,3 +1,4 @@
+
 // ================================================
 //  AgroBilling.DAL / Repositories / CustomerRepository.cs
 // ================================================
@@ -56,29 +57,31 @@ namespace AgroBillling.DAL.Repositories
                 .Take(pageSize)
                 .ToListAsync();
 
-            // Get bill stats for these customers in one query
+            // ✅ Get bill stats — simple math instead of nullable coalesce in GroupBy
             var customerIds = customers.Select(c => c.CustomerId).ToList();
             var billStats = await _context.Bills
                 .AsNoTracking()
-                .Where(b => customerIds.Contains(b.CustomerId) && b.IsReturn == false)
+                .Where(b => customerIds.Contains(b.CustomerId) && !b.IsReturn)
                 .GroupBy(b => b.CustomerId)
                 .Select(g => new
                 {
                     CustomerId = g.Key,
                     TotalBills = g.Count(),
-                    TotalPending = g.Sum(b => b.AmountPending ?? (b.TotalAmount - b.AmountPaid))
+                    TotalAmount = g.Sum(b => b.TotalAmount),
+                    AmountPaid = g.Sum(b => b.AmountPaid)
                 })
                 .ToDictionaryAsync(x => x.CustomerId);
 
-            //// Populate NotMapped fields
-            //foreach (var c in customers)
-            //{
-            //    if (billStats.TryGetValue(c.CustomerId, out var stats))
-            //    {
-            //        c.TotalBills = stats.TotalBills;
-            //        c.TotalPending = stats.TotalPending < 0 ? 0 : stats.TotalPending;
-            //    }
-            //}
+            // Populate NotMapped fields
+            foreach (var c in customers)
+            {
+                if (billStats.TryGetValue(c.CustomerId, out var stats))
+                {
+                    c.TotalBills = stats.TotalBills;
+                    var pending = stats.TotalAmount - stats.AmountPaid;
+                    c.TotalPending = pending < 0 ? 0 : pending;
+                }
+            }
 
             return (customers, total);
         }

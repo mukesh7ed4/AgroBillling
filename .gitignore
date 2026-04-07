@@ -1,35 +1,82 @@
-# ✅ SECURITY — in files GitHub pe mat jaaye
+# ============================================
+# ⚠️ CRITICAL SECURITY - NEVER COMMIT
+# ============================================
 
-# Sensitive config files
-appsettings.Development.json
-appsettings.Production.json
-**/secrets.json
-**/*.pfx
-**/*.p12
+# Backend secrets - API Layer
+AgroBillingAPI/appsettings.json
+AgroBillingAPI/appsettings.Development.json
+AgroBillingAPI/appsettings.Production.json
+AgroBillingAPI/appsettings.Local.json
+AgroBillingAPI/secrets.json
+AgroBillingAPI/*.pfx
+AgroBillingAPI/*.p12
 
-# Build outputs
-bin/
-obj/
-dist/
-.angular/
+# DAL layer - no secrets should be here anyway
+AgroBillling/appsettings.json
+AgroBillling/appsettings.Development.json
 
-# Node modules
-node_modules/
+# Angular environment files - Client
+AgroBillingClient/src/environments/environment.ts
+AgroBillingClient/src/environments/environment.prod.ts
+AgroBillingClient/src/environments/environment.*.ts
+!AgroBillingClient/src/environments/environment.template.ts
 
-# Environment files
+# Environment variables
 .env
 .env.*
 !.env.example
 
-# IDE
+# ============================================
+# Build outputs
+# ============================================
+**/bin/
+**/obj/
+**/dist/
+**/node_modules/
+**/.angular/
+**/out/
+**/publish/
+
+# ============================================
+# IDE and OS files
+# ============================================
 .vs/
-.vscode/settings.json
+.vscode/
+.idea/
 *.user
-
-# Logs
-*.log
-logs/
-
-# OS files
+*.suo
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# ============================================
+# Logs
+# ============================================
+**/logs/
+*.log
+*.txt
+nohup.out
+
+# ============================================
+# Docker (keep Dockerfile, ignore others)
+# ============================================
+docker-compose.override.yml
+*.dockerignore
+!Dockerfile
+
+# ============================================
+# Package files
+# ============================================
+*.zip
+*.7z
+*.rar
+AgroBillingAPI.zip
+AgroBilling.zip
+
+# ============================================
+# Test and temp files
+# ============================================
+**/TestResults/
+**/coverage/
+**/temp/
+**/tmp/

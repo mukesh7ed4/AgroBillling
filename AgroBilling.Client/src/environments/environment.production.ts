@@ -1,5 +1,4 @@
-// environment.ts (development)
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:5249'  // Changed from '/api'
+  production: true,
+  apiUrl: 'https://agrobilling-api.onrender.com/api'
 };

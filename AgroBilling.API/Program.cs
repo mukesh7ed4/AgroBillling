@@ -5,6 +5,7 @@
 
 using AgroBilling.API.Services;
 using AgroBillling.DAL.Context;
+using AgroBillling.DAL.Models;
 using AgroBillling.DAL.Repositories;
 using AgroBillling.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -52,7 +53,6 @@ builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<ICreditNoteRepository, CreditNoteRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-
 
 // ─── SERVICES ────────────────────────────────────────────────
 builder.Services.AddScoped<IBillService, BillService>();

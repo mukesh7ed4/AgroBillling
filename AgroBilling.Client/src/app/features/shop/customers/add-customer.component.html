@@ -1,98 +1,113 @@
-<div class="page-container fade-in">
-  <div class="page-header">
+<div class="add-cust-page fade-in">
+
+  <!-- Header -->
+  <div class="ac-header">
     <div>
-      <p class="breadcrumb">Home <span>/ Customers /</span> <span>Add New</span></p>
-      <h1 class="page-title">Add Customer</h1>
+      <p class="ac-breadcrumb">Home <span>/ Customers /</span> <span>Add New</span></p>
+      <h1 class="ac-title">Add Customer</h1>
     </div>
     <a routerLink="/shop/customers" class="btn btn-outline">← Back</a>
   </div>
 
-  <!-- Error alert -->
-  <div class="alert alert-danger mb-16" *ngIf="error">⚠️ {{ error }}</div>
+  <!-- Error -->
+  <div class="ac-alert" *ngIf="error">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    {{ error }}
+  </div>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header"><span class="card-title">👤 Personal Details</span></div>
+    <div class="ac-grid">
 
-        <div class="form-group">
-          <label class="form-label">Full Name *</label>
-          <input type="text" class="form-control" formControlName="fullName"
-            placeholder="e.g. Ramesh Kumar"
-            [class.is-invalid]="f['fullName'].invalid && f['fullName'].touched" />
-          <div class="form-error" *ngIf="f['fullName'].invalid && f['fullName'].touched">Name is required</div>
+      <!-- Card 1: Personal -->
+      <div class="ac-card">
+        <div class="ac-card-header">
+          <span class="ac-card-title">👤 Personal Details</span>
         </div>
+        <div class="ac-fields">
 
-        <div class="form-group">
-          <label class="form-label">Father's Name</label>
-          <input type="text" class="form-control" formControlName="fatherName"
-            placeholder="e.g. Suresh Kumar" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Mobile Number *</label>
-          <input type="tel" class="form-control" formControlName="mobileNumber"
-            placeholder="10-digit mobile number"
-            [class.is-invalid]="f['mobileNumber'].invalid && f['mobileNumber'].touched" />
-          <div class="form-error" *ngIf="f['mobileNumber'].invalid && f['mobileNumber'].touched">
-            Enter valid 10-digit mobile
+          <div class="ac-field">
+            <label class="ac-label">Full Name *</label>
+            <input type="text" class="ac-input" formControlName="fullName"
+              placeholder="e.g. Ramesh Kumar"
+              [class.ac-invalid]="f['fullName'].invalid && f['fullName'].touched" />
+            <p class="ac-err" *ngIf="f['fullName'].invalid && f['fullName'].touched">Name is required</p>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label class="form-label">Alternate Mobile</label>
-          <input type="tel" class="form-control" formControlName="alternateMobile"
-            placeholder="Optional" />
-        </div>
+          <div class="ac-field">
+            <label class="ac-label">Father's Name</label>
+            <input type="text" class="ac-input" formControlName="fatherName"
+              placeholder="e.g. Suresh Kumar" />
+          </div>
 
-        <div class="form-group">
-          <label class="form-label">Land (Acres)</label>
-          <input type="number" class="form-control" formControlName="landAcres"
-            placeholder="e.g. 5.5" min="0" step="0.5" />
+          <div class="ac-field">
+            <label class="ac-label">Mobile Number *</label>
+            <input type="tel" class="ac-input" formControlName="mobileNumber"
+              placeholder="10-digit mobile number"
+              [class.ac-invalid]="f['mobileNumber'].invalid && f['mobileNumber'].touched" />
+            <p class="ac-err" *ngIf="f['mobileNumber'].invalid && f['mobileNumber'].touched">Enter valid 10-digit mobile</p>
+          </div>
+
+          <div class="ac-field">
+            <label class="ac-label">Alternate Mobile</label>
+            <input type="tel" class="ac-input" formControlName="alternateMobile"
+              placeholder="Optional" />
+          </div>
+
+          <div class="ac-field">
+            <label class="ac-label">Land (Acres)</label>
+            <input type="number" class="ac-input" formControlName="landAcres"
+              placeholder="e.g. 5.5" min="0" step="0.5" />
+          </div>
+
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header"><span class="card-title">📍 Address Details</span></div>
-
-        <div class="form-group">
-          <label class="form-label">Village / Locality</label>
-          <input type="text" class="form-control" formControlName="village"
-            placeholder="e.g. Bahadurgarh" />
+      <!-- Card 2: Address -->
+      <div class="ac-card">
+        <div class="ac-card-header">
+          <span class="ac-card-title">📍 Address & Account</span>
         </div>
+        <div class="ac-fields">
 
-        <div class="form-group">
-          <label class="form-label">Tehsil</label>
-          <input type="text" class="form-control" formControlName="tehsil"
-            placeholder="e.g. Bahadurgarh" />
+          <div class="ac-field">
+            <label class="ac-label">Village / Locality</label>
+            <input type="text" class="ac-input" formControlName="village"
+              placeholder="e.g. Bahadurgarh" />
+          </div>
+
+          <div class="ac-row-2">
+            <div class="ac-field">
+              <label class="ac-label">Tehsil</label>
+              <input type="text" class="ac-input" formControlName="tehsil"
+                placeholder="e.g. Bahadurgarh" />
+            </div>
+            <div class="ac-field">
+              <label class="ac-label">District</label>
+              <input type="text" class="ac-input" formControlName="district"
+                placeholder="e.g. Jhajjar" />
+            </div>
+          </div>
+
+          <div class="ac-field">
+            <label class="ac-label">State</label>
+            <input type="text" class="ac-input" formControlName="state" />
+          </div>
+
+          <div class="ac-field">
+            <label class="ac-label">Opening Balance (₹)</label>
+            <input type="number" class="ac-input" formControlName="openingBalance"
+              min="0" placeholder="0" />
+            <p class="ac-hint">Enter if customer had pending amount before joining this system</p>
+          </div>
+
+          <button type="submit" class="ac-submit-btn" [disabled]="submitting">
+            <span class="ac-spinner" *ngIf="submitting"></span>
+            {{ submitting ? 'Saving…' : '✅ Save Customer' }}
+          </button>
+
         </div>
-
-        <div class="form-group">
-          <label class="form-label">District</label>
-          <input type="text" class="form-control" formControlName="district"
-            placeholder="e.g. Jhajjar" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">State</label>
-          <input type="text" class="form-control" formControlName="state" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Opening Balance (₹)</label>
-          <input type="number" class="form-control" formControlName="openingBalance"
-            min="0" placeholder="Previous due if any" />
-          <p class="text-xs text-muted mt-8">
-            Enter if customer had pending amount before joining this system
-          </p>
-        </div>
-
-        <button type="submit" class="btn btn-primary w-full btn-lg mt-16"
-          [disabled]="submitting">
-          <span *ngIf="submitting" class="btn-spinner"></span>
-          {{ submitting ? 'Saving...' : '✅ Save Customer' }}
-        </button>
       </div>
+
     </div>
   </form>
 </div>

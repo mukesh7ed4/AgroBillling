@@ -1,57 +1,78 @@
-<div class="page-container fade-in">
-  <div class="page-header">
+<div class="inv-page fade-in">
+
+  <!-- Header -->
+  <div class="page-top">
     <div>
       <p class="breadcrumb">Home <span>/ Inventory</span></p>
-      <h1 class="page-title">Inventory</h1>
-      <p class="page-subtitle">{{ totalCount }} products</p>
+      <h1 class="page-heading">Inventory</h1>
+      <p class="page-sub">{{ totalCount }} products</p>
     </div>
-    <a routerLink="/shop/inventory/add" class="btn btn-primary">➕ Add Product</a>
+    <a routerLink="/shop/inventory/add" class="btn btn-primary">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Product
+    </a>
   </div>
 
-  <div class="filter-bar card mb-24">
-    <div class="search-bar">
-      <span class="search-icon">🔍</span>
-      <input [(ngModel)]="searchText" (ngModelChange)="onSearch()" placeholder="Search products..." />
+  <!-- Filter Row -->
+  <div class="filter-row">
+    <div class="search-wrap">
+      <svg class="search-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input [(ngModel)]="searchText" (ngModelChange)="onSearch()"
+        placeholder="Search products, category, company…" class="search-input" />
+      <button *ngIf="searchText" class="clear-btn" (click)="searchText=''; onSearch()">✕</button>
     </div>
   </div>
 
-  <div class="loading-overlay" *ngIf="loading"><div class="spinner"></div></div>
+  <!-- Loading -->
+  <div class="load-wrap" *ngIf="loading">
+    <div class="load-spinner"></div>
+  </div>
 
-  <div class="card" *ngIf="!loading">
-    <div class="empty-state" *ngIf="!products.length">
-      <div class="empty-icon">📦</div>
+  <!-- Content -->
+  <div class="main-card" *ngIf="!loading">
+
+    <!-- Empty -->
+    <div class="empty-box" *ngIf="!products.length">
+      <div class="empty-ico">📦</div>
       <h3>No products found</h3>
+      <p>Add your first product to get started</p>
       <a routerLink="/shop/inventory/add" class="btn btn-primary mt-16">Add Product</a>
     </div>
 
-    <div class="table-wrapper" *ngIf="products.length">
-      <table>
+    <!-- Desktop Table -->
+    <div class="tbl-wrap" *ngIf="products.length">
+      <table class="list-tbl">
         <thead>
           <tr>
-            <th>Product</th><th>Category</th><th>Company</th>
-            <th>Unit</th><th>Purchase ₹</th><th>Selling ₹</th>
-            <th>GST %</th><th>Stock</th>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Company</th>
+            <th>Unit</th>
+            <th class="num-col">Buy ₹</th>
+            <th class="num-col">Sell ₹</th>
+            <th class="num-col">Stock</th>
           </tr>
         </thead>
         <tbody>
-          <!-- ✅ Clickable row → product detail -->
           <tr *ngFor="let p of products"
-              [class.low-stock-row]="isLowStock(p)"
               [routerLink]="['/shop/inventory', p.productId ?? p.id]"
-              style="cursor:pointer"
-              class="tr-hover">
+              class="list-row"
+              [class.low-row]="isLowStock(p)">
             <td>
-              <div class="font-bold">{{ p.productName }}</div>
-              <div class="text-xs text-muted" *ngIf="isLowStock(p)">⚠️ Low Stock</div>
+              <div class="row-cell-info" style="gap:3px">
+                <span class="primary">{{ p.productName }}</span>
+                <span class="secondary low-warn" *ngIf="isLowStock(p)">⚠️ Low stock</span>
+              </div>
             </td>
-            <td class="text-muted">{{ p.categoryName || '—' }}</td>
-            <td class="text-muted">{{ p.companyName || '—' }}</td>
-            <td><span class="badge badge-muted">{{ p.unitShortName }}</span></td>
-            <td>{{ fmt(p.purchasePrice) }}</td>
-            <td class="amount-total font-bold">{{ fmt(p.sellingPrice) }}</td>
-            <td class="text-muted">{{ p.gstPercent }}%</td>
+            <td class="dim">{{ p.categoryName || '—' }}</td>
+            <td class="dim">{{ p.companyName || '—' }}</td>
             <td>
-              <span class="badge" [class]="isLowStock(p) ? 'badge-danger' : 'badge-success'">
+              <span class="unit-chip">{{ p.unitShortName || '—' }}</span>
+            </td>
+            <td class="num-col dim">{{ fmt(p.purchasePrice) }}</td>
+            <td class="num-col fw-bold">{{ fmt(p.sellingPrice) }}</td>
+            <td class="num-col">
+              <span class="stock-chip" [class.stock-low]="isLowStock(p)" [class.stock-ok]="!isLowStock(p)">
                 {{ p.currentStock }} {{ p.unitShortName }}
               </span>
             </td>
@@ -60,10 +81,49 @@
       </table>
     </div>
 
-    <div class="pagination" *ngIf="totalPages > 1">
-      <button class="btn btn-sm btn-outline" (click)="prevPage()" [disabled]="pageNumber===1">← Prev</button>
-      <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
-      <button class="btn btn-sm btn-outline" (click)="nextPage()" [disabled]="pageNumber===totalPages">Next →</button>
+    <!-- Mobile Cards -->
+    <div class="mob-cards" *ngIf="products.length">
+      <div class="mob-card" *ngFor="let p of products"
+           [routerLink]="['/shop/inventory', p.productId ?? p.id]"
+           [class.low-row]="isLowStock(p)">
+        <div class="mob-card-top">
+          <div>
+            <p class="primary fw-bold">{{ p.productName }}</p>
+            <p class="secondary dim">{{ p.categoryName || '—' }} · {{ p.companyName || '—' }}</p>
+          </div>
+          <span class="stock-chip" [class.stock-low]="isLowStock(p)" [class.stock-ok]="!isLowStock(p)">
+            {{ p.currentStock }} {{ p.unitShortName }}
+          </span>
+        </div>
+        <div class="mob-card-row">
+          <div class="mob-col">
+            <span class="mob-label">Buy Price</span>
+            <span class="mob-val dim">{{ fmt(p.purchasePrice) }}</span>
+          </div>
+          <div class="mob-col">
+            <span class="mob-label">Sell Price</span>
+            <span class="mob-val fw-bold">{{ fmt(p.sellingPrice) }}</span>
+          </div>
+          <div class="mob-col" style="text-align:right">
+            <span class="mob-label">Unit</span>
+            <span class="mob-val"><span class="unit-chip">{{ p.unitShortName }}</span></span>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Pagination -->
+    <div class="pagination-row" *ngIf="totalPages > 1">
+      <button class="pag-btn" (click)="prevPage()" [disabled]="pageNumber === 1">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Prev
+      </button>
+      <span class="pag-info">Page {{ pageNumber }} of {{ totalPages }}</span>
+      <button class="pag-btn" (click)="nextPage()" [disabled]="pageNumber >= totalPages">
+        Next
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
   </div>
 </div>
