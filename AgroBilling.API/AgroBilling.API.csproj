@@ -9,22 +9,20 @@
   <ItemGroup>
     <!-- JWT -->
     <PackageReference Include="MailKit" Version="4.15.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5" />
 
     <!-- Swagger -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 
-    <!-- ✅ ADD THIS (IMPORTANT FIX) -->
+    <!-- EF Core -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
-
-    <!-- ✅ ADD THIS (PostgreSQL support) -->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
-   <ProjectReference Include="..\AgroBilling\AgroBilling.DAL.csproj" />
+    <ProjectReference Include="..\AgroBilling\AgroBilling.DAL.csproj" />
   </ItemGroup>
 
 </Project>
