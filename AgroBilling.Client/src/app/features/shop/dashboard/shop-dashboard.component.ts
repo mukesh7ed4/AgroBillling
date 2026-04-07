@@ -10,7 +10,7 @@ import { MonthlyDashboard, SalesSummary } from '../../../core/models/models';
 @Component({
   selector: 'app-shop-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, DecimalPipe],
+  imports: [CommonModule, RouterModule],
   templateUrl: './shop-dashboard.component.html',
   styleUrls: ['./shop-dashboard.component.scss']
 })
