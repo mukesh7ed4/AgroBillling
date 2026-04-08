@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/AgroBilling.Client",
+  "outputDirectory": "dist/AgroBilling.Client/browser",
   "installCommand": "npm install",
   "routes": [
     {
