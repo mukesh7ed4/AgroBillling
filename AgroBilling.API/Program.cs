@@ -78,15 +78,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+var allowedOrigins = builder.Configuration
+    .GetSection("AllowedOrigins")
+    .Get<string[]>()
+    ?? new[] { "http://localhost:4200" };
+
 // CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.AllowAnyOrigin()
+    {
+        policy.WithOrigins(allowedOrigins)
+              .SetIsOriginAllowedToAllowWildcardSubdomains()  // ← add this
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
 });
-
 // CONTROLLERS
 builder.Services.AddControllers();
 
