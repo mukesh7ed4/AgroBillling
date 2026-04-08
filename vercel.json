@@ -1,4 +1,11 @@
 {
-  "buildCommand": "cd AgroBilling.Client && npm install && npm run build -- --configuration production",
-  "outputDirectory": "AgroBilling.Client/dist/AgroBilling.Client"
+  "buildCommand": "npm run build --configuration production",
+  "outputDirectory": "dist/AgroBilling.Client",
+  "installCommand": "npm install",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
