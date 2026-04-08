@@ -1,7 +1,4 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "buildCommand": "cd AgroBilling.Client && npm install && npm run build -- --configuration production",
-  "outputDirectory": "AgroBilling.Client/dist/agrobilling/browser",
-  "installCommand": "cd AgroBilling.Client && npm install",
-  "framework": "angular"
+  "outputDirectory": "AgroBilling.Client/dist/AgroBilling.Client"
 }
