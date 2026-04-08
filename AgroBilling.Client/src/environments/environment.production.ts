@@ -1,5 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://agrobilling-api.onrender.com/api'
+  apiUrl: 'https://agrobilling-api.onrender.com'
 };
- 
