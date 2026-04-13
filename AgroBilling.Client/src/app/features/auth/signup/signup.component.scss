@@ -25,3 +25,23 @@
   display: flex;
   align-items: center;
 }
+
+// signup ke andar add karo
+@media (max-width: 600px) {
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 0;
+  }
+
+  .login-right {
+    padding: 20px 16px;
+  }
+
+  .login-card {
+    max-width: 100%;
+  }
+
+  .form-control {
+    font-size: 16px; // iOS zoom prevent karta hai
+  }
+}

@@ -3,14 +3,14 @@
 //  ✅ Debug logs removed — security fix
 // ================================================
 
-using AgroBillling.DAL.Context;
-using AgroBillling.DAL.Models;
-using AgroBillling.DAL.Repositories.Interfaces;
+using AgroBilling.DAL.Context;
+using AgroBilling.DAL.Models;
+using AgroBilling.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace AgroBillling.DAL.Repositories
+namespace AgroBilling.DAL.Repositories
 {
     public class AuthRepository : IAuthRepository
     {

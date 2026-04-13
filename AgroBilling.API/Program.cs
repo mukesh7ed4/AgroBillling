@@ -3,9 +3,9 @@
 // ================================================
 
 using AgroBilling.API.Services;
-using AgroBillling.DAL.Context;
-using AgroBillling.DAL.Repositories;
-using AgroBillling.DAL.Repositories.Interfaces;
+using AgroBilling.DAL.Context;
+using AgroBilling.DAL.Repositories;
+using AgroBilling.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IO.Compression;
 using System.Text;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,7 +57,7 @@ builder.Services.AddScoped<EmailService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<EmailValidationService>();
 
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 
 // JWT
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -80,22 +82,14 @@ builder.Services.AddAuthorization();
 
 
 
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.SetIsOriginAllowed(origin =>
-        {
-            if (string.IsNullOrEmpty(origin)) return false;
-            var uri = new Uri(origin);
-            return uri.Host == "localhost" ||
-                   uri.Host.EndsWith(".vercel.app") ||
-                   uri.Host == "agro-billling.vercel.app";
-        })
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
+        policy.AllowAnyOrigin()     
+              .AllowAnyHeader()
+              .AllowAnyMethod());   // no AllowCredentials when using AllowAnyOrigin
 });
-
 // CONTROLLERS
 builder.Services.AddControllers();
 
@@ -105,7 +99,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// SECURITY HEADERS
 app.Use(async (context, next) =>
 {
     context.Response.Headers["X-Frame-Options"] = "DENY";
@@ -119,17 +112,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// ✅ CORRECT ORDER — CORS must be first
-app.UseCors("AllowFrontend");
+app.UseCors("AllowFrontend");        // ← FIRST, before everything
 app.UseResponseCompression();
-app.UseDefaultFiles();
-app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/health", () => "OK");
-app.MapFallbackToFile("index.html");
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Run($"http://0.0.0.0:{port}");

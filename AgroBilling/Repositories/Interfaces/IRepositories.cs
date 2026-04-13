@@ -3,9 +3,9 @@
 //  AgroBilling.DAL / Repositories / Interfaces
 // ================================================
 
-using AgroBillling.DAL.Models;
+using AgroBilling.DAL.Models;
 
-namespace AgroBillling.DAL.Repositories.Interfaces
+namespace AgroBilling.DAL.Repositories.Interfaces
 {
     // ─── GENERIC BASE ───
     public interface IGenericRepository<T> where T : class

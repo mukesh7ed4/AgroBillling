@@ -5,7 +5,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AgroBillling.DAL.Models
+namespace AgroBilling.DAL.Models
 {
     [Table("VwCustomerPendingSummary")]
     public class VwCustomerPendingSummary

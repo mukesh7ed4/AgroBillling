@@ -1,5 +1,5 @@
 
-namespace AgroBillling.DAL.Models
+namespace AgroBilling.DAL.Models
 {
     // ─── AUTH ───
     public class LoginRequestDto

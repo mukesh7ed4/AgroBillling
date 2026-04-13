@@ -3,11 +3,11 @@
 // ================================================
 
 using System.Linq;
-using AgroBillling.DAL.Context;
-using AgroBillling.DAL.Models;
+using AgroBilling.DAL.Context;
+using AgroBilling.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AgroBillling.DAL.Repositories
+namespace AgroBilling.DAL.Repositories
 {
     public interface IPurchaseService
     {

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using AgroBillling.DAL.Models;
+using AgroBilling.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AgroBillling.DAL.Context;
+namespace AgroBilling.DAL.Context;
 
 public partial class AgroBillingDbContext : DbContext
 {
