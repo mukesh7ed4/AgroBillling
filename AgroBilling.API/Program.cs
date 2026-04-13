@@ -75,19 +75,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// ── REPLACE your entire AddCors block with this ──
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.SetIsOriginAllowed(origin =>
-        {
-            if (string.IsNullOrEmpty(origin)) return false;
-            var uri = new Uri(origin);
-            return uri.Host == "localhost" ||
-                   uri.Host.EndsWith(".vercel.app");
-        })
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
+        policy.AllowAnyOrigin()     // ✅ allow all origins for now
+              .AllowAnyHeader()
+              .AllowAnyMethod());   // no AllowCredentials when using AllowAnyOrigin
 });
 
 builder.Services.AddControllers();
@@ -109,7 +103,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowFrontend");
+app.UseCors("AllowFrontend");        // ← FIRST, before everything
 app.UseResponseCompression();
 app.UseRouting();
 app.UseAuthentication();
