@@ -1,0 +1,42 @@
+[33meff3e82[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m docker issue solved
+[33m2b34968[m program.cs render issue solved
+[33m17842a8[m program.cs ossiue solved
+[33m2bc3b1b[m billing name
+[33ma7db86b[m naming issue solved
+[33md0b0e39[m cors issue solved
+[33mbf922cf[m origin
+[33m573682a[m any origin
+[33m13ef7f0[m Trig
+[33m2d94d15[m all oriign allow
+[33mff30e3a[m Trigger
+[33m242fd93[m appsettings
+[33m2e21b18[m Trigger redeploy on Render
+[33me5ea8c1[m program,cs updated
+[33ma7eddf1[m Dockerfile updated
+[33m47b490d[m login css
+[33m99f6e8c[m enviromental variable issue solved
+[33m16019e8[m trigger vercel build
+[33mca3ddff[m vercel staus
+[33m413b0c6[m vercel
+[33ma0149cb[m naming error solve
+[33m5e5adcf[m vercel.json
+[33mae61c17[m warning issue solved
+[33mc41d52b[m .ts unused issue solve
+[33m03676e1[m size issue solved
+[33mfca1405[m  version correction
+[33me1198a0[m dal corrected
+[33m6aea3f9[m fix project reference and .NET version
+[33m1296a6b[m dockerfile updated
+[33mdc387af[m new correction
+[33md9ffc54[m Merge branch 'main' of https://github.com/mukesh7ed4/AgroBillling
+[33m0eb7e83[m Docker issue
+[33m4dba083[m Delete AgroBilling.API.zip
+[33m95d6e97[m Delete AgroBillling.zip
+[33me24da04[m production ready , docker file and all necassary changes made
+[33m3394347[m Validation mail , mobile and new feature are added
+[33mb6ccaa9[m purchase and customer and reports new functionality added
+[33m7ff22c1[m new functioanlity added in supplier
+[33m7374dbb[m Fixed model mapping, resolved ShopID error, optimized query
+[33m0c02caf[m Merge remote README with local project
+[33m72af50f[m Initial commit
+[33mdcaaaaf[m Initial commit - AgroBilling project
