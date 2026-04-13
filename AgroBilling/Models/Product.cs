@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AgroBillling.DAL.Models;
+namespace AgroBilling.DAL.Models;
 
 public partial class Product
 {

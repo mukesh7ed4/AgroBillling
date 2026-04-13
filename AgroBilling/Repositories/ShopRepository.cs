@@ -4,12 +4,12 @@
 // ================================================
 
 using System.Collections.Generic;
-using AgroBillling.DAL.Context;
-using AgroBillling.DAL.Models;
-using AgroBillling.DAL.Repositories.Interfaces;
+using AgroBilling.DAL.Context;
+using AgroBilling.DAL.Models;
+using AgroBilling.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace AgroBillling.DAL.Repositories
+namespace AgroBilling.DAL.Repositories
 {
     public class ShopRepository : GenericRepository<Shop>, IShopRepository
     {

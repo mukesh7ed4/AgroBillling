@@ -415,3 +415,32 @@
 @media (max-width: 480px) {
   .mob-card-row { grid-template-columns: repeat(2, 1fr); }
 }
+
+
+// ── Mobile fix ──
+@media (max-width: 768px) {
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;                    // ← gap kam karo
+  }
+
+  .filter-tabs {
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  .ftab {
+    flex: 1;
+    text-align: center;
+    padding: 7px 4px;            // ← padding kam karo
+    font-size: 11px;             // ← font size kam karo
+  }
+
+  // Create Bill button — full width theek hai, bas height fix
+  .page-top .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+  }
+}

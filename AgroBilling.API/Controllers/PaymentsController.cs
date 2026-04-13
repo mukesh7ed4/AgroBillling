@@ -3,14 +3,14 @@
 //  ✅ FIXED - Same pattern as ProductsController
 // ================================================
 
-using AgroBillling.DAL.Context;
-using AgroBillling.DAL.Models;
+using AgroBilling.DAL.Context;
+using AgroBilling.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace AgroBillling.API.Controllers
+namespace AgroBilling.API.Controllers
 {
     [ApiController]
     [Route("api/payments")]

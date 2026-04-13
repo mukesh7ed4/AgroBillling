@@ -1,17 +1,17 @@
 // ================================================
-//  AgroBillling.API / Controllers / ProductsController.cs
+//  AgroBilling.API / Controllers / ProductsController.cs
 //  ✅ COMPLETE FIXED VERSION - Reads role claim correctly
 // ================================================
 
-using AgroBillling.DAL.Context;
-using AgroBillling.DAL.Models;
-using AgroBillling.DAL.Repositories.Interfaces;
+using AgroBilling.DAL.Context;
+using AgroBilling.DAL.Models;
+using AgroBilling.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace AgroBillling.API.Controllers
+namespace AgroBilling.API.Controllers
 {
     [ApiController]
     [Route("api")]

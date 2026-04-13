@@ -4,13 +4,13 @@
 // ================================================
 
 using System.Collections.Concurrent;
-using AgroBillling.DAL.Context;
-using AgroBillling.DAL.Models;
-using AgroBillling.DAL.Repositories.Interfaces;
+using AgroBilling.DAL.Context;
+using AgroBilling.DAL.Models;
+using AgroBilling.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace AgroBillling.DAL.Repositories
+namespace AgroBilling.DAL.Repositories
 {
     public class ProductRepository : GenericRepository<Product>, IProductRepository
     {

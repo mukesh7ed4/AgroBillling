@@ -1,17 +1,17 @@
 // ================================================
-//  AgroBillling.API / Controllers / AdminController.cs
+//  AgroBilling.API / Controllers / AdminController.cs
 // ================================================
 
-using AgroBillling.DAL.Models;
-using AgroBillling.DAL.Repositories.Interfaces;
-using AgroBillling.DAL.Repositories;
+using AgroBilling.DAL.Models;
+using AgroBilling.DAL.Repositories.Interfaces;
+using AgroBilling.DAL.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
-using AgroBillling.DAL.Context;
+using AgroBilling.DAL.Context;
 
-namespace AgroBillling.API.Controllers
+namespace AgroBilling.API.Controllers
 {
     [ApiController]
     [Route("api/admin")]

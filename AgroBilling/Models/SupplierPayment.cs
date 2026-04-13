@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AgroBillling.DAL.Models;
+namespace AgroBilling.DAL.Models;
 
 public partial class SupplierPayment
 {

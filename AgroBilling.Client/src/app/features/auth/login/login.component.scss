@@ -263,3 +263,30 @@
   font-size: 0.75rem;
   margin-top: 24px;
 }
+
+
+@media (max-width: 600px) {
+  .login-right {
+    padding: 24px 20px;
+    align-items: flex-start;
+    padding-top: 40px;
+  }
+
+  .login-card {
+    max-width: 100%;
+  }
+
+  .login-title {
+    font-size: 1.375rem;
+  }
+
+  .form-control {
+    font-size: 16px; // iOS zoom prevent
+    height: 44px;   // touch-friendly
+  }
+
+  .btn-lg {
+    padding: 14px;
+    font-size: 1rem;
+  }
+}

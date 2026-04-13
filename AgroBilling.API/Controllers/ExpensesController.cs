@@ -1,15 +1,15 @@
 // ================================================
-//  AgroBillling.API / Controllers / ExpensesController.cs
+//  AgroBilling.API / Controllers / ExpensesController.cs
 //  ✅ FIXED - Same pattern as ProductsController
 // ================================================
 
-using AgroBillling.DAL.Models;
-using AgroBillling.DAL.Repositories.Interfaces;
+using AgroBilling.DAL.Models;
+using AgroBilling.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace AgroBillling.API.Controllers
+namespace AgroBilling.API.Controllers
 {
     [ApiController]
     [Route("api/expenses")]

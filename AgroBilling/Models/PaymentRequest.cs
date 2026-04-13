@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AgroBillling.DAL.Models;
+namespace AgroBilling.DAL.Models;
 
 public class PaymentRequest
 {

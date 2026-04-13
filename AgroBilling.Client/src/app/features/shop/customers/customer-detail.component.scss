@@ -37,3 +37,16 @@
   }
   .pob-label { font-size: 0.8125rem; color: var(--text-2); font-weight: 500; }
   .pob-value { font-size: 1.1rem; font-weight: 800; font-family: var(--font-display); }
+
+  // customer-detail.component.scss mein
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); // mobile pe 2 column
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr); // desktop pe 4
+  }
+}
