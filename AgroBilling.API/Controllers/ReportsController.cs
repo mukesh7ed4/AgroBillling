@@ -4,15 +4,15 @@
 //  Role claim mismatch se 403 aa raha tha
 // ================================================
 
-using AgroBillling.DAL.Context;
-using AgroBillling.DAL.Models;
-using AgroBillling.DAL.Repositories.Interfaces;
+using AgroBilling.DAL.Context;
+using AgroBilling.DAL.Models;
+using AgroBilling.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IO.Compression;
 
-namespace AgroBillling.API.Controllers
+namespace AgroBilling.API.Controllers
 {
     [ApiController]
     [Route("api/reports")]

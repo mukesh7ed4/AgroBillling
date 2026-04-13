@@ -1,6 +1,6 @@
-using AgroBillling.DAL.Context;
-using AgroBillling.DAL.Models;
-using AgroBillling.DAL.Repositories.Interfaces;
+using AgroBilling.DAL.Context;
+using AgroBilling.DAL.Models;
+using AgroBilling.DAL.Repositories.Interfaces;
 using AgroBilling.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace AgroBillling.API.Controllers
+namespace AgroBilling.API.Controllers
 {
     [ApiController]
     [Route("api/auth")]
