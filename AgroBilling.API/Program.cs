@@ -113,31 +113,23 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// PIPELINE
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-
-app.UseRouting();
+// ✅ CORRECT ORDER — CORS must be first
 app.UseCors("AllowFrontend");
 app.UseResponseCompression();
-app.UseAuthentication();
-app.UseAuthorization();
-
-
-// 🔥🔥 IMPORTANT FIX (SERVE ANGULAR)
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
-
-// 🔥 Angular routing fix
-app.MapFallbackToFile("index.html");
-
 app.MapGet("/health", () => "OK");
+app.MapFallbackToFile("index.html");
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Run($"http://0.0.0.0:{port}");

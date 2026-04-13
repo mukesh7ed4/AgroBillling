@@ -1,45 +1,38 @@
-# =========================
-# ANGULAR BUILD STAGE
-# =========================
-FROM node:20 AS client-build
-WORKDIR /app
+# ══════════════════════════════════════════
+#  AgroBilling API — Render Dockerfile
+#  Only .NET — Angular is on Vercel
+# ══════════════════════════════════════════
 
-COPY AgroBilling.Client ./AgroBilling.Client
-WORKDIR /app/AgroBilling.Client
-
-RUN npm install
-RUN npm run build -- --configuration production
-
-# =========================
-# .NET BUILD STAGE
-# =========================
+# ── STAGE 1: BUILD ──
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
+# Copy project files first (better layer caching)
 COPY AgroBilling/AgroBilling.DAL.csproj AgroBilling/
 COPY AgroBilling.API/AgroBilling.API.csproj AgroBilling.API/
 
+# Restore packages
 RUN dotnet restore AgroBilling.API/AgroBilling.API.csproj
 
+# Copy all source code
 COPY . .
 
-# Copy Angular build to wwwroot
-COPY --from=client-build /app/AgroBilling.Client/dist/AgroBilling.Client /src/AgroBilling.API/wwwroot
+# Publish release build
+RUN dotnet publish AgroBilling.API/AgroBilling.API.csproj \
+    -c Release \
+    -o /app/publish \
+    --no-restore
 
-RUN dotnet publish AgroBilling.API/AgroBilling.API.csproj -c Release -o /app/publish
-
-# =========================
-# RUNTIME STAGE
-# =========================
+# ── STAGE 2: RUNTIME ──
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 
 COPY --from=build /app/publish .
 
-# ✅ FIXED: Use dynamic PORT
-ENV ASPNETCORE_URLS=http://+:${PORT}
+# Render injects PORT env variable dynamically
+ENV ASPNETCORE_URLS=http://+:${PORT:-8080}
+ENV ASPNETCORE_ENVIRONMENT=Production
 
-# Optional but standard
 EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "AgroBilling.API.dll"]
