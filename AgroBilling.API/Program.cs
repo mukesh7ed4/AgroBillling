@@ -9,31 +9,20 @@ using AgroBilling.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.IO.Compression;
 using System.Text;
 
-// Force disable file watching at host level
-AppContext.SetSwitch("Microsoft.Extensions.FileProviders.PhysicalFileProvider.Watch", false);
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-// Custom host builder with no file watching
-var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateEmptyBuilder(new WebApplicationOptions
-{
-    Args = args,
-    EnvironmentName = Environments.Production,
-    ApplicationName = "AgroBilling.API",
-    ContentRootPath = Directory.GetCurrentDirectory(),
-    WebRootPath = null
-});
+var builder = WebApplication.CreateBuilder(args);
 
-// Manual configuration without file watching
-builder.Configuration.Sources.Clear();
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
-builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: false);
-builder.Configuration.AddEnvironmentVariables();
+// Disable file watching — fixes Render inotify crash
+builder.Configuration.Sources
+    .OfType<Microsoft.Extensions.Configuration.Json.JsonConfigurationSource>()
+    .ToList()
+    .ForEach(s => s.ReloadOnChange = false);
 
-// Add services manually
 builder.Services.AddMemoryCache();
 builder.Services.AddResponseCompression(options =>
 {
@@ -44,11 +33,9 @@ builder.Services.AddResponseCompression(options =>
 builder.Services.Configure<BrotliCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
 builder.Services.Configure<GzipCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
 
-// Database
 builder.Services.AddDbContext<AgroBillingDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Repositories
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IShopRepository, ShopRepository>();
 builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
@@ -62,14 +49,12 @@ builder.Services.AddScoped<ICreditNoteRepository, CreditNoteRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
-// Services
 builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<EmailValidationService>();
 
-// JWT
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new Exception("Jwt Key missing");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -82,17 +67,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            RoleClaimType = "role",
+            NameClaimType = "sub"
         };
     });
 
 builder.Services.AddAuthorization();
 
-// CORS
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-    ?? new[] { "https://agro-billling.vercel.app", "http://localhost:4200" };
-
-// CORS — replace karo yeh block
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
