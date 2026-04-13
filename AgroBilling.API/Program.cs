@@ -1,5 +1,5 @@
 // ================================================
-// AgroBilling.API / Program.cs (FINAL FIXED)
+// PROGRAM.CS - RENDER OPTIMIZED (No File Watcher)
 // ================================================
 
 using AgroBilling.API.Services;
@@ -9,19 +9,32 @@ using AgroBilling.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using System.IO.Compression;
 using System.Text;
 
+// Force disable file watching at host level
+AppContext.SetSwitch("Microsoft.Extensions.FileProviders.PhysicalFileProvider.Watch", false);
 
+// Custom host builder with no file watching
+var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateEmptyBuilder(new WebApplicationOptions
+{
+    Args = args,
+    EnvironmentName = Environments.Production,
+    ApplicationName = "AgroBilling.API",
+    ContentRootPath = Directory.GetCurrentDirectory(),
+    WebRootPath = null
+});
 
-var builder = WebApplication.CreateBuilder(args);
+// Manual configuration without file watching
+builder.Configuration.Sources.Clear();
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: false);
+builder.Configuration.AddEnvironmentVariables();
 
-// MEMORY CACHE
+// Add services manually
 builder.Services.AddMemoryCache();
-
-// COMPRESSION
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
@@ -31,11 +44,11 @@ builder.Services.AddResponseCompression(options =>
 builder.Services.Configure<BrotliCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
 builder.Services.Configure<GzipCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
 
-// DATABASE
+// Database
 builder.Services.AddDbContext<AgroBillingDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// REPOSITORIES
+// Repositories
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IShopRepository, ShopRepository>();
 builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
@@ -49,20 +62,15 @@ builder.Services.AddScoped<ICreditNoteRepository, CreditNoteRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
-// SERVICES
+// Services
 builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<EmailService>();
-
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<EmailValidationService>();
 
-
-
 // JWT
-var jwtKey = builder.Configuration["Jwt:Key"]
-    ?? throw new Exception("Jwt Key missing");
-
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new Exception("Jwt Key missing");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -80,20 +88,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// CORS
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "https://agro-billling.vercel.app", "http://localhost:4200" };
 
-
-
+// CORS — replace karo yeh block
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.AllowAnyOrigin()     
-              .AllowAnyHeader()
-              .AllowAnyMethod());   // no AllowCredentials when using AllowAnyOrigin
+        policy.SetIsOriginAllowed(origin =>
+        {
+            if (string.IsNullOrEmpty(origin)) return false;
+            var uri = new Uri(origin);
+            return uri.Host == "localhost" ||
+                   uri.Host.EndsWith(".vercel.app");
+        })
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
 });
-// CONTROLLERS
-builder.Services.AddControllers();
 
-// SWAGGER
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -112,7 +127,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowFrontend");        // ← FIRST, before everything
+app.UseCors("AllowFrontend");
 app.UseResponseCompression();
 app.UseRouting();
 app.UseAuthentication();
