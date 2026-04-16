@@ -1,47 +1,108 @@
-// Login page ke saath same styles hain — sirf import karo
-// Ya yeh ek line:
-@use '../login/login.component.scss';
-// Agar import nahi karna toh login.component.scss ka sara content copy karo yahan
+// ═══════════════════════════════════════════════════════════════
+// SIGNUP PAGE — WARM EARTH DESIGN SYSTEM (Mobile-First Fixed)
+// ═══════════════════════════════════════════════════════════════
 
+// Signup shares same page shell as login
+// Import base login styles, then extend
+@use '../login/login.component' as login;
+
+// ── GRID-2 OVERRIDE FOR MOBILE ────────────────────────────────
+// The global .grid-2 uses repeat(2, 1fr) which breaks on narrow screens.
+// Override it inside .login-card to be mobile-first.
+.login-card {
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr; // mobile: single column
+    gap: 0; // no gap needed when stacked
+
+    // Tablet and above: two columns
+    @media (min-width: 520px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+  }
+}
+
+// ── OTP STEP ─────────────────────────────────────────────────
+.otp-icon {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.otp-input {
+  font-size: 2rem !important;
+  letter-spacing: 12px !important;
+  text-align: center !important;
+  font-weight: 700 !important;
+  height: 68px !important;
+  font-family: var(--font-mono) !important;
+  border-color: var(--border2) !important;
+
+  &:focus {
+    border-color: var(--leaf) !important;
+    box-shadow: 0 0 0 3px rgba(111,207,151,0.15) !important;
+  }
+
+  // On very small screens reduce the letter-spacing a bit
+  @media (max-width: 360px) {
+    font-size: 1.5rem !important;
+    letter-spacing: 8px !important;
+    height: 60px !important;
+  }
+}
+
+// ── RESEND / BACK LINKS ──────────────────────────────────────
+.btn-link-green {
+  background: none;
+  border: none;
+  color: var(--leaf);
+  cursor: pointer;
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  padding: 4px;
+  min-height: 40px; // touch target
+  transition: color var(--transition);
+
+  &:hover:not(:disabled) {
+    color: var(--gold);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-link-muted {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  padding: 4px;
+  min-height: 40px;
+  transition: color var(--transition);
+
+  &:hover {
+    color: var(--text-2);
+  }
+}
+
+// ── SPINNER SMALL (for async validation hints) ────────────────
 .spinner-small {
   display: inline-block;
   width: 12px;
   height: 12px;
-  border: 2px solid var(--text-muted);
-  border-top-color: var(--green-500);
+  border: 2px solid var(--border2);
+  border-top-color: var(--leaf);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin-right: 6px;
+  margin-right: 4px;
+  flex-shrink: 0;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.form-hint {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-}
-
-// signup ke andar add karo
-@media (max-width: 600px) {
-  .grid-2 {
-    grid-template-columns: 1fr !important;
-    gap: 0;
-  }
-
-  .login-right {
-    padding: 20px 16px;
-  }
-
-  .login-card {
-    max-width: 100%;
-  }
-
-  .form-control {
-    font-size: 16px; // iOS zoom prevent karta hai
-  }
-}
+@keyframes spin { to { transform: rotate(360deg); } }

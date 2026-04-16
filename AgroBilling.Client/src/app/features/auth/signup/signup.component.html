@@ -38,104 +38,117 @@
         </div>
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+          <!-- Row 1: Shop Name + Owner Name -->
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label">Shop Name *</label>
-              <input type="text" class="form-control" formControlName="shopName" placeholder="e.g. Kisan Agro Store"
+              <input type="text" class="form-control" formControlName="shopName"
+                placeholder="e.g. Kisan Agro Store"
+                autocomplete="organization"
                 [class.is-invalid]="f['shopName'].invalid && f['shopName'].touched" />
               <div class="form-error" *ngIf="f['shopName'].invalid && f['shopName'].touched">Required</div>
             </div>
             <div class="form-group">
               <label class="form-label">Owner Name *</label>
-              <input type="text" class="form-control" formControlName="ownerName" placeholder="Your full name"
+              <input type="text" class="form-control" formControlName="ownerName"
+                placeholder="Your full name"
+                autocomplete="name"
                 [class.is-invalid]="f['ownerName'].invalid && f['ownerName'].touched" />
               <div class="form-error" *ngIf="f['ownerName'].invalid && f['ownerName'].touched">Required</div>
             </div>
           </div>
 
+          <!-- Row 2: Mobile + Email -->
           <div class="grid-2">
-            <!-- Mobile Number Field -->
             <div class="form-group">
               <label class="form-label">Mobile *</label>
-              <input type="tel" class="form-control" formControlName="mobileNumber" placeholder="10-digit number"
+              <input type="tel" class="form-control" formControlName="mobileNumber"
+                placeholder="10-digit number"
+                autocomplete="tel"
+                inputmode="numeric"
                 [class.is-invalid]="(f['mobileNumber'].invalid && f['mobileNumber'].touched) || f['mobileNumber'].errors?.['mobileExists']" />
-
               <div class="form-error"
                 *ngIf="f['mobileNumber'].invalid && f['mobileNumber'].touched && !f['mobileNumber'].errors?.['mobileExists']">
                 Valid 10-digit mobile required
               </div>
-
               <div class="form-error" *ngIf="f['mobileNumber'].errors?.['mobileExists']">
                 ⚠️ {{ f['mobileNumber'].errors?.['mobileExists'] }}
               </div>
-
               <div class="form-hint"
                 *ngIf="f['mobileNumber'].status === 'PENDING' && f['mobileNumber'].value?.length === 10">
-                🔄 Checking mobile number...
+                <span class="spinner-small"></span> Checking...
               </div>
             </div>
 
-            <!-- Email Field -->
             <div class="form-group">
               <label class="form-label">Email *</label>
-              <input type="email" class="form-control" formControlName="email" placeholder="your@email.com"
+              <input type="email" class="form-control" formControlName="email"
+                placeholder="your@email.com"
+                autocomplete="email"
                 [class.is-invalid]="(f['email'].invalid && f['email'].touched) || f['email'].errors?.['invalidEmail'] || f['email'].errors?.['emailExists']" />
-
               <div class="form-error"
                 *ngIf="f['email'].invalid && f['email'].touched && !f['email'].errors?.['invalidEmail'] && !f['email'].errors?.['emailExists']">
                 Valid email required
               </div>
-
               <div class="form-error" *ngIf="f['email'].errors?.['invalidEmail']">
                 ⚠️ {{ f['email'].errors?.['invalidEmail'] }}
               </div>
-
               <div class="form-error" *ngIf="f['email'].errors?.['emailExists']">
                 ⚠️ {{ f['email'].errors?.['emailExists'] }}
               </div>
-
               <div class="form-hint" *ngIf="f['email'].status === 'PENDING' && f['email'].value?.includes('@')">
-                🔄 Validating email...
+                <span class="spinner-small"></span> Validating...
               </div>
             </div>
           </div>
 
+          <!-- Row 3: City + State -->
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label">City *</label>
-              <input type="text" class="form-control" formControlName="city" placeholder="e.g. Rohtak"
+              <input type="text" class="form-control" formControlName="city"
+                placeholder="e.g. Rohtak"
+                autocomplete="address-level2"
                 [class.is-invalid]="f['city'].invalid && f['city'].touched" />
               <div class="form-error" *ngIf="f['city'].invalid && f['city'].touched">Required</div>
             </div>
             <div class="form-group">
               <label class="form-label">State</label>
-              <input type="text" class="form-control" formControlName="state" />
+              <input type="text" class="form-control" formControlName="state"
+                autocomplete="address-level1" />
             </div>
           </div>
 
+          <!-- Row 4: Password + Confirm -->
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label">Password *</label>
-              <input type="password" class="form-control" formControlName="password" placeholder="Min 6 characters"
+              <input type="password" class="form-control" formControlName="password"
+                placeholder="Min 6 characters"
+                autocomplete="new-password"
                 [class.is-invalid]="f['password'].invalid && f['password'].touched" />
               <div class="form-error" *ngIf="f['password'].invalid && f['password'].touched">Min 6 characters</div>
             </div>
             <div class="form-group">
               <label class="form-label">Confirm Password *</label>
-              <input type="password" class="form-control" formControlName="confirmPass" placeholder="Repeat password"
+              <input type="password" class="form-control" formControlName="confirmPass"
+                placeholder="Repeat password"
+                autocomplete="new-password"
                 [class.is-invalid]="form.errors?.['mismatch'] && f['confirmPass'].touched" />
               <div class="form-error" *ngIf="form.errors?.['mismatch'] && f['confirmPass'].touched">Passwords do not match</div>
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary w-full btn-lg mt-8" [disabled]="submitting">
+          <button type="submit" class="btn btn-primary w-full btn-lg login-btn mt-8" [disabled]="submitting">
             <span *ngIf="submitting" class="btn-spinner"></span>
             {{ submitting ? 'Creating Account...' : '🚀 Start Free Trial' }}
           </button>
         </form>
 
         <div class="signup-link mt-16 text-center">
-          <p class="text-muted">Already have an account?
+          <p class="text-muted text-sm">
+            Already have an account?
             <a routerLink="/auth/login" class="text-green font-bold">Sign In →</a>
           </p>
         </div>
@@ -159,36 +172,41 @@
         </div>
 
         <div class="form-group mt-16">
-          <label class="form-label" style="text-align:center;display:block">
+          <label class="form-label text-center" style="display:block; text-align:center;">
             6-Digit OTP Enter Karo
           </label>
-          <input type="text" class="form-control otp-input" [(ngModel)]="otpValue" maxlength="6" placeholder="------"
+          <input
+            type="text"
+            class="form-control otp-input"
+            [(ngModel)]="otpValue"
+            maxlength="6"
+            placeholder="------"
             inputmode="numeric"
-            style="font-size:2rem;letter-spacing:14px;text-align:center;font-weight:700;height:64px" />
+            autocomplete="one-time-code"
+          />
         </div>
 
-        <button class="btn btn-primary w-full btn-lg mt-16" (click)="verifyOtp()"
+        <button class="btn btn-primary w-full btn-lg login-btn mt-16"
+          (click)="verifyOtp()"
           [disabled]="verifying || otpValue.length !== 6">
           <span *ngIf="verifying" class="btn-spinner"></span>
           {{ verifying ? 'Verifying...' : '✅ Verify & Start' }}
         </button>
 
         <div class="text-center mt-16">
-          <p class="text-muted" style="font-size:0.875rem">
+          <p class="text-muted text-sm">
             OTP nahi aaya?
-            <button class="btn-link" (click)="resendOtp()" [disabled]="resending"
-              style="background:none;border:none;color:var(--green-400);cursor:pointer;font-weight:600">
+            <button class="btn-link-green" (click)="resendOtp()" [disabled]="resending">
               {{ resending ? 'Sending...' : 'Resend OTP' }}
             </button>
           </p>
-          <p class="text-muted" style="font-size:0.75rem;margin-top:8px">
+          <p class="text-muted mt-8" style="font-size:0.75rem;">
             ⏰ OTP 10 minutes mein expire ho jaata hai
           </p>
         </div>
 
         <div class="text-center mt-8">
-          <button class="btn-link" (click)="step='form'"
-            style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.8125rem">
+          <button class="btn-link-muted" (click)="step='form'">
             ← Wapas jaao
           </button>
         </div>

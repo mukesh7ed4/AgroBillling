@@ -1,9 +1,16 @@
+// ═══════════════════════════════════════════════════════════════
+// LOGIN PAGE — WARM EARTH DESIGN SYSTEM (Mobile-First Fixed)
+// ═══════════════════════════════════════════════════════════════
+
 .login-page {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh; // dynamic viewport for mobile browsers
   background: var(--bg);
+  overflow-x: hidden;
 }
 
+// ── LEFT PANEL (hidden on mobile) ────────────────────────────────
 .login-left {
   flex: 1;
   background: #0D3318;
@@ -13,8 +20,11 @@
   justify-content: space-between;
   position: relative;
   overflow: hidden;
+  min-width: 0; // prevent flex overflow
 
-  @media (max-width: 900px) { display: none; }
+  @media (max-width: 900px) {
+    display: none;
+  }
 }
 
 .brand-logo {
@@ -33,9 +43,11 @@
   align-items: center;
   justify-content: center;
   font-size: 20px;
+  flex-shrink: 0;
 }
 
 .logo-text {
+  font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 700;
   color: #fff;
@@ -43,6 +55,7 @@
 }
 
 .brand-tagline {
+  font-family: var(--font-display);
   font-size: 1.1rem;
   font-weight: 600;
   color: #F9A825;
@@ -89,22 +102,45 @@
 .c2 { width: 220px; height: 220px; bottom: 50px; right: 50px; background: rgba(67,160,71,0.04); border: 1px solid rgba(255,255,255,0.03); }
 .c3 { width: 100px; height: 100px; bottom: 110px; right: 110px; background: rgba(249,168,37,0.06); }
 
+// ── RIGHT PANEL (main content area) ─────────────────────────────
 .login-right {
-  width: 420px;
+  // Mobile-first: take full width
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
+  padding: 32px 20px;
   background: var(--card);
+  min-height: 100dvh;
+  box-sizing: border-box;
 
-  @media (max-width: 900px) { width: 100%; }
+  // Tablet/desktop: fixed width panel
+  @media (min-width: 900px) {
+    width: 420px;
+    min-width: 420px;
+    flex-shrink: 0;
+    min-height: auto;
+  }
+
+  // Small mobile: tighter padding, top-aligned
+  @media (max-width: 480px) {
+    padding: 24px 16px;
+    align-items: flex-start;
+    padding-top: 40px;
+  }
 }
 
+// ── LOGIN CARD ────────────────────────────────────────────────────
 .login-card {
   width: 100%;
   max-width: 360px;
+  // On mobile, card fills the container
+  @media (max-width: 480px) {
+    max-width: 100%;
+  }
 }
 
+// ── THEME TOGGLE ─────────────────────────────────────────────────
 .theme-toggle {
   float: right;
   background: var(--surface);
@@ -114,14 +150,26 @@
   cursor: pointer;
   font-size: 1rem;
   margin-bottom: 8px;
+  transition: all var(--transition);
+
+  &:hover {
+    border-color: var(--border2);
+  }
 }
 
+// ── TITLES ──────────────────────────────────────────────────────
 .login-title {
+  font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 4px;
   margin-top: 8px;
   clear: both;
+  color: var(--text-1);
+
+  @media (max-width: 480px) {
+    font-size: 1.375rem;
+  }
 }
 
 .login-subtitle {
@@ -130,7 +178,7 @@
   margin-bottom: 24px;
 }
 
-// ── Role tabs ──────────────────────────────────────
+// ── ROLE TABS ────────────────────────────────────────────────────
 .role-tabs {
   display: flex;
   background: var(--surface);
@@ -152,13 +200,14 @@
   border: none;
   background: transparent;
   color: var(--text-2);
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 0.8125rem;
   cursor: pointer;
   transition: all 0.15s;
 
   &.active {
-    background: #1B5E20;
+    background: var(--forest);
     color: #fff;
   }
 
@@ -168,41 +217,61 @@
   }
 }
 
-// ── Form fields ────────────────────────────────────
-.form-group { margin-bottom: 16px; }
+// ── FORM FIELDS ──────────────────────────────────────────────────
+.form-group {
+  margin-bottom: 16px;
+}
 
 .form-label {
   display: block;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-2);
-  margin-bottom: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-3);
+  margin-bottom: 7px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-family: var(--font-display);
 }
 
 .form-control {
   width: 100%;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
+  height: 44px; // touch-friendly on all devices
+  padding: 0 14px;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-md);
+  background: var(--input-bg);
   color: var(--text-1);
-  font-size: 0.9375rem;
+  font-family: var(--font-body);
+  font-size: 16px; // CRITICAL: prevents iOS auto-zoom
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+  -webkit-appearance: none; // removes iOS default styling
 
   &:focus {
-    border-color: #2E7D32;
-    box-shadow: 0 0 0 3px rgba(46,125,50,0.12);
+    border-color: var(--leaf);
+    box-shadow: 0 0 0 3px rgba(111,207,151,0.12);
   }
 
-  &.is-invalid { border-color: var(--red-400); }
+  &.is-invalid {
+    border-color: var(--alert);
+    box-shadow: 0 0 0 3px var(--alert-dim);
+  }
 
-  &::placeholder { color: var(--text-3); }
+  &::placeholder {
+    color: var(--text-3);
+    font-size: 0.875rem;
+  }
 }
 
-.password-field { position: relative; }
-.password-field .form-control { padding-right: 40px; }
+// Password field
+.password-field {
+  position: relative;
+}
+
+.password-field .form-control {
+  padding-right: 44px;
+}
 
 .pass-toggle {
   position: absolute;
@@ -212,11 +281,18 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-3);
-  padding: 4px;
+  padding: 6px;
+  // Larger touch target
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+// Forgot password row
 .form-row-end {
   display: flex;
   justify-content: flex-end;
@@ -226,67 +302,98 @@
 
 .forgot-link {
   font-size: 0.8125rem;
-  color: #2E7D32;
-  font-weight: 500;
+  color: var(--forest-light);
+  font-weight: 600;
   text-decoration: none;
+  padding: 4px 0; // easier to tap
+
+  &:hover {
+    color: var(--leaf);
+  }
 }
 
-// ── Submit btn ─────────────────────────────────────
+// Form errors and hints
+.form-error {
+  font-size: 0.75rem;
+  color: var(--alert);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.4;
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+// ── SUBMIT BUTTON ────────────────────────────────────────────────
 .login-btn {
   justify-content: center;
-  background: #1B5E20 !important;
-  border-color: #1B5E20 !important;
-  height: 42px;
+  background: linear-gradient(135deg, var(--forest), var(--forest-light)) !important;
+  height: 48px; // taller for mobile tap comfort
+  font-size: 0.9375rem;
 
-  &:hover { background: #2E7D32 !important; }
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--forest-light), var(--leaf)) !important;
+  }
 }
 
 .btn-spinner {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   border: 2px solid rgba(255,255,255,0.3);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   display: inline-block;
-  margin-right: 8px;
+  flex-shrink: 0;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-// ── Footer ─────────────────────────────────────────
-.signup-link { margin-top: 20px; }
+// ── FOOTER / SIGN UP LINK ────────────────────────────────────────
+.signup-link {
+  margin-top: 20px;
+}
+
+.text-green {
+  color: var(--leaf);
+  &:hover { color: var(--gold); }
+}
 
 .login-footer {
   text-align: center;
   color: var(--text-3);
-  font-size: 0.75rem;
-  margin-top: 24px;
+  font-size: 0.72rem;
+  margin-top: 28px;
 }
 
+// ── ALERTS ───────────────────────────────────────────────────────
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  margin-bottom: 16px;
+  line-height: 1.5;
 
-@media (max-width: 600px) {
-  .login-right {
-    padding: 24px 20px;
-    align-items: flex-start;
-    padding-top: 40px;
+  &.alert-danger {
+    background: var(--alert-dim);
+    color: var(--alert);
+    border: 1px solid rgba(235,87,87,0.2);
   }
 
-  .login-card {
-    max-width: 100%;
-  }
-
-  .login-title {
-    font-size: 1.375rem;
-  }
-
-  .form-control {
-    font-size: 16px; // iOS zoom prevent
-    height: 44px;   // touch-friendly
-  }
-
-  .btn-lg {
-    padding: 14px;
-    font-size: 1rem;
+  &.alert-success {
+    background: var(--leaf-dim);
+    color: var(--leaf);
+    border: 1px solid rgba(111,207,151,0.2);
   }
 }

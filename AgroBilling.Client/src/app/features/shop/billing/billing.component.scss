@@ -1,4 +1,4 @@
-// billing.component.scss — Premium Redesign
+// billing.component.scss — Premium Redesign (Mobile-First Fixed)
 
 .billing-page {
   padding: 24px 28px 32px;
@@ -17,9 +17,9 @@
 
 .breadcrumb {
   font-size: 12px;
-  color: var(--text-2);
+  color: var(--text-3);
   margin-bottom: 4px;
-  span { color: var(--green-400); }
+  span { color: var(--leaf); }
 }
 
 .page-heading {
@@ -66,15 +66,17 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   color: var(--text-1);
-  font-size: 0.875rem;
+  font-size: 16px; // prevents iOS zoom
   font-family: var(--font-body);
   transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  height: 44px;
 
-  &::placeholder { color: var(--text-2); }
+  &::placeholder { color: var(--text-3); font-size: 0.875rem; }
   &:focus {
     outline: none;
-    border-color: var(--green-500);
-    box-shadow: 0 0 0 3px rgba(67,160,71,0.1);
+    border-color: var(--leaf);
+    box-shadow: 0 0 0 3px rgba(111,207,151,0.1);
   }
 }
 
@@ -86,9 +88,15 @@
   color: var(--text-2);
   cursor: pointer;
   font-size: 13px;
-  padding: 4px 6px;
+  padding: 6px;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 4px;
-  &:hover { color: var(--text-1); background: var(--border); }
+
+  &:hover { color: var(--text-1); background: var(--hover-bg); }
 }
 
 // ── Filter Tabs ───────────────────────────────────────────────
@@ -114,10 +122,10 @@
   white-space: nowrap;
   font-family: var(--font-body);
 
-  &:hover { color: var(--text-1); background: var(--border); }
+  &:hover { color: var(--text-1); background: var(--hover-bg); }
 
   &.ftab-active {
-    background: var(--green-700);
+    background: var(--forest);
     color: #fff;
 
     &.ftab-green  { background: #2E7D32; }
@@ -137,7 +145,7 @@
   width: 36px; height: 36px;
   border: 3px solid var(--border);
   border-radius: 50%;
-  border-top-color: var(--green-400);
+  border-top-color: var(--leaf);
   animation: spin 0.7s linear infinite;
 }
 
@@ -164,9 +172,7 @@
 .mt-16 { margin-top: 16px; }
 
 // ── Desktop Table ─────────────────────────────────────────────
-.tbl-wrap {
-  overflow-x: auto;
-}
+.tbl-wrap { overflow-x: auto; }
 
 .bills-tbl {
   width: 100%;
@@ -180,13 +186,9 @@
   thead th {
     padding: 12px 16px;
     text-align: left;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--text-2);
-    white-space: nowrap;
-
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--text-2); white-space: nowrap;
     &.num-col { text-align: right; }
   }
 
@@ -194,7 +196,6 @@
     border-bottom: 1px solid var(--border);
     cursor: pointer;
     transition: background 0.15s;
-
     &:last-child { border-bottom: none; }
     &:hover { background: var(--hover-bg); }
   }
@@ -204,7 +205,6 @@
     font-size: 0.875rem;
     color: var(--text-1);
     vertical-align: middle;
-
     &.num-col { text-align: right; }
     &.date-cell { color: var(--text-2); font-size: 0.8rem; white-space: nowrap; }
   }
@@ -213,8 +213,8 @@
 .bill-no-chip {
   display: inline-block;
   padding: 3px 9px;
-  background: rgba(67,160,71,0.1);
-  color: var(--green-400);
+  background: var(--leaf-dim);
+  color: var(--leaf);
   border-radius: 6px;
   font-family: var(--font-display);
   font-weight: 700;
@@ -231,13 +231,11 @@
 .cust-avatar-sm {
   width: 32px; height: 32px;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--green-700), var(--green-500));
+  background: linear-gradient(135deg, var(--forest), var(--forest-light));
   color: #fff;
   font-weight: 700;
   font-size: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   text-transform: uppercase;
 }
@@ -246,50 +244,48 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .cust-name-sm {
   font-weight: 600;
   font-size: 0.875rem;
   color: var(--text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.cust-mob-sm {
-  font-size: 0.75rem;
-  color: var(--text-2);
-}
+.cust-mob-sm { font-size: 0.75rem; color: var(--text-2); }
 
 .status-chip {
   display: inline-block;
   padding: 3px 10px;
   border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.4px;
 
-  &.chip-paid    { background: rgba(102,187,106,0.15); color: #66BB6A; }
-  &.chip-partial { background: rgba(251,192,45,0.15);  color: #FBC02D; }
-  &.chip-pending { background: rgba(239,83,80,0.15);   color: #EF5350; }
+  &.chip-paid    { background: var(--leaf-dim);  color: var(--leaf); }
+  &.chip-partial { background: var(--gold-dim);  color: var(--gold); }
+  &.chip-pending { background: var(--alert-dim); color: var(--alert); }
 }
 
 .view-btn {
   padding: 5px 12px;
   border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--green-400);
-  background: rgba(67,160,71,0.08);
+  font-size: 12px; font-weight: 600;
+  color: var(--leaf);
+  background: var(--leaf-dim);
   text-decoration: none;
   transition: all 0.2s;
   white-space: nowrap;
 
-  &:hover { background: rgba(67,160,71,0.18); color: var(--green-300); }
+  &:hover { background: rgba(111,207,151,0.2); }
 }
 
-.fw-bold  { font-weight: 700; }
-.clr-green { color: #66BB6A; font-weight: 600; }
-.clr-red   { color: #EF5350; font-weight: 600; }
+.fw-bold   { font-weight: 700; }
+.clr-green { color: var(--leaf); font-weight: 600; }
+.clr-red   { color: var(--alert); font-weight: 600; }
 
 // ── Mobile Cards ──────────────────────────────────────────────
 .mob-cards { display: none; }
@@ -299,9 +295,8 @@
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: background 0.15s;
-
   &:last-child { border-bottom: none; }
-  &:hover { background: var(--hover-bg); }
+  &:active { background: var(--hover-bg); }
 }
 
 .mob-card-top {
@@ -332,7 +327,7 @@
 
 .mob-label {
   font-size: 10px;
-  color: var(--text-2);
+  color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
@@ -364,83 +359,71 @@
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--text-1);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 13px; font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   font-family: var(--font-body);
+  min-height: 40px;
 
-  &:hover:not(:disabled) { border-color: var(--green-500); color: var(--green-400); }
+  &:hover:not(:disabled) { border-color: var(--leaf); color: var(--leaf); }
   &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
-.pag-info {
-  font-size: 13px;
-  color: var(--text-2);
-}
+.pag-info { font-size: 13px; color: var(--text-2); }
 
-// ── Animation ─────────────────────────────────────────────────
+// ── Animations ────────────────────────────────────────────────
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-// ── Tablet ────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// RESPONSIVE
+// ─────────────────────────────────────────────────────────────
+
 @media (max-width: 1024px) {
   .billing-page { padding: 20px 20px 80px; }
 }
 
-// ── Mobile ────────────────────────────────────────────────────
 @media (max-width: 768px) {
   .billing-page { padding: 16px 14px 100px; }
 
+  // Header
   .page-top { flex-direction: column; }
-  .page-top .btn { width: 100%; justify-content: center; }
+  .page-top .btn { width: 100%; justify-content: center; padding: 12px; }
 
-  .filter-row { flex-direction: column; align-items: stretch; }
+  // Filters stack vertically
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
   .search-wrap { min-width: unset; }
-  .filter-tabs { justify-content: stretch; }
-  .ftab { flex: 1; text-align: center; padding: 6px 8px; font-size: 12px; }
 
-  // Hide desktop table, show cards
-  .tbl-wrap { display: none; }
+  // Filter tabs — stretch to fill row
+  .filter-tabs {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .ftab {
+    flex: 1;
+    text-align: center;
+    padding: 7px 4px;
+    font-size: 11px;
+  }
+
+  // Table → Cards
+  .tbl-wrap  { display: none; }
   .mob-cards { display: block; }
 
+  // Mobile cards: 2 columns for amounts
   .mob-card-row { grid-template-columns: repeat(2, 1fr); }
 
+  // Pagination
   .pagination-row { flex-direction: column; gap: 10px; }
   .pag-btn { width: 100%; justify-content: center; }
 }
 
 @media (max-width: 480px) {
   .mob-card-row { grid-template-columns: repeat(2, 1fr); }
-}
-
-
-// ── Mobile fix ──
-@media (max-width: 768px) {
-  .filter-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;                    // ← gap kam karo
-  }
-
-  .filter-tabs {
-    justify-content: stretch;
-    width: 100%;
-  }
-
-  .ftab {
-    flex: 1;
-    text-align: center;
-    padding: 7px 4px;            // ← padding kam karo
-    font-size: 11px;             // ← font size kam karo
-  }
-
-  // Create Bill button — full width theek hai, bas height fix
-  .page-top .btn {
-    width: 100%;
-    justify-content: center;
-    padding: 12px;
-  }
 }
