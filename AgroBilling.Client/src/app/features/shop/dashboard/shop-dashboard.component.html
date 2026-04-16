@@ -1,169 +1,162 @@
-<!-- shop-dashboard.component.html — Ultra Premium Redesign -->
-<div class="dash-page">
+<!-- shop-dashboard.component.html — Premium Redesign -->
+<div class="dash-page fade-in">
 
-  <!-- ── Header ── -->
+  <!-- Header -->
   <div class="dash-header">
     <div class="dash-header-left">
-      <div class="greeting-chip">
-        <span class="greeting-dot"></span>
-        Good {{ timeOfDay }}, {{ shopName }}
-      </div>
+      <p class="breadcrumb">Home <span>/ Dashboard</span></p>
       <h1 class="dash-title">{{ monthName }}</h1>
-      <p class="dash-subtitle">Performance overview &amp; insights</p>
+      <p class="dash-subtitle">Your shop performance at a glance</p>
     </div>
     <div class="dash-header-actions">
       <a routerLink="/shop/billing/create" class="btn btn-primary">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
         New Bill
       </a>
-      <a routerLink="/shop/customers/add" class="btn btn-ghost">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <a routerLink="/shop/customers/add" class="btn btn-outline">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Add Customer
       </a>
     </div>
   </div>
 
-  <!-- ── Loading ── -->
+  <!-- Loading -->
   <div class="dash-loading" *ngIf="loading">
-    <div class="skeleton-row">
+    <div class="loading-grid">
       <div class="skeleton-card" *ngFor="let i of [1,2,3,4]"></div>
     </div>
-    <div class="skeleton-row">
-      <div class="skeleton-card tall"></div>
-      <div class="skeleton-card tall"></div>
-    </div>
   </div>
 
-  <!-- ── Empty ── -->
+  <!-- Empty -->
   <div class="dash-empty" *ngIf="!loading && !dashboard">
-    <div class="empty-glow">📊</div>
-    <h3>Nothing here yet</h3>
-    <p>No transactions found for {{ monthName }}</p>
+    <div class="empty-icon-wrap">📊</div>
+    <h3>No data yet</h3>
+    <p>No transactions found for this month</p>
   </div>
 
-  <!-- ── Content ── -->
+  <!-- Content -->
   <ng-container *ngIf="!loading && dashboard">
 
     <!-- KPI Cards -->
     <div class="kpi-grid">
 
-      <div class="kpi-card" data-accent="blue">
-        <div class="kpi-head">
-          <div class="kpi-ico blue">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap kpi-icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>
-          <span class="kpi-badge">This month</span>
+          <span class="kpi-trend">This month</span>
         </div>
-        <div class="kpi-val">{{ sm.totalBills ?? 0 }}</div>
-        <div class="kpi-lbl">Total Bills</div>
-        <div class="kpi-accent-bar blue"></div>
+        <div class="kpi-value">{{ sm.totalBills ?? 0 }}</div>
+        <div class="kpi-label">Total Bills</div>
+        <div class="kpi-bar kpi-bar-blue"></div>
       </div>
 
-      <div class="kpi-card" data-accent="amber">
-        <div class="kpi-head">
-          <div class="kpi-ico amber">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap kpi-icon-amber">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
-          <span class="kpi-badge">Gross</span>
+          <span class="kpi-trend">Gross</span>
         </div>
-        <div class="kpi-val">{{ formatCurrency(sm.totalSales) }}</div>
-        <div class="kpi-lbl">Total Sales</div>
-        <div class="kpi-accent-bar amber"></div>
+        <div class="kpi-value">{{ formatCurrency(sm.totalSales) }}</div>
+        <div class="kpi-label">Total Sales</div>
+        <div class="kpi-bar kpi-bar-amber"></div>
       </div>
 
-      <div class="kpi-card" data-accent="green">
-        <div class="kpi-head">
-          <div class="kpi-ico green">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap kpi-icon-green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <span class="kpi-badge green">Collected</span>
+          <span class="kpi-trend kpi-trend-up">Collected</span>
         </div>
-        <div class="kpi-val green">{{ formatCurrency(sm.totalCollected) }}</div>
-        <div class="kpi-lbl">Amount Received</div>
-        <div class="kpi-accent-bar green"></div>
+        <div class="kpi-value kpi-value-green">{{ formatCurrency(sm.totalCollected) }}</div>
+        <div class="kpi-label">Amount Received</div>
+        <div class="kpi-bar kpi-bar-green"></div>
       </div>
 
-      <div class="kpi-card" data-accent="red">
-        <div class="kpi-head">
-          <div class="kpi-ico red">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="kpi-card kpi-red">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap kpi-icon-red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
-          <span class="kpi-badge red">Outstanding</span>
+          <span class="kpi-trend kpi-trend-down">Outstanding</span>
         </div>
-        <div class="kpi-val red">{{ formatCurrency(sm.totalPending) }}</div>
-        <div class="kpi-lbl">Pending Recovery</div>
-        <div class="kpi-accent-bar red"></div>
+        <div class="kpi-value kpi-value-red">{{ formatCurrency(sm.totalPending) }}</div>
+        <div class="kpi-label">Pending Recovery</div>
+        <div class="kpi-bar kpi-bar-red"></div>
       </div>
 
     </div>
 
-    <!-- Mid Row -->
-    <div class="two-col-grid">
+    <!-- Middle Row -->
+    <div class="mid-grid">
 
       <!-- Bill Status -->
-      <div class="glass-card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <div class="info-card">
+        <div class="info-card-header">
+          <div class="info-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             Bill Status
           </div>
-          <a routerLink="/shop/billing" class="link-btn">View all →</a>
+          <a routerLink="/shop/billing" class="view-link">View All →</a>
         </div>
-        <div class="stat-rows">
-          <div class="stat-row">
-            <div class="stat-row-left">
-              <span class="pulse-dot green"></span>
-              <span class="stat-label">Paid</span>
+        <div class="status-list">
+          <div class="status-item">
+            <div class="status-left">
+              <span class="status-dot dot-green"></span>
+              <span class="status-name">Paid</span>
             </div>
-            <div class="stat-row-right">
-              <strong class="stat-num">{{ sm.paidBills ?? 0 }}</strong>
-              <span class="tag green">bills</span>
-            </div>
-          </div>
-          <div class="stat-row">
-            <div class="stat-row-left">
-              <span class="pulse-dot amber"></span>
-              <span class="stat-label">Partial</span>
-            </div>
-            <div class="stat-row-right">
-              <strong class="stat-num">{{ sm.partialBills ?? 0 }}</strong>
-              <span class="tag amber">bills</span>
+            <div class="status-right">
+              <span class="status-count">{{ sm.paidBills ?? 0 }}</span>
+              <span class="status-pill pill-green">bills</span>
             </div>
           </div>
-          <div class="stat-row">
-            <div class="stat-row-left">
-              <span class="pulse-dot red"></span>
-              <span class="stat-label">Pending</span>
+          <div class="status-item">
+            <div class="status-left">
+              <span class="status-dot dot-amber"></span>
+              <span class="status-name">Partial</span>
             </div>
-            <div class="stat-row-right">
-              <strong class="stat-num">{{ sm.pendingBills ?? 0 }}</strong>
-              <span class="tag red">bills</span>
+            <div class="status-right">
+              <span class="status-count">{{ sm.partialBills ?? 0 }}</span>
+              <span class="status-pill pill-amber">bills</span>
+            </div>
+          </div>
+          <div class="status-item">
+            <div class="status-left">
+              <span class="status-dot dot-red"></span>
+              <span class="status-name">Pending</span>
+            </div>
+            <div class="status-right">
+              <span class="status-count">{{ sm.pendingBills ?? 0 }}</span>
+              <span class="status-pill pill-red">bills</span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Supplier Summary -->
-      <div class="glass-card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            Supplier Summary
+      <div class="info-card">
+        <div class="info-card-header">
+          <div class="info-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            Purchases This Month
           </div>
-          <a routerLink="/shop/suppliers" class="link-btn">View →</a>
+          <a routerLink="/shop/suppliers" class="view-link">View →</a>
         </div>
-        <div class="stat-rows">
-          <div class="stat-row">
-            <span class="stat-label">Total Purchased</span>
-            <strong class="stat-amount">{{ formatCurrency(dashboard.totalPurchased) }}</strong>
+        <div class="status-list">
+          <div class="status-item">
+            <span class="status-name">Total Purchased</span>
+            <span class="status-amount">{{ formatCurrency(dashboard.totalPurchased) }}</span>
           </div>
-          <div class="stat-row">
-            <span class="stat-label">Paid to Suppliers</span>
-            <strong class="stat-amount green">{{ formatCurrency(dashboard.paidToSuppliers) }}</strong>
+          <div class="status-item">
+            <span class="status-name">Paid to Suppliers</span>
+            <span class="status-amount amount-green">{{ formatCurrency(dashboard.paidToSuppliers) }}</span>
           </div>
-          <div class="stat-row">
-            <span class="stat-label">Outstanding Due</span>
-            <strong class="stat-amount red">{{ formatCurrency(supplierOutstanding) }}</strong>
+          <div class="status-item">
+            <span class="status-name">Outstanding Due</span>
+            <span class="status-amount amount-red">{{ formatCurrency(supplierOutstanding) }}</span>
           </div>
         </div>
       </div>
@@ -171,52 +164,47 @@
     </div>
 
     <!-- Bottom Row -->
-    <div class="two-col-grid">
+    <div class="bottom-grid">
 
       <!-- Top Products -->
-      <div class="glass-card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            Top Products
+      <div class="info-card">
+        <div class="info-card-header">
+          <div class="info-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Top Selling Products
           </div>
         </div>
         <div class="empty-mini" *ngIf="!dashboard.topProducts?.length">
-          <span>📦</span><p>No sales this month</p>
+          <span>📦</span> No sales this month
         </div>
         <div class="product-list" *ngIf="dashboard.topProducts?.length">
-          <div class="product-row" *ngFor="let p of dashboard.topProducts; let i = index">
-            <div class="rank-badge" [ngClass]="'r' + (i+1)">{{ i + 1 }}</div>
-            <div class="product-meta">
-              <span class="p-name">{{ p.productName }}</span>
-              <span class="p-qty">{{ p.totalQty }} units</span>
+          <div class="product-item" *ngFor="let p of dashboard.topProducts; let i = index">
+            <div class="product-rank" [class]="'rank-' + (i+1)">{{ i + 1 }}</div>
+            <div class="product-info">
+              <span class="product-name">{{ p.productName }}</span>
+              <span class="product-qty">{{ p.totalQty }} units</span>
             </div>
-            <span class="p-amount">{{ formatCurrency(p.totalAmount) }}</span>
+            <span class="product-amount">{{ formatCurrency(p.totalAmount) }}</span>
           </div>
         </div>
       </div>
 
       <!-- Expense Breakdown -->
-      <div class="glass-card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            Expenses
+      <div class="info-card">
+        <div class="info-card-header">
+          <div class="info-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Expense Breakdown
           </div>
-          <span class="expense-total-chip">{{ formatCurrency(dashboard.totalExpenses) }}</span>
+          <span class="expense-total">{{ formatCurrency(dashboard.totalExpenses) }}</span>
         </div>
         <div class="empty-mini" *ngIf="!dashboard.expenseBreakdown?.length">
-          <span>💸</span><p>No expenses recorded</p>
+          <span>💸</span> No expenses recorded
         </div>
         <div class="expense-list" *ngIf="dashboard.expenseBreakdown?.length">
-          <div class="expense-row" *ngFor="let e of dashboard.expenseBreakdown">
-            <span class="exp-cat">{{ e.categoryName }}</span>
-            <div class="exp-right">
-              <div class="exp-bar-wrap">
-                <div class="exp-bar" [style.width.%]="getExpensePct(e.totalExpense)"></div>
-              </div>
-              <span class="exp-amt">{{ formatCurrency(e.totalExpense) }}</span>
-            </div>
+          <div class="expense-item" *ngFor="let e of dashboard.expenseBreakdown">
+            <span class="expense-cat">{{ e.categoryName }}</span>
+            <span class="expense-amt">{{ formatCurrency(e.totalExpense) }}</span>
           </div>
         </div>
       </div>
