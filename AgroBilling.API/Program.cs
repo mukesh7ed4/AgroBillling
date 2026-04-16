@@ -1,5 +1,5 @@
 // ================================================
-// PROGRAM.CS - RENDER OPTIMIZED (No File Watcher)
+// COMPLETE WORKING PROGRAM.CS FOR RENDER
 // ================================================
 
 using AgroBilling.API.Services;
@@ -17,7 +17,7 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Disable file watching — fixes Render inotify crash
+// Disable file watching for Render
 builder.Configuration.Sources
     .OfType<Microsoft.Extensions.Configuration.Json.JsonConfigurationSource>()
     .ToList()
@@ -36,6 +36,7 @@ builder.Services.Configure<GzipCompressionProviderOptions>(o => o.Level = Compre
 builder.Services.AddDbContext<AgroBillingDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Repositories
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IShopRepository, ShopRepository>();
 builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
@@ -49,12 +50,14 @@ builder.Services.AddScoped<ICreditNoteRepository, CreditNoteRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
+// Services
 builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<EmailValidationService>();
 
+// JWT
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new Exception("Jwt Key missing");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -67,21 +70,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-            RoleClaimType = "role",
-            NameClaimType = "sub"
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
 
 builder.Services.AddAuthorization();
 
-// ── REPLACE your entire AddCors block with this ──
+// ================================================
+// CORS - SIMPLE WORKING CONFIGURATION
+// ================================================
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
-        policy.AllowAnyOrigin()     // ✅ allow all origins for now
-              .AllowAnyHeader()
-              .AllowAnyMethod());   // no AllowCredentials when using AllowAnyOrigin
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
 builder.Services.AddControllers();
@@ -90,10 +95,32 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// ================================================
+// MANUAL CORS HEADERS (BACKUP)
+// ================================================
 app.Use(async (context, next) =>
 {
-    context.Response.Headers["X-Frame-Options"] = "DENY";
-    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    // Add CORS headers to every response
+    context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+    context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH";
+    context.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin";
+    context.Response.Headers["Access-Control-Expose-Headers"] = "Content-Length, Content-Type";
+
+    // Handle preflight
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 200;
+        await context.Response.CompleteAsync();
+        return;
+    }
+
+    await next();
+});
+
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"[DEBUG] {context.Request.Method} {context.Request.Path}");
+    Console.WriteLine($"[DEBUG] Origin: {context.Request.Headers.Origin}");
     await next();
 });
 
@@ -103,11 +130,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowFrontend");        // ← FIRST, before everything
+// IMPORTANT: Order matters
+app.UseCors("AllowAll");
 app.UseResponseCompression();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 app.MapGet("/health", () => "OK");
 
