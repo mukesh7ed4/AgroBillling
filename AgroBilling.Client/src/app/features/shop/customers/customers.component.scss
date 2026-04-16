@@ -287,3 +287,18 @@
   .pagination-row { flex-direction: column; gap: 10px; }
   .pag-btn { width: 100%; justify-content: center; }
 }
+
+.mob-card {
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:not(:last-child) {
+    margin-bottom: 12px;
+  }
+
+  &:hover { background: var(--hover-bg); }
+}

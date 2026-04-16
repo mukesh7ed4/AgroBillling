@@ -1,128 +1,156 @@
 <!-- ============================================================
-     AGROBILLING — SIDEBAR COMPONENT
-     Desktop/Tablet: Fixed left sidebar (collapsible)
-     Mobile (≤768px): Bottom fixed nav bar + "More" sheet
+     AGROBILLING — SIDEBAR v2 REDESIGN
+     Desktop: Sleek glass sidebar with gradient accents
+     Mobile: Floating dock bottom nav + elegant bottom sheet
      ============================================================ -->
 
-     <aside class="sidebar" [class.collapsed]="collapsed">
+<!-- ═══════════════════════════════════════
+     DESKTOP SIDEBAR
+     ═══════════════════════════════════════ -->
+<aside class="sb" [class.sb--collapsed]="collapsed">
 
-      <!-- ── DESKTOP LOGO ── -->
-      <div class="sidebar-logo">
-        <span class="logo-icon">🌿</span>
-        <span class="logo-text" *ngIf="!collapsed">AgroBilling</span>
-        <button class="collapse-btn" (click)="toggleCollapse.emit()">
-          {{ collapsed ? '»' : '«' }}
-        </button>
-      </div>
-    
-      <!-- ── SHOP LABEL (desktop) ── -->
-      <div class="shop-label" *ngIf="!isAdmin && !collapsed">
-        <span class="shop-icon">🏪</span>
-        <span class="shop-name">{{ shopName }}</span>
-      </div>
-      <div class="shop-label shop-label-sm" *ngIf="!isAdmin && collapsed" [title]="shopName">
-        <span>🏪</span>
-      </div>
-    
-      <!-- ── DESKTOP NAV ── -->
-      <nav class="sidebar-nav desktop-nav">
-        <a *ngFor="let item of navItems"
-           [routerLink]="item.route"
-           class="nav-item"
-           [class.active]="isActive(item.route)"
-           [title]="collapsed ? item.label : ''">
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span class="nav-label" *ngIf="!collapsed">
-            {{ theme.currentLang === 'hi' ? item.labelHi : item.label }}
-          </span>
-          <span class="nav-active-bar" *ngIf="isActive(item.route)"></span>
-        </a>
-      </nav>
-    
-      <!-- ── DESKTOP BOTTOM BUTTONS ── -->
-      <div class="sidebar-bottom">
-        <button class="bottom-btn" (click)="theme.toggleLang()" [title]="collapsed ? 'Language' : ''">
-          <span>🌐</span>
-          <span *ngIf="!collapsed">{{ theme.currentLang === 'en' ? 'हिंदी' : 'English' }}</span>
-        </button>
-        <button class="bottom-btn" (click)="theme.toggleTheme()" [title]="collapsed ? 'Theme' : ''">
-          <span>{{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}</span>
-          <span *ngIf="!collapsed">{{ theme.currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
-        </button>
-        <button class="bottom-btn logout-btn" (click)="logout()" [title]="collapsed ? 'Logout' : ''">
-          <span>🚪</span>
-          <span *ngIf="!collapsed">Logout</span>
-        </button>
-      </div>
-    
-    </aside>
-    
-    <!-- ══════════════════════════════════════════════════
-         MOBILE BOTTOM NAVIGATION BAR (≤768px only)
-         ══════════════════════════════════════════════════ -->
-    <nav class="mobile-bottom-nav">
-    
-      <!-- Primary nav items (first 4 only) -->
-      <a *ngFor="let item of primaryMobileNav"
-         [routerLink]="item.route"
-         class="mob-nav-item"
-         [class.active]="isActive(item.route)">
-        <span class="mob-nav-indicator" *ngIf="isActive(item.route)"></span>
-        <span class="mob-nav-icon">{{ item.icon }}</span>
-        <span class="mob-nav-label">
-          {{ theme.currentLang === 'hi' ? item.labelHi : item.label }}
-        </span>
-      </a>
-    
-      <!-- More button -->
-      <button class="mob-nav-item mob-more-btn" (click)="toggleMoreSheet()">
-        <span class="mob-more-dot" *ngIf="hasActiveInMore()"></span>
-        <span class="mob-nav-icon">☰</span>
-        <span class="mob-nav-label">More</span>
-      </button>
-    
-    </nav>
-    
-    <!-- ══════════════════════════════════════════════════
-         MOBILE "MORE" BOTTOM SHEET
-         ══════════════════════════════════════════════════ -->
-    <div class="more-backdrop" *ngIf="moreSheetOpen" (click)="closeMoreSheet()"></div>
-    
-    <div class="more-sheet" [class.open]="moreSheetOpen">
-      <div class="more-sheet-handle"></div>
-    
-      <div class="more-sheet-header">
-        <span class="more-sheet-logo">🌿</span>
-        <span class="more-sheet-title">AgroBilling</span>
-        <span class="more-sheet-shop" *ngIf="!isAdmin">{{ shopName }}</span>
-      </div>
-    
-      <!-- Extra nav items (remaining after first 4) -->
-      <div class="more-sheet-grid">
-        <a *ngFor="let item of secondaryMobileNav"
-           [routerLink]="item.route"
-           class="more-sheet-item"
-           [class.active]="isActive(item.route)"
-           (click)="closeMoreSheet()">
-          <span class="more-item-icon">{{ item.icon }}</span>
-          <span class="more-item-label">
-            {{ theme.currentLang === 'hi' ? item.labelHi : item.label }}
-          </span>
-        </a>
-      </div>
-    
-      <div class="more-sheet-footer">
-        <button class="more-action-btn" (click)="theme.toggleLang(); closeMoreSheet()">
-          <span>🌐</span>
-          <span>{{ theme.currentLang === 'en' ? 'हिंदी' : 'English' }}</span>
-        </button>
-        <button class="more-action-btn" (click)="theme.toggleTheme(); closeMoreSheet()">
-          <span>{{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}</span>
-          <span>{{ theme.currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
-        </button>
-        <button class="more-action-btn more-logout-btn" (click)="logout()">
-          <span>🚪</span>
-          <span>Logout</span>
-        </button>
-      </div>
+  <!-- Logo bar -->
+  <div class="sb__brand">
+    <div class="sb__logo-mark">
+      <span class="sb__logo-leaf">🌿</span>
     </div>
+    <div class="sb__logo-text" *ngIf="!collapsed">
+      <span class="sb__logo-name">Agro</span><span class="sb__logo-accent">Billing</span>
+    </div>
+    <button class="sb__toggle" (click)="toggleCollapse.emit()" [title]="collapsed ? 'Expand' : 'Collapse'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline *ngIf="!collapsed" points="15 18 9 12 15 6"></polyline>
+        <polyline *ngIf="collapsed"  points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Shop pill -->
+  <div class="sb__shop" *ngIf="!isAdmin && !collapsed">
+    <div class="sb__shop-dot"></div>
+    <span class="sb__shop-name">{{ shopName }}</span>
+  </div>
+  <div class="sb__shop sb__shop--mini" *ngIf="!isAdmin && collapsed" [title]="shopName">
+    <div class="sb__shop-dot"></div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="sb__nav">
+    <a *ngFor="let item of navItems; let i = index"
+       [routerLink]="item.route"
+       class="sb__item"
+       [class.sb__item--active]="isActive(item.route)"
+       [title]="collapsed ? item.label : ''"
+       [style.animation-delay]="(i * 40) + 'ms'">
+      <span class="sb__item-icon">{{ item.icon }}</span>
+      <span class="sb__item-label" *ngIf="!collapsed">
+        {{ theme.currentLang === 'hi' ? item.labelHi : item.label }}
+      </span>
+      <span class="sb__item-glow" *ngIf="isActive(item.route)"></span>
+    </a>
+  </nav>
+
+  <!-- Bottom actions -->
+  <div class="sb__foot">
+    <button class="sb__foot-btn" (click)="theme.toggleLang()" [title]="collapsed ? 'Language' : ''">
+      <span>🌐</span>
+      <span class="sb__foot-label" *ngIf="!collapsed">
+        {{ theme.currentLang === 'en' ? 'हिंदी' : 'English' }}
+      </span>
+    </button>
+    <button class="sb__foot-btn" (click)="theme.toggleTheme()" [title]="collapsed ? 'Theme' : ''">
+      <span>{{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}</span>
+      <span class="sb__foot-label" *ngIf="!collapsed">
+        {{ theme.currentTheme === 'dark' ? 'Light' : 'Dark' }}
+      </span>
+    </button>
+    <button class="sb__foot-btn sb__foot-btn--logout" (click)="logout()" [title]="collapsed ? 'Logout' : ''">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      <span class="sb__foot-label" *ngIf="!collapsed">Logout</span>
+    </button>
+  </div>
+
+</aside>
+
+<!-- ═══════════════════════════════════════
+     MOBILE FLOATING DOCK
+     ═══════════════════════════════════════ -->
+<nav class="mob-dock">
+  <div class="mob-dock__inner">
+
+    <a *ngFor="let item of primaryMobileNav"
+       [routerLink]="item.route"
+       class="mob-dock__item"
+       [class.mob-dock__item--active]="isActive(item.route)">
+      <span class="mob-dock__bubble" *ngIf="isActive(item.route)"></span>
+      <span class="mob-dock__icon">{{ item.icon }}</span>
+      <span class="mob-dock__label">{{ theme.currentLang === 'hi' ? item.labelHi : item.label }}</span>
+    </a>
+
+    <button class="mob-dock__item mob-dock__more" (click)="toggleMoreSheet()">
+      <span class="mob-dock__badge" *ngIf="hasActiveInMore()"></span>
+      <span class="mob-dock__icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="5"  cy="12" r="1.5" fill="currentColor"/>
+          <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+          <circle cx="19" cy="12" r="1.5" fill="currentColor"/>
+        </svg>
+      </span>
+      <span class="mob-dock__label">More</span>
+    </button>
+
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     MOBILE BOTTOM SHEET
+     ═══════════════════════════════════════ -->
+<div class="sheet-backdrop" *ngIf="moreSheetOpen" (click)="closeMoreSheet()"></div>
+
+<div class="sheet" [class.sheet--open]="moreSheetOpen">
+
+  <div class="sheet__handle"></div>
+
+  <div class="sheet__head">
+    <div class="sheet__head-brand">
+      <span class="sheet__leaf">🌿</span>
+      <span class="sheet__brand-name">Agro<span class="sheet__brand-accent">Billing</span></span>
+    </div>
+    <span class="sheet__shop-chip" *ngIf="!isAdmin">{{ shopName }}</span>
+  </div>
+
+  <div class="sheet__grid">
+    <a *ngFor="let item of secondaryMobileNav"
+       [routerLink]="item.route"
+       class="sheet__item"
+       [class.sheet__item--active]="isActive(item.route)"
+       (click)="closeMoreSheet()">
+      <span class="sheet__item-icon">{{ item.icon }}</span>
+      <span class="sheet__item-label">{{ theme.currentLang === 'hi' ? item.labelHi : item.label }}</span>
+    </a>
+  </div>
+
+  <div class="sheet__actions">
+    <button class="sheet__action-btn" (click)="theme.toggleLang(); closeMoreSheet()">
+      <span>🌐</span>
+      <span>{{ theme.currentLang === 'en' ? 'Switch to हिंदी' : 'Switch to English' }}</span>
+    </button>
+    <button class="sheet__action-btn" (click)="theme.toggleTheme(); closeMoreSheet()">
+      <span>{{ theme.currentTheme === 'dark' ? '☀️' : '🌙' }}</span>
+      <span>{{ theme.currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
+    </button>
+    <button class="sheet__action-btn sheet__action-btn--logout" (click)="logout()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      <span>Logout</span>
+    </button>
+  </div>
+
+</div>

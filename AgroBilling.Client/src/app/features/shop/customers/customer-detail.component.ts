@@ -145,6 +145,8 @@ export class CustomerDetailComponent implements OnInit {
     return n > shown ? `Credit notes (${shown} of ${n})` : `Credit notes (${n})`;
   }
 
+  
+
   fmt(v: number | undefined): string {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency', currency: 'INR', maximumFractionDigits: 0

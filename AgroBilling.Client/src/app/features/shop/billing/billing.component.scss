@@ -427,3 +427,30 @@
 @media (max-width: 480px) {
   .mob-card-row { grid-template-columns: repeat(2, 1fr); }
 }
+
+
+.mob-cards {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+    padding: 8px; // optional outer spacing
+  }
+}
+
+.mob-bill-card {
+  padding: 16px;
+  background: var(--card); // important so spacing looks like cards
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:not(:last-child) {
+    margin-bottom: 12px; // 👈 THIS creates space between cards
+  }
+
+  &:active {
+    background: var(--hover-bg);
+  }
+}

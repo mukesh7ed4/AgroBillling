@@ -79,6 +79,7 @@ export class AddProductComponent implements OnInit {
       }
     });
     
+    
     this.supplierService.getSuppliers(shopId).subscribe({
       next: (res) => {
         this.suppliers = res.data || [];
@@ -90,6 +91,8 @@ export class AddProductComponent implements OnInit {
       }
     });
   }
+
+  
 
   onSubmit(): void {
     if (this.form.invalid) { 
@@ -131,5 +134,6 @@ export class AddProductComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+    
   }
 }
