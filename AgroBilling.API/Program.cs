@@ -89,7 +89,21 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Ignore cycles (reference loops)
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+
+        // Pretty print JSON
+        options.JsonSerializerOptions.WriteIndented = true;
+
+        // Case insensitive
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+
+        // Ignore null values
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

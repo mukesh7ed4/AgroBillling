@@ -1,6 +1,7 @@
 // ================================================
 //  AgroBilling.DAL / Repositories / AuthRepository.cs
 //  ✅ Debug logs removed — security fix
+//  ✅ Null handling added for database null values
 // ================================================
 
 using AgroBilling.DAL.Context;
@@ -24,11 +25,23 @@ namespace AgroBilling.DAL.Repositories
         public async Task<Shop?> ValidateShopAsync(string email, string plainPassword)
         {
             var hashedPassword = HashPassword(plainPassword);
-            return await _context.Shops
+            var shop = await _context.Shops
                 .FirstOrDefaultAsync(s =>
+                    s.Email != null &&
                     s.Email == email &&
                     s.PasswordHash == hashedPassword &&
                     s.IsActive == true);
+
+            // Handle null values from database
+            if (shop != null)
+            {
+                shop.AlternateMobile ??= string.Empty;
+                shop.Email ??= string.Empty;
+                shop.Gstnumber ??= string.Empty;
+                shop.LogoPath ??= string.Empty;
+            }
+
+            return shop;
         }
 
         public async Task<AdminUser?> ValidateAdminAsync(string email, string plainPassword)
